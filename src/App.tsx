@@ -17,7 +17,7 @@ import UserManagementPage from "@/pages/UserManagementPage";
 import LogPage from "@/pages/LogPage";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useApp();
