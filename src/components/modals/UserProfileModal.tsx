@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function UserProfileModal({ user, onClose }: Props) {
-  const { updateUserAvatar, logout } = useApp();
+  const { updateUserAvatar, logout, currentUser } = useApp();
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -17,15 +17,19 @@ export default function UserProfileModal({ user, onClose }: Props) {
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Only allow editing own avatar
+  const isOwnProfile = currentUser.id === user.id;
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !isOwnProfile) return;
     const reader = new FileReader();
     reader.onload = () => updateUserAvatar(user.id, reader.result as string);
     reader.readAsDataURL(file);
   };
 
   const startCamera = useCallback(async () => {
+    if (!isOwnProfile) return;
     try {
       const s = await navigator.mediaDevices.getUserMedia({ video: true });
       setStream(s);
@@ -33,7 +37,7 @@ export default function UserProfileModal({ user, onClose }: Props) {
     } catch {
       alert("Kamera tidak tersedia");
     }
-  }, []);
+  }, [isOwnProfile]);
 
   useEffect(() => {
     if (showCamera && stream && videoRef.current) {
@@ -43,7 +47,7 @@ export default function UserProfileModal({ user, onClose }: Props) {
   }, [showCamera, stream]);
 
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+    if (!videoRef.current || !canvasRef.current || !isOwnProfile) return;
     const ctx = canvasRef.current.getContext("2d");
     canvasRef.current.width = videoRef.current.videoWidth;
     canvasRef.current.height = videoRef.current.videoHeight;
@@ -74,8 +78,8 @@ export default function UserProfileModal({ user, onClose }: Props) {
             </div>
           </div>
 
-          {/* Avatar upload buttons */}
-          {!showCamera && (
+          {/* Avatar upload buttons - only for own profile */}
+          {isOwnProfile && !showCamera && (
             <div className="flex gap-2">
               <button onClick={() => fileRef.current?.click()} className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-input text-sm hover:bg-muted transition-colors">
                 <Upload size={16} /> Upload Foto
@@ -85,6 +89,10 @@ export default function UserProfileModal({ user, onClose }: Props) {
               </button>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
             </div>
+          )}
+
+          {!isOwnProfile && (
+            <p className="text-xs text-muted-foreground italic">Anda hanya dapat mengubah foto profil Anda sendiri.</p>
           )}
 
           {/* Camera preview */}
@@ -121,25 +129,29 @@ export default function UserProfileModal({ user, onClose }: Props) {
 
           <div className="h-px bg-border" />
 
-          {/* Password */}
-          {!showPassword ? (
-            <button onClick={() => setShowPassword(true)} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-input text-sm hover:bg-muted transition-colors">
-              <Lock size={16} /> Ubah Password
-            </button>
-          ) : (
-            <div className="space-y-3">
-              <input type="password" placeholder="Password Lama" className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              <input type="password" placeholder="Password Baru" className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
-              <div className="flex gap-2">
-                <button className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">Simpan</button>
-                <button onClick={() => setShowPassword(false)} className="px-3 py-2 rounded-lg border border-input text-sm">Batal</button>
-              </div>
-            </div>
-          )}
+          {/* Password - only for own profile */}
+          {isOwnProfile && (
+            <>
+              {!showPassword ? (
+                <button onClick={() => setShowPassword(true)} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-input text-sm hover:bg-muted transition-colors">
+                  <Lock size={16} /> Ubah Password
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <input type="password" placeholder="Password Lama" className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <input type="password" placeholder="Password Baru" className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring" />
+                  <div className="flex gap-2">
+                    <button className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium">Simpan</button>
+                    <button onClick={() => setShowPassword(false)} className="px-3 py-2 rounded-lg border border-input text-sm">Batal</button>
+                  </div>
+                </div>
+              )}
 
-          <button onClick={() => { logout(); onClose(); }} className="w-full px-4 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
-            Keluar dari Sistem
-          </button>
+              <button onClick={() => { logout(); onClose(); }} className="w-full px-4 py-2.5 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+                Keluar dari Sistem
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

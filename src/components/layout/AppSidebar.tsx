@@ -4,19 +4,21 @@ import logoSakura from "@/assets/logo_sakura.png";
 import { useApp } from "@/contexts/AppContext";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Upload Dokumen", icon: Upload, path: "/upload" },
-  { label: "Arsip Dokumen", icon: Archive, path: "/archive" },
-  { label: "Alur Persetujuan", icon: GitBranch, path: "/approval" },
-  { label: "Manajemen User", icon: Users, path: "/users" },
-  { label: "Manajemen Role", icon: Shield, path: "/roles" },
-  { label: "Log Sistem", icon: FileText, path: "/logs" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", permission: "dashboard.view" },
+  { label: "Upload Dokumen", icon: Upload, path: "/upload", permission: "documents.upload" },
+  { label: "Arsip Dokumen", icon: Archive, path: "/archive", permission: "documents.archive" },
+  { label: "Persetujuan", icon: GitBranch, path: "/approval", permission: "documents.approve" },
+  { label: "Manajemen User", icon: Users, path: "/users", permission: "users.manage" },
+  { label: "Manajemen Role", icon: Shield, path: "/roles", permission: "roles.manage" },
+  { label: "Log Sistem", icon: FileText, path: "/logs", permission: "audit.view" },
 ];
 
 export default function AppSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser } = useApp();
+  const { currentUser, hasPermission } = useApp();
+
+  const visibleItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
   return (
     <aside className="w-[260px] min-h-screen bg-sidebar flex flex-col shrink-0">
@@ -28,7 +30,7 @@ export default function AppSidebar() {
         </div>
       </div>
       <nav className="flex-1 px-3 space-y-1 mt-2">
-        {NAV_ITEMS.map((item) => {
+        {visibleItems.map((item) => {
           const active = location.pathname === item.path;
           return (
             <button

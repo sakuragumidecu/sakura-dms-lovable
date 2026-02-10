@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
-import { USERS } from "@/data/mockData";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -76,22 +75,14 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
               <div className="relative">
                 <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }}
-                  placeholder="nama@sakura.sch.id"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+                <input type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} placeholder="nama@sakura.sch.id" className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1.5">Kata Sandi</label>
               <div className="relative">
                 <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+                <input type={showPass ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
                 <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -103,20 +94,21 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-8 p-4 rounded-lg border border-border bg-muted/30">
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Belum punya akun?{" "}
+            <button onClick={() => navigate("/signup")} className="text-primary font-semibold hover:underline">Daftar di sini</button>
+          </p>
+
+          <div className="mt-6 p-4 rounded-lg border border-border bg-muted/30">
             <p className="text-xs text-muted-foreground mb-3">Akun Demo (Mode Pengembangan):</p>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { label: "Operator", email: "admin@sakura.sch.id" },
+                { label: "Operator / TU", email: "admin@sakura.sch.id" },
                 { label: "Kepala Sekolah", email: "principal@sakura.sch.id" },
-                { label: "Tata Usaha", email: "staff@sakura.sch.id" },
+                { label: "Staff Administrasi", email: "staff@sakura.sch.id" },
                 { label: "Guru", email: "teacher@sakura.sch.id" },
               ].map((a) => (
-                <button
-                  key={a.email}
-                  onClick={() => quickLogin(a.email)}
-                  className="text-left p-2 rounded-lg border border-border hover:bg-muted text-xs transition-colors"
-                >
+                <button key={a.email} onClick={() => quickLogin(a.email)} className="text-left p-2 rounded-lg border border-border hover:bg-muted text-xs transition-colors">
                   <div className="font-semibold text-foreground">{a.label}</div>
                   <div className="text-muted-foreground">{a.email}</div>
                 </button>

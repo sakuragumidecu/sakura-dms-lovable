@@ -1,6 +1,7 @@
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useState } from "react";
+import { format } from "date-fns";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 
 interface Props {
@@ -9,8 +10,11 @@ interface Props {
 }
 
 export default function AppHeader({ title, subtitle }: Props) {
-  const { currentUser } = useApp();
+  const { currentUser, notifications, markNotificationRead, markAllNotificationsRead } = useApp();
   const [showProfile, setShowProfile] = useState(false);
+  const [showNotifs, setShowNotifs] = useState(false);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <>
@@ -20,10 +24,44 @@ export default function AppHeader({ title, subtitle }: Props) {
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
         <div className="flex items-center gap-4">
-          <button className="relative p-2 rounded-lg hover:bg-muted transition-colors">
-            <Bell size={20} className="text-muted-foreground" />
-            <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">3</span>
-          </button>
+          {/* Notification bell */}
+          <div className="relative">
+            <button onClick={() => setShowNotifs(!showNotifs)} className="relative p-2 rounded-lg hover:bg-muted transition-colors">
+              <Bell size={20} className="text-muted-foreground" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">{unreadCount}</span>
+              )}
+            </button>
+
+            {/* Notification dropdown */}
+            {showNotifs && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowNotifs(false)} />
+                <div className="absolute right-0 top-12 z-50 w-80 bg-card border border-border rounded-xl shadow-2xl overflow-hidden">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                    <span className="font-bold text-sm text-foreground">Notifikasi</span>
+                    {unreadCount > 0 && (
+                      <button onClick={markAllNotificationsRead} className="text-xs text-primary hover:underline">Tandai semua dibaca</button>
+                    )}
+                  </div>
+                  <div className="max-h-80 overflow-y-auto divide-y divide-border scrollbar-thin">
+                    {notifications.length === 0 && <p className="text-sm text-muted-foreground text-center py-6">Tidak ada notifikasi</p>}
+                    {notifications.map((n) => (
+                      <button
+                        key={n.id}
+                        onClick={() => { markNotificationRead(n.id); }}
+                        className={`w-full text-left px-4 py-3 hover:bg-muted/30 transition-colors ${!n.read ? "bg-secondary/30" : ""}`}
+                      >
+                        <div className="text-sm text-foreground">{n.message}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{format(new Date(n.time), "dd/MM/yyyy HH:mm")}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
           <button onClick={() => setShowProfile(true)} className="flex items-center gap-3 hover:bg-muted rounded-lg px-3 py-1.5 transition-colors">
             <img src={currentUser.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
             <div className="text-right">

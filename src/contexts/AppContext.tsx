@@ -1,11 +1,12 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { USERS, DOCUMENTS, ROLE_PERMISSIONS, type User, type UserRole, type Document } from "@/data/mockData";
+import { USERS, DOCUMENTS, ROLE_PERMISSIONS, INITIAL_NOTIFICATIONS, type User, type UserRole, type Document, type Notification } from "@/data/mockData";
 
 interface AppState {
   currentUser: User;
   users: User[];
   documents: Document[];
   rolePermissions: Record<UserRole, string[]>;
+  notifications: Notification[];
   isLoggedIn: boolean;
   login: (email: string) => boolean;
   logout: () => void;
@@ -13,6 +14,14 @@ interface AppState {
   updateUserAvatar: (userId: number, avatar: string) => void;
   togglePermission: (role: UserRole, permission: string) => void;
   addAuditNote: (docId: number, note: string) => void;
+  hasPermission: (permission: string) => boolean;
+  approveDocument: (docId: number) => void;
+  rejectDocument: (docId: number, reason: string) => void;
+  uploadDocument: (doc: Omit<Document, "id" | "auditTrail" | "tanggalEdit" | "versi" | "status">) => void;
+  archiveDocument: (docId: number) => void;
+  toggleFavorite: (docId: number) => void;
+  markNotificationRead: (notifId: number) => void;
+  markAllNotificationsRead: () => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -28,6 +37,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [users, setUsers] = useState<User[]>(USERS);
   const [documents, setDocuments] = useState<Document[]>(DOCUMENTS);
   const [rolePermissions, setRolePermissions] = useState(ROLE_PERMISSIONS);
+  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const login = (email: string) => {
@@ -42,14 +52,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = () => setIsLoggedIn(false);
 
+  const hasPermission = (permission: string) => {
+    return rolePermissions[currentUser.role]?.includes(permission) ?? false;
+  };
+
   const updateUserRole = (userId: number, newRole: UserRole) => {
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)));
     if (currentUser.id === userId) setCurrentUser((p) => ({ ...p, role: newRole }));
   };
 
   const updateUserAvatar = (userId: number, avatar: string) => {
+    // Only allow changing own avatar
+    if (userId !== currentUser.id) return;
     setUsers((prev) => prev.map((u) => (u.id === userId ? { ...u, avatar } : u)));
-    if (currentUser.id === userId) setCurrentUser((p) => ({ ...p, avatar }));
+    setCurrentUser((p) => ({ ...p, avatar }));
   };
 
   const togglePermission = (role: UserRole, permission: string) => {
@@ -61,24 +77,129 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addAuditNote = (docId: number, note: string) => {
+    if (!hasPermission("audit.addNote")) return;
     setDocuments((prev) =>
       prev.map((d) => {
         if (d.id !== docId) return d;
-        const lastEntry = d.auditTrail[d.auditTrail.length - 1];
-        const newTrail = [...d.auditTrail];
-        // Add note to last entry or create admin note entry
-        newTrail.push({
+        const newTrail = [...d.auditTrail, {
           time: new Date().toISOString(),
           user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
           action: `Catatan Admin: ${note}`,
-        });
+        }];
         return { ...d, auditTrail: newTrail };
       })
     );
   };
 
+  const approveDocument = (docId: number) => {
+    if (!hasPermission("documents.approve")) return;
+    setDocuments((prev) =>
+      prev.map((d) => {
+        if (d.id !== docId || d.status !== "Menunggu") return d;
+        return {
+          ...d,
+          status: "Disetujui" as const,
+          tanggalEdit: new Date().toISOString(),
+          auditTrail: [...d.auditTrail, {
+            time: new Date().toISOString(),
+            user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
+            action: "Menyetujui dokumen",
+          }],
+        };
+      })
+    );
+    const doc = documents.find((d) => d.id === docId);
+    if (doc) {
+      setNotifications((prev) => [{
+        id: Date.now(), message: `Dokumen '${doc.judul}' telah disetujui`, time: new Date().toISOString(), read: false, type: "approval", docId,
+      }, ...prev]);
+    }
+  };
+
+  const rejectDocument = (docId: number, reason: string) => {
+    if (!hasPermission("documents.reject")) return;
+    setDocuments((prev) =>
+      prev.map((d) => {
+        if (d.id !== docId || d.status !== "Menunggu") return d;
+        return {
+          ...d,
+          status: "Ditolak" as const,
+          tanggalEdit: new Date().toISOString(),
+          catatan: reason,
+          auditTrail: [...d.auditTrail, {
+            time: new Date().toISOString(),
+            user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
+            action: `Menolak dokumen — ${reason}`,
+          }],
+        };
+      })
+    );
+    const doc = documents.find((d) => d.id === docId);
+    if (doc) {
+      setNotifications((prev) => [{
+        id: Date.now(), message: `Dokumen '${doc.judul}' telah ditolak`, time: new Date().toISOString(), read: false, type: "rejection", docId,
+      }, ...prev]);
+    }
+  };
+
+  const uploadDocument = (doc: Omit<Document, "id" | "auditTrail" | "tanggalEdit" | "versi" | "status">) => {
+    if (!hasPermission("documents.upload")) return;
+    const newDoc: Document = {
+      ...doc,
+      id: Date.now(),
+      status: "Menunggu",
+      versi: 1,
+      tanggalEdit: doc.tanggalUpload,
+      auditTrail: [{
+        time: doc.tanggalUpload,
+        user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
+        action: "Mengunggah dokumen",
+      }],
+    };
+    setDocuments((prev) => [newDoc, ...prev]);
+    setNotifications((prev) => [{
+      id: Date.now(), message: `Dokumen '${doc.judul}' telah diunggah dan menunggu persetujuan`, time: doc.tanggalUpload, read: false, type: "upload", docId: newDoc.id,
+    }, ...prev]);
+  };
+
+  const archiveDocument = (docId: number) => {
+    if (!hasPermission("documents.archive")) return;
+    setDocuments((prev) =>
+      prev.map((d) => {
+        if (d.id !== docId || d.status !== "Disetujui") return d;
+        return {
+          ...d,
+          status: "Diarsipkan" as const,
+          tanggalEdit: new Date().toISOString(),
+          auditTrail: [...d.auditTrail, {
+            time: new Date().toISOString(),
+            user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
+            action: "Mengarsipkan dokumen",
+          }],
+        };
+      })
+    );
+  };
+
+  const toggleFavorite = (docId: number) => {
+    setDocuments((prev) => prev.map((d) => d.id === docId ? { ...d, favorite: !d.favorite } : d));
+  };
+
+  const markNotificationRead = (notifId: number) => {
+    setNotifications((prev) => prev.map((n) => n.id === notifId ? { ...n, read: true } : n));
+  };
+
+  const markAllNotificationsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
   return (
-    <AppContext.Provider value={{ currentUser, users, documents, rolePermissions, isLoggedIn, login, logout, updateUserRole, updateUserAvatar, togglePermission, addAuditNote }}>
+    <AppContext.Provider value={{
+      currentUser, users, documents, rolePermissions, notifications, isLoggedIn,
+      login, logout, updateUserRole, updateUserAvatar, togglePermission, addAuditNote,
+      hasPermission, approveDocument, rejectDocument, uploadDocument, archiveDocument,
+      toggleFavorite, markNotificationRead, markAllNotificationsRead,
+    }}>
       {children}
     </AppContext.Provider>
   );
