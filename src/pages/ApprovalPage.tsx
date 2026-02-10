@@ -17,6 +17,8 @@ export default function ApprovalPage() {
   const [detailDoc, setDetailDoc] = useState<Document | null>(null);
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [approveId, setApproveId] = useState<number | null>(null);
+  const [approveComment, setApproveComment] = useState("");
 
   const canApprove = hasPermission("documents.approve");
   const pendingDocs = documents.filter((d) => d.status === "Menunggu");
@@ -27,6 +29,12 @@ export default function ApprovalPage() {
     rejectDocument(docId, rejectReason.trim());
     setRejectId(null);
     setRejectReason("");
+  };
+
+  const handleApprove = (docId: number) => {
+    approveDocument(docId, approveComment.trim() || undefined);
+    setApproveId(null);
+    setApproveComment("");
   };
 
   return (
@@ -79,7 +87,7 @@ export default function ApprovalPage() {
                     </button>
                     {canApprove && (
                       <>
-                        <button onClick={() => approveDocument(doc.id)} className="px-3 py-1.5 rounded-lg bg-sakura-success/20 text-sakura-success text-xs font-semibold hover:bg-sakura-success/30 transition-colors">
+                        <button onClick={() => setApproveId(doc.id)} className="px-3 py-1.5 rounded-lg bg-sakura-success/20 text-sakura-success text-xs font-semibold hover:bg-sakura-success/30 transition-colors">
                           <CheckCircle size={14} className="inline mr-1" /> Setujui
                         </button>
                         <button onClick={() => setRejectId(doc.id)} className="px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive text-xs font-semibold hover:bg-destructive/20 transition-colors">
@@ -93,6 +101,20 @@ export default function ApprovalPage() {
             </div>
           )}
         </div>
+
+        {/* Approve comment modal */}
+        {approveId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm" onClick={() => setApproveId(null)}>
+            <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+              <h3 className="font-bold text-foreground mb-3">Konfirmasi Persetujuan</h3>
+              <textarea value={approveComment} onChange={(e) => setApproveComment(e.target.value)} placeholder="Komentar (opsional), misal: Dokumen sudah sesuai standar..." rows={3} className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none mb-4" />
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => { setApproveId(null); setApproveComment(""); }} className="px-4 py-2 rounded-lg border border-input text-sm hover:bg-muted">Batal</button>
+                <button onClick={() => handleApprove(approveId)} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90">Setujui Dokumen</button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Reject reason modal */}
         {rejectId && (

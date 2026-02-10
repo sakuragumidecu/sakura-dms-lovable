@@ -15,7 +15,7 @@ interface AppState {
   togglePermission: (role: UserRole, permission: string) => void;
   addAuditNote: (docId: number, note: string) => void;
   hasPermission: (permission: string) => boolean;
-  approveDocument: (docId: number) => void;
+  approveDocument: (docId: number, comment?: string) => void;
   rejectDocument: (docId: number, reason: string) => void;
   uploadDocument: (doc: Omit<Document, "id" | "auditTrail" | "tanggalEdit" | "versi" | "status">) => void;
   archiveDocument: (docId: number) => void;
@@ -91,7 +91,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
-  const approveDocument = (docId: number) => {
+  const approveDocument = (docId: number, comment?: string) => {
     if (!hasPermission("documents.approve")) return;
     setDocuments((prev) =>
       prev.map((d) => {
@@ -103,7 +103,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           auditTrail: [...d.auditTrail, {
             time: new Date().toISOString(),
             user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
-            action: "Menyetujui dokumen",
+            action: comment ? `Menyetujui dokumen — ${comment}` : "Menyetujui dokumen",
           }],
         };
       })

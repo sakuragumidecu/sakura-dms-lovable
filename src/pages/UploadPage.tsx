@@ -210,7 +210,14 @@ export default function UploadPage() {
           </div>
         </form>
       </div>
-      {showPdfPreview && <PdfPreviewOverlay onClose={() => setShowPdfPreview(false)} fileName={form.judul || "Dokumen"} />}
+      {showPdfPreview && <PdfPreviewOverlay onClose={() => setShowPdfPreview(false)} document={{
+        id: 0, nomorDokumen: form.nomorDokumen || "DRAFT", judul: form.judul || "Dokumen Baru",
+        kategori: form.kategori || "Umum", kelas: form.kelas || "-", jenisDokumen: form.jenisDokumen,
+        namaSiswa: form.namaSiswa, nisn: form.nisn, tahunAjaran: form.tahunAjaran,
+        pengunggah: { id: currentUser.id, nama: currentUser.nama, role: currentUser.role, avatar: currentUser.avatar },
+        tanggalUpload: new Date().toISOString(), tanggalEdit: new Date().toISOString(),
+        status: "Menunggu", versi: 1, fileUrl: "", auditTrail: [],
+      }} />}
     </>
   );
 }

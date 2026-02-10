@@ -164,7 +164,7 @@ export const PERMISSIONS = [
   { key: "users.manage", label: "Kelola User" },
   { key: "roles.manage", label: "Kelola Role" },
   { key: "audit.view", label: "Log Sistem" },
-  { key: "audit.addNote", label: "Tambah Catatan Audit" },
+  { key: "audit.addNote", label: "Tambah Catatan Jejak Aktivitas" },
   { key: "profile.edit", label: "Pengaturan Profil" },
 ];
 

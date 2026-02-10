@@ -22,6 +22,8 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
   const [noteText, setNoteText] = useState("");
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
+  const [showApproveForm, setShowApproveForm] = useState(false);
+  const [approveComment, setApproveComment] = useState("");
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
 
   const handleAddNote = () => {
@@ -39,7 +41,9 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
   };
 
   const handleApprove = () => {
-    approveDocument(doc.id);
+    approveDocument(doc.id, approveComment.trim() || undefined);
+    setShowApproveForm(false);
+    setApproveComment("");
     onClose();
   };
 
@@ -112,7 +116,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
               </button>
               {canApprove && (
                 <>
-                  <button onClick={handleApprove} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sakura-success/20 text-sakura-success text-sm font-semibold hover:bg-sakura-success/30 transition-colors">
+                  <button onClick={() => setShowApproveForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sakura-success/20 text-sakura-success text-sm font-semibold hover:bg-sakura-success/30 transition-colors">
                     <CheckCircle size={16} /> Setujui
                   </button>
                   <button onClick={() => setShowRejectForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive/10 text-destructive text-sm font-semibold hover:bg-destructive/20 transition-colors">
@@ -126,6 +130,18 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
                 </button>
               )}
             </div>
+
+            {/* Approve form */}
+            {showApproveForm && (
+              <div className="p-4 rounded-lg border border-sakura-success/30 bg-sakura-success/5 space-y-3">
+                <h4 className="font-semibold text-sm text-sakura-success">Konfirmasi Persetujuan</h4>
+                <textarea value={approveComment} onChange={(e) => setApproveComment(e.target.value)} placeholder="Komentar (opsional), misal: Dokumen sudah sesuai standar..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
+                <div className="flex gap-2">
+                  <button onClick={handleApprove} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90">Konfirmasi Setujui</button>
+                  <button onClick={() => { setShowApproveForm(false); setApproveComment(""); }} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button>
+                </div>
+              </div>
+            )}
 
             {/* Reject form */}
             {showRejectForm && (
@@ -143,7 +159,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Clock size={18} className="text-primary" />
-                <h3 className="font-bold text-foreground">Audit Trail</h3>
+                <h3 className="font-bold text-foreground">Jejak Aktivitas</h3>
                 <span className="text-xs text-muted-foreground">(Read-only)</span>
               </div>
               <div className="space-y-4">
@@ -173,7 +189,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
           </div>
         </div>
       </div>
-      {showPdf && <PdfPreviewOverlay onClose={() => setShowPdf(false)} fileName={doc.judul} />}
+      {showPdf && <PdfPreviewOverlay onClose={() => setShowPdf(false)} document={doc} />}
     </>
   );
 }

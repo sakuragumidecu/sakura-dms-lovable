@@ -44,7 +44,7 @@ export default function LogPage() {
       <div className="p-8 space-y-6 animate-fade-in">
         <div className="flex items-center gap-2 mb-1">
           <Clock size={22} className="text-primary" />
-          <h2 className="text-xl font-bold text-foreground">Audit Trail Global</h2>
+          <h2 className="text-xl font-bold text-foreground">Jejak Aktivitas Global</h2>
           <span className="text-xs text-muted-foreground">({allLogs.length} entri)</span>
         </div>
 
