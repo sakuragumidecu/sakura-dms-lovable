@@ -5,7 +5,7 @@ import { useApp } from "@/contexts/AppContext";
 import { PERMISSIONS, type UserRole } from "@/data/mockData";
 
 const ROLES: { role: UserRole; desc: string }[] = [
-  { role: "Administrator IT", desc: "Akses penuh ke semua fitur sistem" },
+  { role: "Admin/TU", desc: "Akses penuh ke semua fitur sistem" },
   { role: "Kepala Sekolah", desc: "Review dan persetujuan dokumen" },
   { role: "Staff Administrasi", desc: "Upload dan lihat dokumen" },
   { role: "Guru", desc: "Upload dan lihat dokumen" },
