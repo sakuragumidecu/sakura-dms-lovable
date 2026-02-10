@@ -4,7 +4,7 @@ import { useApp } from "@/contexts/AppContext";
 import type { UserRole } from "@/data/mockData";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 
-const ALL_ROLES: UserRole[] = ["Administrator IT", "Kepala Sekolah", "Staff Administrasi", "Guru"];
+const ALL_ROLES: UserRole[] = ["Admin/TU", "Kepala Sekolah", "Staff Administrasi", "Guru"];
 
 export default function UserManagementPage() {
   const { users, updateUserRole } = useApp();

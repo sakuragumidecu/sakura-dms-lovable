@@ -3,7 +3,7 @@ import avatarAdmin from "@/assets/avatar_admin.jpg";
 import avatarStaff from "@/assets/avatar_staff.jpg";
 import avatarTeacher from "@/assets/avatar_teacher.jpg";
 
-export type UserRole = "Administrator IT" | "Kepala Sekolah" | "Staff Administrasi" | "Guru";
+export type UserRole = "Admin/TU" | "Kepala Sekolah" | "Staff Administrasi" | "Guru";
 
 export interface User {
   id: number;
@@ -58,7 +58,7 @@ export interface FolderNode {
 }
 
 export const USERS: User[] = [
-  { id: 1, nama: "Budi Santoso", email: "admin@sakura.sch.id", role: "Administrator IT", avatar: avatarAdmin, departemen: "Operator / TU" },
+  { id: 1, nama: "Budi Santoso", email: "admin@sakura.sch.id", role: "Admin/TU", avatar: avatarAdmin, departemen: "Operator / TU" },
   { id: 2, nama: "Dr. Siti Rahayu", email: "principal@sakura.sch.id", role: "Kepala Sekolah", avatar: avatarPrincipal, departemen: "Kepala Sekolah" },
   { id: 3, nama: "Dewi Kartika", email: "staff@sakura.sch.id", role: "Staff Administrasi", avatar: avatarStaff, departemen: "Tata Usaha" },
   { id: 4, nama: "Ahmad Fauzi", email: "teacher@sakura.sch.id", role: "Guru", avatar: avatarTeacher, departemen: "Guru Mata Pelajaran" },
@@ -175,7 +175,7 @@ export const PERMISSIONS = [
 ];
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  "Administrator IT": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
+  "Admin/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
   "Kepala Sekolah": ["dashboard.view", "documents.approve", "documents.reject", "audit.view", "profile.edit"],
   "Staff Administrasi": ["dashboard.view", "documents.upload", "documents.archive", "profile.edit"],
   "Guru": ["dashboard.view", "documents.upload", "documents.archive", "profile.edit"],

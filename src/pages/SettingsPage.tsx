@@ -22,7 +22,7 @@ export default function SettingsPage() {
   const { currentUser } = useApp();
   const { toast } = useToast();
   const [activeSection, setActiveSection] = useState("tema");
-  const isAdmin = currentUser.role === "Administrator IT";
+  const isAdmin = currentUser.role === "Admin/TU";
 
   const Card = ({ children, title, icon: Icon }: { children: React.ReactNode; title: string; icon: React.ElementType }) => (
     <div className="bg-card border border-border rounded-xl p-6">
