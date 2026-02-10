@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Upload, Camera, X, Eye, FileText } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
+import { useSettings } from "@/contexts/SettingsContext";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +17,7 @@ interface UploadFormProps {
 
 export default function UploadForm({ targetFolder, onSuccess, onCancel }: UploadFormProps) {
   const { uploadDocument, currentUser } = useApp();
+  const { settings } = useSettings();
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -38,6 +40,26 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
     tahunAjaran: parsedTahun || "2024/2025",
     catatan: "",
   });
+
+  const [mappedFolder, setMappedFolder] = useState<string | null>(targetFolder || null);
+
+  // Auto-map folder based on jenisDokumen when folderMapping is enabled
+  useEffect(() => {
+    if (targetFolder) return; // don't override explicit target
+    if (!settings.folderMapping.enabled || !form.jenisDokumen) {
+      setMappedFolder(null);
+      return;
+    }
+    const mapping = settings.folderMapping.mappings.find((m) => m.jenisDokumen === form.jenisDokumen);
+    if (mapping) {
+      const folderPath = form.tahunAjaran
+        ? `${form.tahunAjaran.split("/").pop()}/${mapping.targetFolder}`
+        : mapping.targetFolder;
+      setMappedFolder(folderPath);
+    } else {
+      setMappedFolder(null);
+    }
+  }, [form.jenisDokumen, form.tahunAjaran, settings.folderMapping, targetFolder]);
 
   const handleFile = (f: File) => {
     const maxSize = 10 * 1024 * 1024;
@@ -113,11 +135,11 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left - File section */}
         <div className="space-y-6">
-          {targetFolder && (
+          {(targetFolder || mappedFolder) && (
             <div className="p-3 rounded-lg bg-secondary/50 border border-border text-sm">
               <span className="text-muted-foreground">Masukkan ke folder: </span>
-              <span className="font-semibold text-primary">{targetFolder}</span>
-              <span className="text-muted-foreground"> (direkomendasikan)</span>
+              <span className="font-semibold text-primary">{targetFolder || mappedFolder}</span>
+              <span className="text-muted-foreground">{!targetFolder && mappedFolder ? " (auto-mapping)" : " (direkomendasikan)"}</span>
             </div>
           )}
           <div className="bg-card border border-border rounded-xl p-6">

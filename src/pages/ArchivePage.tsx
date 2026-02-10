@@ -1,16 +1,20 @@
 import { useState, useMemo } from "react";
-import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload } from "lucide-react";
+import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, FolderPlus } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import UploadForm from "@/components/upload/UploadForm";
 import { useApp } from "@/contexts/AppContext";
+import { useSettings } from "@/contexts/SettingsContext";
 import { buildFolderTree, docMatchesFolder } from "@/data/mockData";
 import type { Document, FolderNode } from "@/data/mockData";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ArchivePage() {
-  const { documents, toggleFavorite } = useApp();
+  const { documents, toggleFavorite, currentUser } = useApp();
+  const { settings } = useSettings();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [categoryFilter, setCategoryFilter] = useState("Semua");
@@ -21,16 +25,41 @@ export default function ArchivePage() {
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
   const [showPdfOverlay, setShowPdfOverlay] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCreateFolder, setShowCreateFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [customFolders, setCustomFolders] = useState<string[]>([]);
+
+  const isAdmin = currentUser.role === "Administrator IT";
 
   // Dynamic folder tree from document metadata
   const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 
+  // Merge custom folders into tree
+  const fullTree = useMemo(() => {
+    const tree = [...folderTree];
+    customFolders.forEach((cf) => {
+      if (!tree.find((n) => n.path === cf)) {
+        tree.push({ name: cf, path: cf, children: [] });
+      }
+    });
+    return tree;
+  }, [folderTree, customFolders]);
+
   // Auto-expand first year
   useMemo(() => {
-    if (folderTree.length > 0 && expandedFolders.size === 0) {
-      setExpandedFolders(new Set([folderTree[0].path]));
+    if (fullTree.length > 0 && expandedFolders.size === 0) {
+      setExpandedFolders(new Set([fullTree[0].path]));
     }
-  }, [folderTree]);
+  }, [fullTree]);
+
+  const handleCreateFolder = () => {
+    if (!newFolderName.trim()) return;
+    const folderPath = selectedFolder ? `${selectedFolder}/${newFolderName.trim()}` : newFolderName.trim();
+    setCustomFolders((prev) => [...prev, folderPath]);
+    toast({ title: "Folder dibuat", description: `Folder "${newFolderName.trim()}" berhasil dibuat.` });
+    setNewFolderName("");
+    setShowCreateFolder(false);
+  };
 
   const toggleExpand = (path: string) => {
     setExpandedFolders((prev) => {
@@ -121,7 +150,33 @@ export default function ArchivePage() {
             <Star size={14} className="text-sakura-warning" /> Favorit
           </button>
           <div className="h-px bg-border my-2" />
-          {folderTree.map((folder) => renderFolder(folder))}
+          {fullTree.map((folder) => renderFolder(folder))}
+          {/* Admin-only create folder */}
+          {isAdmin && (
+            <div className="mt-2">
+              {showCreateFolder ? (
+                <div className="flex gap-1 px-2">
+                  <input
+                    value={newFolderName}
+                    onChange={(e) => setNewFolderName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
+                    placeholder="Nama folder"
+                    className="flex-1 min-w-0 px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                    autoFocus
+                  />
+                  <button onClick={handleCreateFolder} className="px-2 py-1.5 rounded bg-primary text-primary-foreground text-xs font-medium">OK</button>
+                  <button onClick={() => { setShowCreateFolder(false); setNewFolderName(""); }} className="px-2 py-1.5 rounded border border-input text-xs">✕</button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowCreateFolder(true)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  <FolderPlus size={14} /> Buat Folder
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Center - Document list */}
