@@ -131,18 +131,13 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
               )}
             </div>
 
-            {/* Approve form - System-based, no biometric */}
+            {/* Approve form */}
             {showApproveForm && (
               <div className="p-4 rounded-lg border border-sakura-success/30 bg-sakura-success/5 space-y-3">
-                <h4 className="font-semibold text-sm text-sakura-success flex items-center gap-2">
-                  <CheckCircle size={16} /> Konfirmasi Persetujuan Sistem
-                </h4>
-                <p className="text-xs text-muted-foreground">Dokumen akan disetujui oleh sistem atas nama Anda.</p>
+                <h4 className="font-semibold text-sm text-sakura-success">Konfirmasi Persetujuan</h4>
                 <textarea value={approveComment} onChange={(e) => setApproveComment(e.target.value)} placeholder="Komentar (opsional), misal: Dokumen sudah sesuai standar..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" />
                 <div className="flex gap-2">
-                  <button onClick={handleApprove} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90 flex items-center gap-2">
-                    <CheckCircle size={14} /> Setujui Dokumen
-                  </button>
+                  <button onClick={handleApprove} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90">Konfirmasi Setujui</button>
                   <button onClick={() => { setShowApproveForm(false); setApproveComment(""); }} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button>
                 </div>
               </div>
