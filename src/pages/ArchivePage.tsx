@@ -226,9 +226,20 @@ export default function ArchivePage() {
       <div className="flex flex-1 animate-fade-in overflow-hidden">
         {/* Left - Folder tree */}
         <div className="w-64 shrink-0 border-r border-border bg-card p-4 space-y-1 overflow-y-auto">
-          <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
-            <Folder size={16} className="text-sakura-warning" /> Struktur Folder
-          </h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
+              <Folder size={16} className="text-sakura-warning" /> Struktur Folder
+            </h3>
+            {isAdmin && (
+              <button
+                onClick={() => { setShowCreateFolder(true); setCreateFolderParent(null); setNewFolderName(""); }}
+                className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
+                title="Buat folder baru"
+              >
+                <Plus size={16} />
+              </button>
+            )}
+          </div>
           <button
             onClick={() => { setSelectedFolder(null); setShowFavorites(false); setPreviewDoc(null); }}
             className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -245,34 +256,23 @@ export default function ArchivePage() {
           >
             <Star size={14} className="text-sakura-warning" /> Favorit
           </button>
-          <div className="h-px bg-border my-2" />
-          {fullTree.map((folder) => renderFolder(folder))}
-          {/* Admin-only create folder */}
-          {isAdmin && (
-            <div className="mt-2">
-              {showCreateFolder ? (
-                <div className="flex gap-1 px-2">
-                  <input
-                    value={newFolderName}
-                    onChange={(e) => setNewFolderName(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
-                    placeholder="Nama folder"
-                    className="flex-1 min-w-0 px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                    autoFocus
-                  />
-                  <button onClick={() => handleCreateFolder()} className="px-2 py-1.5 rounded bg-primary text-primary-foreground text-xs font-medium">OK</button>
-                  <button onClick={() => { setShowCreateFolder(false); setNewFolderName(""); }} className="px-2 py-1.5 rounded border border-input text-xs">✕</button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowCreateFolder(true)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted transition-colors"
-                >
-                  <FolderPlus size={14} /> Buat Folder
-                </button>
-              )}
+          {/* Root-level create folder input */}
+          {isAdmin && showCreateFolder && createFolderParent === null && (
+            <div className="flex gap-1 px-2 mb-1">
+              <input
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
+                placeholder="Nama folder baru"
+                className="flex-1 min-w-0 px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
+                autoFocus
+              />
+              <button onClick={() => handleCreateFolder()} className="px-2 py-1.5 rounded bg-primary text-primary-foreground text-xs font-medium">OK</button>
+              <button onClick={() => { setShowCreateFolder(false); setNewFolderName(""); }} className="px-2 py-1.5 rounded border border-input text-xs">✕</button>
             </div>
           )}
+          {fullTree.map((folder) => renderFolder(folder))}
+          {/* Spacer */}
         </div>
 
         {/* Center - Document list */}
