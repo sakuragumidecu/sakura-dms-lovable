@@ -1,17 +1,15 @@
 import { useState, useMemo } from "react";
-import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Clock, X, Plus, Upload, FolderPlus } from "lucide-react";
+import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import { useApp } from "@/contexts/AppContext";
-import { useSettings } from "@/contexts/SettingsContext";
 import { buildFolderTree, docMatchesFolder } from "@/data/mockData";
 import type { Document, FolderNode } from "@/data/mockData";
 import { format } from "date-fns";
 
 export default function ArchivePage() {
-  const { documents, toggleFavorite, currentUser, hasPermission, uploadDocument } = useApp();
-  const { settings } = useSettings();
+  const { documents, toggleFavorite } = useApp();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [categoryFilter, setCategoryFilter] = useState("Semua");
@@ -21,28 +19,9 @@ export default function ArchivePage() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [previewDoc, setPreviewDoc] = useState<Document | null>(null);
   const [showPdfOverlay, setShowPdfOverlay] = useState(false);
-  const [showNewFolder, setShowNewFolder] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
-  const [customFolders, setCustomFolders] = useState<string[]>([]);
-  const [showUploadInArchive, setShowUploadInArchive] = useState(false);
-  const [uploadForm, setUploadForm] = useState({ judul: "", kategori: "", kelas: "", tahunAjaran: "2024/2025" });
 
-  const isAdmin = currentUser.role === "Administrator IT";
-  const canCreateFolder = true; // All roles can create folders
-  const canDeleteFolder = isAdmin;
-  const canMoveFolder = isAdmin;
-
-  // Dynamic folder tree from document metadata + custom folders
-  const folderTree = useMemo(() => {
-    const tree = buildFolderTree(documents);
-    // Add custom folders
-    customFolders.forEach((name) => {
-      if (!tree.find((f) => f.name === name)) {
-        tree.push({ name, path: name, children: [] });
-      }
-    });
-    return tree;
-  }, [documents, customFolders]);
+  // Dynamic folder tree from document metadata
+  const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 
   // Auto-expand first year
   useMemo(() => {
@@ -71,36 +50,6 @@ export default function ArchivePage() {
     }
     return docs;
   }, [documents, search, statusFilter, categoryFilter, selectedFolder, showFavorites]);
-
-  const handleCreateFolder = () => {
-    if (!newFolderName.trim()) return;
-    setCustomFolders((prev) => [...prev, newFolderName.trim()]);
-    setNewFolderName("");
-    setShowNewFolder(false);
-  };
-
-  const handleUploadInArchive = () => {
-    if (!uploadForm.judul.trim()) return;
-    uploadDocument({
-      nomorDokumen: `DOC-${Date.now()}`,
-      judul: uploadForm.judul,
-      kategori: uploadForm.kategori || selectedFolder || "Lainnya",
-      kelas: uploadForm.kelas || "-",
-      tahunAjaran: uploadForm.tahunAjaran,
-      pengunggah: { id: currentUser.id, nama: currentUser.nama, role: currentUser.role, avatar: currentUser.avatar },
-      tanggalUpload: new Date().toISOString(),
-      fileUrl: "/mock/sample.pdf",
-    });
-    setUploadForm({ judul: "", kategori: "", kelas: "", tahunAjaran: "2024/2025" });
-    setShowUploadInArchive(false);
-  };
-
-  // Breadcrumb for selected folder
-  const breadcrumb = selectedFolder
-    ? selectedFolder.split("/")
-    : showFavorites
-    ? ["Favorit"]
-    : ["Semua Dokumen"];
 
   const renderFolder = (folder: FolderNode, depth = 0) => {
     const isExpanded = expandedFolders.has(folder.path);
@@ -138,45 +87,21 @@ export default function ArchivePage() {
     );
   };
 
+  const selectedFolderName = selectedFolder
+    ? selectedFolder.includes("/")
+      ? selectedFolder.split("/")[1]
+      : selectedFolder
+    : null;
+
   return (
     <>
       <AppHeader title="Arsip Dokumen" subtitle="SMP Negeri 4 Cikarang Barat" />
       <div className="flex flex-1 animate-fade-in overflow-hidden">
         {/* Left - Folder tree */}
         <div className="w-64 shrink-0 border-r border-border bg-card p-4 space-y-1 overflow-y-auto">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
-              <Folder size={16} className="text-sakura-warning" /> Struktur Folder
-            </h3>
-            {canCreateFolder && (
-              <button
-                onClick={() => setShowNewFolder(true)}
-                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                title="Buat Folder Baru"
-              >
-                <FolderPlus size={16} />
-              </button>
-            )}
-          </div>
-
-          {/* New folder form */}
-          {showNewFolder && (
-            <div className="p-2 rounded-lg bg-muted/50 border border-border space-y-2 mb-2">
-              <input
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                placeholder="Nama folder baru..."
-                className="w-full px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                autoFocus
-                onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
-              />
-              <div className="flex gap-1">
-                <button onClick={handleCreateFolder} className="flex-1 px-2 py-1 rounded bg-primary text-primary-foreground text-xs font-medium">Buat</button>
-                <button onClick={() => { setShowNewFolder(false); setNewFolderName(""); }} className="px-2 py-1 rounded border border-input text-xs">Batal</button>
-              </div>
-            </div>
-          )}
-
+          <h3 className="font-bold text-foreground text-sm mb-3 flex items-center gap-2">
+            <Folder size={16} className="text-sakura-warning" /> Struktur Folder
+          </h3>
           <button
             onClick={() => { setSelectedFolder(null); setShowFavorites(false); setPreviewDoc(null); }}
             className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -195,37 +120,16 @@ export default function ArchivePage() {
           </button>
           <div className="h-px bg-border my-2" />
           {folderTree.map((folder) => renderFolder(folder))}
-
-          {/* Upload from archive button */}
-          {hasPermission("documents.upload") && (
-            <button
-              onClick={() => setShowUploadInArchive(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 mt-3 rounded-lg border border-dashed border-primary/40 text-xs font-medium text-primary hover:bg-secondary transition-colors"
-            >
-              <Upload size={14} /> Upload ke Arsip
-            </button>
-          )}
         </div>
 
         {/* Center - Document list */}
         <div className={`flex-1 p-6 space-y-4 overflow-y-auto ${previewDoc ? "max-w-[50%]" : ""}`}>
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Folder size={12} />
-            {breadcrumb.map((part, i) => (
-              <span key={i} className="flex items-center gap-1.5">
-                {i > 0 && <ChevronRight size={10} />}
-                <span className={i === breadcrumb.length - 1 ? "text-foreground font-medium" : ""}>{part}</span>
-              </span>
-            ))}
-          </div>
-
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               {showFavorites ? (
                 <><Star size={20} className="text-sakura-warning fill-sakura-warning" /> Dokumen Favorit</>
-              ) : selectedFolder ? (
-                <><Folder size={20} className="text-sakura-warning" /> {breadcrumb[breadcrumb.length - 1]}</>
+              ) : selectedFolderName ? (
+                <><Folder size={20} className="text-sakura-warning" /> {selectedFolderName}</>
               ) : (
                 "Semua Dokumen Arsip"
               )}
@@ -254,41 +158,32 @@ export default function ArchivePage() {
 
           {/* Results */}
           <div className="space-y-2">
-            {filtered.map((doc) => {
-              // Build document location breadcrumb
-              const docYear = doc.tahunAjaran?.match(/(\d{4})\/(\d{4})/)?.[2] || "";
-              const docLocation = docYear && /^(Kelas|Alumni)/i.test(doc.kelas) ? `${docYear} / ${doc.kelas}` : doc.kelas || doc.kategori;
-
-              return (
-                <div
-                  key={doc.id}
-                  className={`flex items-center gap-4 p-4 bg-card rounded-lg border transition cursor-pointer ${
-                    previewDoc?.id === doc.id ? "border-primary shadow-md" : "border-border hover:shadow"
-                  }`}
-                  onClick={() => setPreviewDoc(doc)}
-                >
-                  <button onClick={(e) => { e.stopPropagation(); toggleFavorite(doc.id); }} className="shrink-0">
-                    <Star size={18} className={doc.favorite ? "fill-sakura-warning text-sakura-warning" : "text-muted-foreground hover:text-sakura-warning"} />
-                  </button>
-                  <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                    <FileIcon size={20} className="text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-foreground truncate">{doc.judul}</div>
-                    <div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.kelas}</div>
-                    <div className="text-[10px] text-muted-foreground/70 flex items-center gap-1 mt-0.5">
-                      <Folder size={10} /> {docLocation}
-                    </div>
-                  </div>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
-                    doc.status === "Disetujui" ? "bg-sakura-success/20 text-sakura-success" :
-                    doc.status === "Menunggu" ? "bg-sakura-warning/20 text-sakura-warning" :
-                    doc.status === "Ditolak" ? "bg-destructive/20 text-destructive" :
-                    "bg-muted text-muted-foreground"
-                  }`}>{doc.status}</span>
+            {filtered.map((doc) => (
+              <div
+                key={doc.id}
+                className={`flex items-center gap-4 p-4 bg-card rounded-lg border transition cursor-pointer ${
+                  previewDoc?.id === doc.id ? "border-primary shadow-md" : "border-border hover:shadow"
+                }`}
+                onClick={() => setPreviewDoc(doc)}
+              >
+                <button onClick={(e) => { e.stopPropagation(); toggleFavorite(doc.id); }} className="shrink-0">
+                  <Star size={18} className={doc.favorite ? "fill-sakura-warning text-sakura-warning" : "text-muted-foreground hover:text-sakura-warning"} />
+                </button>
+                <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+                  <FileIcon size={20} className="text-primary" />
                 </div>
-              );
-            })}
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm text-foreground truncate">{doc.judul}</div>
+                  <div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.kelas}</div>
+                </div>
+                <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
+                  doc.status === "Disetujui" ? "bg-sakura-success/20 text-sakura-success" :
+                  doc.status === "Menunggu" ? "bg-sakura-warning/20 text-sakura-warning" :
+                  doc.status === "Ditolak" ? "bg-destructive/20 text-destructive" :
+                  "bg-muted text-muted-foreground"
+                }`}>{doc.status}</span>
+              </div>
+            ))}
             {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Tidak ada dokumen ditemukan.</p>}
           </div>
         </div>
@@ -306,15 +201,6 @@ export default function ArchivePage() {
                 <button onClick={() => setPreviewDoc(null)} className="p-1 rounded hover:bg-muted shrink-0">
                   <X size={16} />
                 </button>
-              </div>
-
-              {/* Breadcrumb location */}
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground px-2 py-1.5 rounded bg-muted/50">
-                <Folder size={12} />
-                <span>{previewDoc.tahunAjaran?.match(/(\d{4})\/(\d{4})/)?.[2] || previewDoc.kategori}</span>
-                {/^(Kelas|Alumni)/i.test(previewDoc.kelas) && (
-                  <><ChevronRight size={10} /><span>{previewDoc.kelas}</span></>
-                )}
               </div>
 
               <span className={`inline-block text-xs font-medium px-3 py-1 rounded-full ${
@@ -401,62 +287,6 @@ export default function ArchivePage() {
           </div>
         )}
       </div>
-
-      {/* Upload from archive modal */}
-      {showUploadInArchive && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm" onClick={() => setShowUploadInArchive(false)}>
-          <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Upload size={20} className="text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-foreground">Upload Dokumen ke Arsip</h3>
-                {selectedFolder && <p className="text-xs text-muted-foreground">Folder tujuan: {selectedFolder}</p>}
-              </div>
-            </div>
-            <div className="space-y-3">
-              <input
-                value={uploadForm.judul}
-                onChange={(e) => setUploadForm((p) => ({ ...p, judul: e.target.value }))}
-                placeholder="Nama Dokumen *"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <input
-                value={uploadForm.kategori}
-                onChange={(e) => setUploadForm((p) => ({ ...p, kategori: e.target.value }))}
-                placeholder={selectedFolder ? `Kategori (default: ${selectedFolder})` : "Kategori"}
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <input
-                value={uploadForm.kelas}
-                onChange={(e) => setUploadForm((p) => ({ ...p, kelas: e.target.value }))}
-                placeholder="Kelas / Unit"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <input
-                value={uploadForm.tahunAjaran}
-                onChange={(e) => setUploadForm((p) => ({ ...p, tahunAjaran: e.target.value }))}
-                placeholder="Tahun Ajaran"
-                className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-
-              {settings.autoSuggestFolder && uploadForm.kategori && (
-                <div className="px-3 py-2 rounded-lg bg-secondary/50 border border-border text-xs">
-                  💡 Saran folder: <span className="font-semibold text-primary">{uploadForm.kategori}</span>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2 justify-end mt-4">
-              <button onClick={() => setShowUploadInArchive(false)} className="px-4 py-2 rounded-lg border border-input text-sm hover:bg-muted">Batal</button>
-              <button onClick={handleUploadInArchive} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 flex items-center gap-2">
-                <Upload size={16} /> Upload
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {detailDoc && <DocumentDetailModal document={detailDoc} onClose={() => setDetailDoc(null)} />}
       {showPdfOverlay && previewDoc && <PdfPreviewOverlay onClose={() => setShowPdfOverlay(false)} document={previewDoc} />}
     </>

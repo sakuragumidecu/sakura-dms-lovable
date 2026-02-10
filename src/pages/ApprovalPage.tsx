@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle, XCircle, Clock, Eye, FileText, ArrowRight, Pencil } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Eye, FileText, ArrowRight, AlertTriangle, Pencil, Fingerprint } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import { useApp } from "@/contexts/AppContext";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
@@ -10,7 +10,8 @@ import { format, differenceInHours } from "date-fns";
 const STEPS = [
   { label: "Staff / Guru Upload", icon: FileText },
   { label: "Antrian Persetujuan", icon: Clock },
-  { label: "Review Dokumen", icon: Pencil },
+  { label: "Review & Annotate", icon: Pencil },
+  { label: "Verifikasi & Tanda Tangan", icon: Fingerprint },
   { label: "Disetujui / Ditolak", icon: CheckCircle },
 ];
 
@@ -29,9 +30,9 @@ export default function ApprovalPage() {
 
   const getUrgency = (doc: Document) => {
     const hours = differenceInHours(new Date(), new Date(doc.tanggalUpload));
-    if (hours > 72) return { label: "Urgent", color: "bg-destructive/20 text-destructive" };
-    if (hours > 24) return { label: "Pending", color: "bg-sakura-warning/20 text-sakura-warning" };
-    return { label: "Baru", color: "bg-sakura-success/20 text-sakura-success" };
+    if (hours > 72) return { label: "Urgent", color: "bg-destructive/20 text-destructive", icon: AlertTriangle };
+    if (hours > 24) return { label: "Pending", color: "bg-sakura-warning/20 text-sakura-warning", icon: Clock };
+    return { label: "Baru", color: "bg-sakura-success/20 text-sakura-success", icon: Clock };
   };
 
   const handleReject = (docId: number) => {
@@ -131,7 +132,7 @@ export default function ApprovalPage() {
                         onClick={() => setReviewDoc(doc)}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-colors"
                       >
-                        <Eye size={14} /> Review
+                        <Pencil size={14} /> Review & Annotate
                       </button>
                       {canApprove && (
                         <>
@@ -139,7 +140,7 @@ export default function ApprovalPage() {
                             onClick={() => setApproveId(doc.id)}
                             className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-sakura-success text-white text-xs font-bold hover:opacity-90 transition-opacity"
                           >
-                            <CheckCircle size={14} /> Setujui
+                            <CheckCircle size={14} /> Approve
                           </button>
                           <button
                             onClick={() => setRejectId(doc.id)}
@@ -158,27 +159,27 @@ export default function ApprovalPage() {
           )}
         </div>
 
-        {/* Approve comment modal - System-based, NO biometric/digital signature */}
+        {/* Approve comment modal */}
         {approveId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 backdrop-blur-sm" onClick={() => setApproveId(null)}>
             <div className="bg-card rounded-xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-sakura-success/20 flex items-center justify-center">
-                  <CheckCircle size={20} className="text-sakura-success" />
+                  <Fingerprint size={20} className="text-sakura-success" />
                 </div>
                 <div>
                   <h3 className="font-bold text-foreground">Konfirmasi Persetujuan</h3>
-                  <p className="text-xs text-muted-foreground">Persetujuan sistem oleh {currentUser.nama}</p>
+                  <p className="text-xs text-muted-foreground">Verifikasi biometrik (simulasi)</p>
                 </div>
               </div>
               <div className="mb-4 p-3 rounded-lg bg-sakura-success/5 border border-sakura-success/20">
-                <p className="text-xs text-muted-foreground">Dokumen akan disetujui oleh sistem atas nama <span className="font-semibold text-foreground">{currentUser.nama}</span> ({currentUser.role})</p>
+                <p className="text-xs text-muted-foreground">✅ Identitas terverifikasi sebagai <span className="font-semibold text-foreground">{currentUser.nama}</span></p>
               </div>
               <textarea value={approveComment} onChange={(e) => setApproveComment(e.target.value)} placeholder="Komentar persetujuan (opsional)..." rows={3} className="w-full px-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none mb-4" />
               <div className="flex gap-2 justify-end">
                 <button onClick={() => { setApproveId(null); setApproveComment(""); }} className="px-4 py-2 rounded-lg border border-input text-sm hover:bg-muted">Batal</button>
                 <button onClick={() => handleApprove(approveId)} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90 flex items-center gap-2">
-                  <CheckCircle size={16} /> Setujui Dokumen
+                  <Fingerprint size={16} /> Setujui & Tanda Tangan Digital
                 </button>
               </div>
             </div>

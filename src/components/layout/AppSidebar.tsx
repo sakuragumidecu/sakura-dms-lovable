@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Upload, Archive, GitBranch, Users, Shield, FileText, Settings } from "lucide-react";
+import { LayoutDashboard, Upload, Archive, GitBranch, Users, Shield, FileText } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
 import { useApp } from "@/contexts/AppContext";
 
@@ -11,7 +11,6 @@ const NAV_ITEMS = [
   { label: "Manajemen User", icon: Users, path: "/users", permission: "users.manage" },
   { label: "Manajemen Role", icon: Shield, path: "/roles", permission: "roles.manage" },
   { label: "Log Sistem", icon: FileText, path: "/logs", permission: "audit.view" },
-  { label: "Pengaturan", icon: Settings, path: "/settings", permission: "profile.edit" },
 ];
 
 export default function AppSidebar() {

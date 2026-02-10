@@ -1,8 +1,7 @@
-import { useState, useRef, useEffect } from "react";
-import { Upload, Camera, X, Eye, FileText, Folder } from "lucide-react";
+import { useState, useRef } from "react";
+import { Upload, Camera, X, Eye, FileText } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import { useApp } from "@/contexts/AppContext";
-import { useSettings } from "@/contexts/SettingsContext";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import { format } from "date-fns";
 
@@ -11,7 +10,6 @@ const KATEGORI_OPTIONS = ["Ijazah", "Nilai", "SK", "Data Siswa", "Laporan", "Ser
 
 export default function UploadPage() {
   const { uploadDocument, currentUser } = useApp();
-  const { settings } = useSettings();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -88,9 +86,6 @@ export default function UploadPage() {
   };
 
   const update = (key: string, val: string) => setForm((p) => ({ ...p, [key]: val }));
-
-  // Auto-suggest folder based on jenisDokumen
-  const suggestedFolder = settings.autoSuggestFolder && form.jenisDokumen ? settings.folderMapping[form.jenisDokumen] || null : null;
 
   return (
     <>
@@ -173,20 +168,6 @@ export default function UploadPage() {
                   {JENIS_OPTIONS.map((j) => <option key={j}>{j}</option>)}
                 </select>
               </div>
-              {/* Auto-suggest folder */}
-              {suggestedFolder && (
-                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 border border-border text-xs">
-                  <Folder size={14} className="text-sakura-warning" />
-                  <span className="text-foreground">Folder tujuan arsip: <span className="font-semibold text-primary">{suggestedFolder}</span></span>
-                  <button
-                    type="button"
-                    onClick={() => update("kategori", suggestedFolder)}
-                    className="ml-auto px-2 py-0.5 rounded bg-primary text-primary-foreground text-[10px] font-semibold hover:opacity-90"
-                  >
-                    Terapkan
-                  </button>
-                </div>
-              )}
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1">Kategori</label>
                 <select value={form.kategori} onChange={(e) => update("kategori", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
