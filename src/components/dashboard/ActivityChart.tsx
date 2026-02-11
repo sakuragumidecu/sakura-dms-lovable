@@ -1,7 +1,8 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { getChartData, CHART_MONTHS } from "@/data/mockData";
 import { useState, useMemo } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Check } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Props {
   onDateClick: (date: string) => void;
@@ -13,8 +14,10 @@ type Period = "weekly" | "monthly";
 export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
   const [period, setPeriod] = useState<Period>("weekly");
   const [selectedMonth, setSelectedMonth] = useState(CHART_MONTHS[0].value);
+  const [monthOpen, setMonthOpen] = useState(false);
 
   const source = useMemo(() => getChartData(period, selectedMonth), [period, selectedMonth]);
+  const monthLabel = CHART_MONTHS.find(m => m.value === selectedMonth)?.label || selectedMonth;
 
   const data = source.labels.map((label, i) => ({
     name: label,
@@ -45,18 +48,30 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
           <p className="text-xs text-muted-foreground">Klik pada titik grafik untuk melihat dokumen, klik legend untuk filter status</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1.5 border border-border rounded-md px-2 py-1.5">
-            <CalendarDays size={14} className="text-muted-foreground" />
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="text-xs font-medium bg-transparent text-foreground outline-none cursor-pointer"
-            >
+          <Popover open={monthOpen} onOpenChange={setMonthOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-1.5 border border-border rounded-md px-2.5 py-1.5 hover:bg-muted transition-colors">
+                <CalendarDays size={14} className="text-muted-foreground" />
+                <span className="text-xs font-medium text-foreground">{monthLabel}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-1 z-50 bg-popover" align="end" sideOffset={4}>
               {CHART_MONTHS.map((m) => (
-                <option key={m.value} value={m.value}>{m.label}</option>
+                <button
+                  key={m.value}
+                  onClick={() => { setSelectedMonth(m.value); setMonthOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3 py-2 text-xs rounded-md transition-colors ${
+                    selectedMonth === m.value
+                      ? "bg-primary/10 text-primary font-semibold"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                >
+                  {m.label}
+                  {selectedMonth === m.value && <Check size={14} />}
+                </button>
               ))}
-            </select>
-          </div>
+            </PopoverContent>
+          </Popover>
           <div className="flex gap-1 bg-muted rounded-lg p-1">
             <button
               onClick={() => setPeriod("weekly")}
