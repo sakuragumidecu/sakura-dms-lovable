@@ -6,6 +6,7 @@ import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import type { Document } from "@/data/mockData";
 import { format, differenceInHours } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 const STEPS = [
   { label: "Staff / Guru Upload", icon: FileText },
@@ -15,6 +16,7 @@ const STEPS = [
 
 export default function ApprovalPage() {
   const { documents, currentUser, hasPermission, approveDocument, rejectDocument } = useApp();
+  const { toast } = useToast();
   const [detailDoc, setDetailDoc] = useState<Document | null>(null);
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -37,12 +39,14 @@ export default function ApprovalPage() {
     rejectDocument(docId, rejectReason.trim());
     setRejectId(null);
     setRejectReason("");
+    toast({ title: "Dokumen berhasil ditolak" });
   };
 
   const handleApprove = (docId: number) => {
     approveDocument(docId, approveComment.trim() || undefined);
     setApproveId(null);
     setApproveComment("");
+    toast({ title: "Dokumen berhasil disetujui" });
   };
 
   return (

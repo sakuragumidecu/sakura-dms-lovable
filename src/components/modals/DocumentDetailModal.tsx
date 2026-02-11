@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useState } from "react";
 import PdfPreviewOverlay from "./PdfPreviewOverlay";
 import { useApp } from "@/contexts/AppContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   document: Document;
@@ -17,16 +18,11 @@ const STATUS_COLORS: Record<string, string> = {
   Diarsipkan: "bg-muted text-muted-foreground",
 };
 
-const ROLE_BADGE: Record<string, string> = {
-  "Admin/TU": "bg-primary/10 text-primary border border-primary/20",
-  "Kepala Sekolah": "bg-sakura-success/10 text-sakura-success border border-sakura-success/20",
-  "Staff Administrasi": "bg-sakura-warning/10 text-sakura-warning border border-sakura-warning/30",
-  "Guru": "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
-  "Sistem": "bg-muted text-muted-foreground border border-border",
-};
+const AUDIT_ROLE_BADGE = "bg-secondary text-foreground border border-border";
 
 const ACTION_BADGE: Record<string, string> = {
-  "Mengunggah": "bg-secondary text-foreground border border-border",
+  "Mengunggah": "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
+  "Menunggu": "bg-sakura-warning/10 text-sakura-warning border border-sakura-warning/20",
   "Menyetujui": "bg-sakura-success/10 text-sakura-success border border-sakura-success/20",
   "Menolak": "bg-destructive/10 text-destructive border border-destructive/20",
   "Mengarsipkan": "bg-muted text-muted-foreground border border-border",
@@ -50,11 +46,13 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
   const [showApproveForm, setShowApproveForm] = useState(false);
   const [approveComment, setApproveComment] = useState("");
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
+  const { toast } = useToast();
 
   const handleAddNote = () => {
     if (!noteText.trim()) return;
     addAuditNote(doc.id, noteText.trim());
     setNoteText("");
+    toast({ title: "Catatan berhasil ditambahkan" });
   };
 
   const handleReject = () => {
@@ -62,6 +60,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
     rejectDocument(doc.id, rejectReason.trim());
     setShowRejectForm(false);
     setRejectReason("");
+    toast({ title: "Dokumen berhasil ditolak" });
     onClose();
   };
 
@@ -69,11 +68,13 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
     approveDocument(doc.id, approveComment.trim() || undefined);
     setShowApproveForm(false);
     setApproveComment("");
+    toast({ title: "Dokumen berhasil disetujui" });
     onClose();
   };
 
   const handleArchive = () => {
     archiveDocument(doc.id);
+    toast({ title: "Dokumen berhasil diarsipkan" });
     onClose();
   };
 
@@ -123,7 +124,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
                   {label === "Pengunggah" ? (
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="font-medium text-foreground">{doc.pengunggah.nama}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_BADGE[doc.pengunggah.role] || "bg-muted text-muted-foreground border border-border"}`}>{doc.pengunggah.role}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium bg-secondary text-foreground border border-border`}>{doc.pengunggah.role}</span>
                     </div>
                   ) : label === "Status" ? (
                     <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-0.5 ${STATUS_COLORS[doc.status]}`}>{doc.status}</span>
@@ -204,7 +205,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm text-foreground">{entry.user.nama}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_BADGE[entry.user.role] || "bg-muted text-muted-foreground border border-border"}`}>{entry.user.role}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${AUDIT_ROLE_BADGE}`}>{entry.user.role}</span>
                         <span className="text-xs text-muted-foreground ml-auto">{format(new Date(entry.time), "yyyy-MM-dd HH:mm")}</span>
                       </div>
                       <div className="mt-1">

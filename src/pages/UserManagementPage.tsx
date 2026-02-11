@@ -5,6 +5,7 @@ import type { UserRole } from "@/data/mockData";
 import UserProfileModal from "@/components/modals/UserProfileModal";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import avatarAdmin from "@/assets/avatar_admin.jpg";
+import { useToast } from "@/hooks/use-toast";
 
 const ALL_ROLES: UserRole[] = ["Admin/TU", "Kepala Sekolah", "Staff Administrasi", "Guru"];
 
@@ -19,6 +20,7 @@ const EMPTY_FORM: UserFormData = { nama: "", email: "", role: "Staff Administras
 
 export default function UserManagementPage() {
   const { users, currentUser, addUser, updateUser, deleteUser } = useApp();
+  const { toast } = useToast();
   const [profileUser, setProfileUser] = useState<typeof users[0] | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editUserId, setEditUserId] = useState<number | null>(null);
@@ -32,6 +34,7 @@ export default function UserManagementPage() {
     addUser({ ...formData, avatar: avatarAdmin });
     setShowCreateModal(false);
     setFormData(EMPTY_FORM);
+    toast({ title: "User berhasil ditambahkan" });
   };
 
   const handleEdit = () => {
@@ -39,12 +42,14 @@ export default function UserManagementPage() {
     updateUser(editUserId, formData);
     setEditUserId(null);
     setFormData(EMPTY_FORM);
+    toast({ title: "User berhasil diperbarui" });
   };
 
   const handleDelete = () => {
     if (!deleteUserId) return;
     deleteUser(deleteUserId);
     setDeleteUserId(null);
+    toast({ title: "User berhasil dihapus" });
   };
 
   const openEdit = (u: typeof users[0]) => {

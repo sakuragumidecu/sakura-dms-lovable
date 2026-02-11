@@ -10,6 +10,7 @@ import { useApp } from "@/contexts/AppContext";
 import { buildFolderTree, docMatchesFolder } from "@/data/mockData";
 import { format, differenceInHours } from "date-fns";
 import type { Document, FolderNode } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
 type TabKey = "ringkasan" | "dokumen" | "persetujuan";
 
@@ -114,12 +115,14 @@ function OverviewTab({ visibleDocs, onOpenList, onSelectDoc }: {
   };
 
   const handleStatusClick = (status: string) => {
-    const statusMap: Record<string, string> = { "Disetujui": "Disetujui", "Ditolak": "Ditolak", "Menunggu": "Menunggu", "Upload": "all" };
-    const key = statusMap[status];
-    if (key === "all") {
-      onOpenList(`Semua Dokumen (Upload)`, visibleDocs);
-    } else if (key) {
-      onOpenList(`Dokumen ${status}`, visibleDocs.filter((d) => d.status === key || (key === "Disetujui" && d.status === "Diarsipkan")));
+    const statusMap: Record<string, string[]> = {
+      "Disetujui": ["Disetujui", "Diarsipkan"],
+      "Ditolak": ["Ditolak"],
+      "Menunggu": ["Menunggu"],
+    };
+    const allowed = statusMap[status];
+    if (allowed) {
+      onOpenList(`Dokumen ${status}`, visibleDocs.filter((d) => allowed.includes(d.status)));
     }
   };
 
@@ -341,6 +344,7 @@ function PersetujuanTab({ documents, canApprove, approveDocument, rejectDocument
   const [approveComment, setApproveComment] = useState("");
   const [rejectId, setRejectId] = useState<number | null>(null);
   const [rejectReason, setRejectReason] = useState("");
+  const { toast } = useToast();
 
   const pendingDocs = documents.filter((d) => d.status === "Menunggu");
 
@@ -355,6 +359,7 @@ function PersetujuanTab({ documents, canApprove, approveDocument, rejectDocument
     approveDocument(docId, approveComment.trim() || undefined);
     setApproveId(null);
     setApproveComment("");
+    toast({ title: "Dokumen berhasil disetujui" });
   };
 
   const handleReject = (docId: number) => {
@@ -362,6 +367,7 @@ function PersetujuanTab({ documents, canApprove, approveDocument, rejectDocument
     rejectDocument(docId, rejectReason.trim());
     setRejectId(null);
     setRejectReason("");
+    toast({ title: "Dokumen berhasil ditolak" });
   };
 
   if (pendingDocs.length === 0) {

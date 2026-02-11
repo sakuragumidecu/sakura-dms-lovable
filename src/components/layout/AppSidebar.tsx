@@ -19,7 +19,12 @@ const BOTTOM_ITEMS = [
   { label: "Pengaturan Sistem", icon: Settings, path: "/settings", section: "tema" },
 ];
 
-export default function AppSidebar() {
+interface Props {
+  mobileMode?: boolean;
+  onClose?: () => void;
+}
+
+export default function AppSidebar({ mobileMode, onClose }: Props = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, hasPermission } = useApp();
@@ -27,8 +32,13 @@ export default function AppSidebar() {
 
   const visibleItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
+  const handleNavigate = (path: string) => {
+    navigate(path);
+    if (mobileMode && onClose) onClose();
+  };
+
   return (
-    <aside className={`${collapsed ? "w-[68px]" : "w-[260px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300`}>
+    <aside className={`${mobileMode ? "w-[260px] h-full" : (collapsed ? "w-[68px]" : "w-[260px]")} ${mobileMode ? "" : "sticky top-0 h-screen hidden md:flex"} bg-sidebar flex flex-col shrink-0 transition-all duration-300 overflow-y-auto`}>
       {/* Top: Logo + Collapse button */}
       <div className="flex items-center gap-3 px-4 py-5">
         <img src={logoSakura} alt="SAKURA" className="w-10 h-10 rounded-full bg-sidebar-accent shrink-0" />
@@ -53,7 +63,7 @@ export default function AppSidebar() {
           return (
             <button
               key={item.path}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               title={collapsed ? item.label : undefined}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 active
@@ -75,7 +85,7 @@ export default function AppSidebar() {
           return (
             <button
               key={item.label}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
               title={collapsed ? item.label : undefined}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 active
