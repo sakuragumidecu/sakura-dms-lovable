@@ -106,7 +106,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             {
               time: new Date().toISOString(),
               user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
-              action: comment ? `Menyetujui dokumen — ${comment}` : "Menyetujui dokumen",
+              action: comment ? `Menyetujui dokumen: ${comment}` : "Menyetujui dokumen",
             },
             {
               time: new Date().toISOString(),
@@ -138,7 +138,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           auditTrail: [...d.auditTrail, {
             time: new Date().toISOString(),
             user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role },
-            action: `Menolak dokumen — ${reason}`,
+            action: `Menolak dokumen: ${reason}`,
           }],
         };
       })

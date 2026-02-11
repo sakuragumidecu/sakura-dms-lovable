@@ -35,11 +35,13 @@ export default function LoginPage() {
       {/* Left - Branding */}
       <div className="hidden lg:flex flex-col justify-center w-1/2 bg-primary px-12 py-16">
         <div className="flex items-center gap-3 mb-10">
-          <img src={logoSakura} alt="SAKURA" className="w-12 h-12 rounded-full" />
-          <div>
-            <div className="text-primary-foreground font-bold text-xl">SAKURA</div>
-            <div className="text-primary-foreground/70 text-sm">Secure Document System</div>
-          </div>
+          <button onClick={() => navigate("/")} className="flex items-center gap-3">
+            <img src={logoSakura} alt="SAKURA" className="w-12 h-12 rounded-full" />
+            <div className="text-left">
+              <div className="text-primary-foreground font-bold text-xl">SAKURA</div>
+              <div className="text-primary-foreground/70 text-sm">Secure Document System</div>
+            </div>
+          </button>
         </div>
         <h1 className="text-4xl font-extrabold text-primary-foreground leading-tight mb-4">
           Secure Archiving and<br />Keeping of Unified<br />Records for Administration
@@ -61,16 +63,16 @@ export default function LoginPage() {
             );
           })}
         </div>
-        <p className="mt-auto text-primary-foreground/40 text-xs pt-8">© 2026 SAKURA — President University Capstone Project</p>
+        <p className="mt-auto text-primary-foreground/40 text-xs pt-8">© 2026 SAKURA · President University Capstone Project</p>
       </div>
 
       {/* Right - Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 bg-background">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-3 mb-8">
+          <button onClick={() => navigate("/")} className="lg:hidden flex items-center gap-3 mb-8">
             <img src={logoSakura} alt="SAKURA" className="w-10 h-10 rounded-full" />
             <span className="text-xl font-bold text-primary">SAKURA</span>
-          </div>
+          </button>
           <h2 className="text-2xl font-bold text-foreground mb-1">Masuk ke Sistem</h2>
           <p className="text-muted-foreground mb-8">Autentikasi diperlukan untuk mengakses sistem</p>
 

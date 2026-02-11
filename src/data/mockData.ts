@@ -107,7 +107,7 @@ export const DOCUMENTS: Document[] = [
     fileUrl: "/mock/sample.pdf", catatan: "Format tidak sesuai standar",
     auditTrail: [
       { time: "2025-09-10T11:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
-      { time: "2025-09-10T15:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menolak dokumen — Format tidak sesuai standar" },
+      { time: "2025-09-10T15:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menolak dokumen: Format tidak sesuai standar" },
     ],
   },
   {

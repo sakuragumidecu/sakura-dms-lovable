@@ -98,9 +98,19 @@ function OverviewTab({ visibleDocs, onOpenList, onSelectDoc }: {
     diarsipkan: visibleDocs.filter((d) => d.status === "Diarsipkan").length,
   };
 
-  const handleChartClick = (date: string) => {
-    const matched = visibleDocs.filter((d) => d.tanggalUpload.startsWith(date));
-    onOpenList(`Dokumen tanggal ${date}`, matched.length > 0 ? matched : visibleDocs.slice(0, 3));
+  const handleChartClick = (date: string, status?: string) => {
+    let matched = visibleDocs.filter((d) => d.tanggalUpload.startsWith(date));
+    if (status && status !== "Upload") {
+      const statusMap: Record<string, string[]> = {
+        "Disetujui": ["Disetujui", "Diarsipkan"],
+        "Ditolak": ["Ditolak"],
+        "Menunggu": ["Menunggu"],
+      };
+      const allowedStatuses = statusMap[status] || [];
+      matched = matched.filter((d) => allowedStatuses.includes(d.status));
+    }
+    const label = status ? `Dokumen ${status} tanggal ${date}` : `Dokumen tanggal ${date}`;
+    onOpenList(label, matched.length > 0 ? matched : visibleDocs.slice(0, 3));
   };
 
   const handleStatusClick = (status: string) => {

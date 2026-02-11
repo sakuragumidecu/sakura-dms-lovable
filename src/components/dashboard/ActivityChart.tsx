@@ -5,7 +5,7 @@ import { CalendarDays, Check } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Props {
-  onDateClick: (date: string) => void;
+  onDateClick: (date: string, status?: string) => void;
   onStatusClick?: (status: string) => void;
 }
 
@@ -28,9 +28,9 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
     Menunggu: source.menunggu[i],
   }));
 
-  const handleClick = (payload: any) => {
-    if (payload?.activePayload?.[0]) {
-      onDateClick(payload.activePayload[0].payload.date);
+  const handleLineClick = (status: string) => (payload: any) => {
+    if (payload?.payload?.date) {
+      onDateClick(payload.payload.date, status);
     }
   };
 
@@ -89,7 +89,7 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
         </div>
       </div>
       <ResponsiveContainer width="100%" height={280}>
-        <LineChart data={data} onClick={handleClick} style={{ cursor: "pointer" }}>
+        <LineChart data={data} style={{ cursor: "pointer" }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(350 15% 90%)" />
           <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(0 0% 49%)" angle={-25} textAnchor="end" height={60} interval={period === "monthly" ? 2 : 0} />
           <YAxis tick={{ fontSize: 12 }} stroke="hsl(0 0% 49%)" />
@@ -102,10 +102,10 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
             }}
           />
           <Legend onClick={handleLegendClick} wrapperStyle={{ cursor: "pointer" }} />
-          <Line type="monotone" dataKey="Upload" stroke="hsl(352 48% 28%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(352 48% 28%)" }} activeDot={{ r: 6 }} />
-          <Line type="monotone" dataKey="Disetujui" stroke="hsl(155 54% 40%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(155 54% 40%)" }} activeDot={{ r: 6 }} />
-          <Line type="monotone" dataKey="Ditolak" stroke="hsl(0 84% 60%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(0 84% 60%)" }} activeDot={{ r: 6 }} />
-          <Line type="monotone" dataKey="Menunggu" stroke="hsl(35 86% 59%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(35 86% 59%)" }} activeDot={{ r: 6 }} />
+          <Line type="monotone" dataKey="Upload" stroke="hsl(352 48% 28%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(352 48% 28%)" }} activeDot={{ r: 6, onClick: handleLineClick("Upload") }} />
+          <Line type="monotone" dataKey="Disetujui" stroke="hsl(155 54% 40%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(155 54% 40%)" }} activeDot={{ r: 6, onClick: handleLineClick("Disetujui") }} />
+          <Line type="monotone" dataKey="Ditolak" stroke="hsl(0 84% 60%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(0 84% 60%)" }} activeDot={{ r: 6, onClick: handleLineClick("Ditolak") }} />
+          <Line type="monotone" dataKey="Menunggu" stroke="hsl(35 86% 59%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(35 86% 59%)" }} activeDot={{ r: 6, onClick: handleLineClick("Menunggu") }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

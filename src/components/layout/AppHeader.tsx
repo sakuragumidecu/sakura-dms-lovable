@@ -101,7 +101,7 @@ export default function AppHeader({ title, subtitle }: Props) {
                 </button>
                 <div className="border-t border-border" />
                 <button
-                  onClick={() => { setShowDropdown(false); logout(); navigate("/"); }}
+                  onClick={() => { setShowDropdown(false); logout(); navigate("/login"); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-destructive hover:bg-muted transition-colors"
                 >
                   <LogOut size={16} /> Keluar

@@ -107,7 +107,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="py-8 bg-card border-t border-border">
         <div className="max-w-7xl mx-auto px-6 text-center text-sm text-muted-foreground">
-          © 2026 SAKURA — SMP Negeri 4 Cikarang Barat · President University Capstone Project
+          © 2026 SAKURA · SMP Negeri 4 Cikarang Barat · President University Capstone Project
         </div>
       </footer>
     </div>
