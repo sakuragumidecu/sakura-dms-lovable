@@ -1,15 +1,22 @@
 import { useState, useMemo } from "react";
-import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, FolderPlus, Plus, Pencil, Trash2 } from "lucide-react";
+import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, FolderPlus, Plus, Pencil, Trash2, Monitor } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import UploadForm from "@/components/upload/UploadForm";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { buildFolderTree, docMatchesFolder } from "@/data/mockData";
+import { buildFolderTree, docMatchesFolder, KATEGORI_OPTIONS } from "@/data/mockData";
 import type { Document, FolderNode } from "@/data/mockData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+
+const STATUS_SECTIONS = [
+  { key: "Menunggu", label: "Belum Disetujui", color: "text-sakura-warning", bgColor: "bg-sakura-warning/10 border-sakura-warning/20", badgeColor: "bg-sakura-warning/20 text-sakura-warning", opacity: true },
+  { key: "Disetujui", label: "Disetujui", color: "text-sakura-success", bgColor: "bg-sakura-success/10 border-sakura-success/20", badgeColor: "bg-sakura-success/20 text-sakura-success", opacity: false },
+  { key: "Diarsipkan", label: "Diarsipkan", color: "text-muted-foreground", bgColor: "bg-muted/50 border-border", badgeColor: "bg-muted text-muted-foreground", opacity: false },
+  { key: "Ditolak", label: "Ditolak", color: "text-destructive", bgColor: "bg-destructive/5 border-destructive/20", badgeColor: "bg-destructive/20 text-destructive", opacity: false },
+];
 
 export default function ArchivePage() {
   const { documents, toggleFavorite, currentUser } = useApp();
@@ -34,10 +41,8 @@ export default function ArchivePage() {
 
   const isAdmin = currentUser.role === "Admin/TU";
 
-  // Dynamic folder tree from document metadata
   const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 
-  // Merge custom folders into tree
   const fullTree = useMemo(() => {
     const tree: FolderNode[] = JSON.parse(JSON.stringify(folderTree));
     customFolders.forEach((cf) => {
@@ -57,7 +62,6 @@ export default function ArchivePage() {
     return tree;
   }, [folderTree, customFolders]);
 
-  // Auto-expand first year
   useMemo(() => {
     if (fullTree.length > 0 && expandedFolders.size === 0) {
       setExpandedFolders(new Set([fullTree[0].path]));
@@ -118,6 +122,26 @@ export default function ArchivePage() {
     }
     return docs;
   }, [documents, search, statusFilter, categoryFilter, selectedFolder, showFavorites]);
+
+  // Group filtered docs by status
+  const groupedDocs = useMemo(() => {
+    const groups: Record<string, Document[]> = {};
+    STATUS_SECTIONS.forEach((s) => { groups[s.key] = []; });
+    filtered.forEach((doc) => {
+      if (groups[doc.status]) groups[doc.status].push(doc);
+    });
+    return groups;
+  }, [filtered]);
+
+  // Build breadcrumb path
+  const breadcrumbParts = useMemo(() => {
+    if (!selectedFolder) return null;
+    const parts = selectedFolder.split("/");
+    return parts.map((part, i) => ({
+      label: part,
+      path: parts.slice(0, i + 1).join("/"),
+    }));
+  }, [selectedFolder]);
 
   const renderFolder = (folder: FolderNode, depth = 0) => {
     const isExpanded = expandedFolders.has(folder.path);
@@ -214,11 +238,32 @@ export default function ArchivePage() {
     );
   };
 
-  const selectedFolderName = selectedFolder
-    ? selectedFolder.includes("/")
-      ? selectedFolder.split("/")[1]
-      : selectedFolder
-    : null;
+  const renderDocCard = (doc: Document, dimmed: boolean) => (
+    <div
+      key={doc.id}
+      className={`flex items-center gap-4 p-4 bg-card rounded-lg border transition cursor-pointer ${
+        previewDoc?.id === doc.id ? "border-primary shadow-md" : "border-border hover:shadow"
+      } ${dimmed ? "opacity-50" : ""}`}
+      onClick={() => setPreviewDoc(doc)}
+    >
+      <button onClick={(e) => { e.stopPropagation(); toggleFavorite(doc.id); }} className="shrink-0">
+        <Star size={18} className={doc.favorite ? "fill-sakura-warning text-sakura-warning" : "text-muted-foreground hover:text-sakura-warning"} />
+      </button>
+      <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
+        <FileIcon size={20} className="text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-sm text-foreground truncate">{doc.judul}</div>
+        <div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.kelas}</div>
+      </div>
+      <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
+        doc.status === "Disetujui" ? "bg-sakura-success/20 text-sakura-success" :
+        doc.status === "Menunggu" ? "bg-sakura-warning/20 text-sakura-warning" :
+        doc.status === "Ditolak" ? "bg-destructive/20 text-destructive" :
+        "bg-muted text-muted-foreground"
+      }`}>{doc.status}</span>
+    </div>
+  );
 
   return (
     <>
@@ -256,7 +301,6 @@ export default function ArchivePage() {
           >
             <Star size={14} className="text-sakura-warning" /> Favorit
           </button>
-          {/* Root-level create folder input */}
           {isAdmin && showCreateFolder && createFolderParent === null && (
             <div className="flex gap-1 px-2 mb-1">
               <input
@@ -272,17 +316,35 @@ export default function ArchivePage() {
             </div>
           )}
           {fullTree.map((folder) => renderFolder(folder))}
-          {/* Spacer */}
         </div>
 
         {/* Center - Document list */}
         <div className={`flex-1 p-6 space-y-4 overflow-y-auto ${previewDoc ? "max-w-[50%]" : ""}`}>
+          {/* Breadcrumb filepath */}
+          {breadcrumbParts && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 rounded-lg px-3 py-2 border border-border">
+              <Monitor size={14} className="shrink-0" />
+              <ChevronRight size={12} className="shrink-0" />
+              {breadcrumbParts.map((part, i) => (
+                <span key={part.path} className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => { setSelectedFolder(part.path); setPreviewDoc(null); }}
+                    className={`hover:text-primary transition-colors ${i === breadcrumbParts.length - 1 ? "font-semibold text-foreground" : ""}`}
+                  >
+                    {part.label}
+                  </button>
+                  {i < breadcrumbParts.length - 1 && <ChevronRight size={12} className="shrink-0" />}
+                </span>
+              ))}
+            </div>
+          )}
+
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
               {showFavorites ? (
                 <><Star size={20} className="text-sakura-warning fill-sakura-warning" /> Dokumen Favorit</>
-              ) : selectedFolderName ? (
-                <><Folder size={20} className="text-sakura-warning" /> {selectedFolderName}</>
+              ) : selectedFolder ? (
+                <><Folder size={20} className="text-sakura-warning" /> {selectedFolder.includes("/") ? selectedFolder.split("/").pop() : selectedFolder}</>
               ) : (
                 "Semua Dokumen Arsip"
               )}
@@ -302,7 +364,7 @@ export default function ArchivePage() {
             </select>
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="px-3 py-2 rounded-lg border border-input bg-background text-sm">
               <option value="Semua">Semua Kategori</option>
-              <option>Ijazah</option><option>Nilai</option><option>SK</option><option>Data Siswa</option><option>Laporan</option>
+              {KATEGORI_OPTIONS.map((k) => <option key={k}>{k}</option>)}
             </select>
             <button onClick={() => { setSearch(""); setStatusFilter("Semua"); setCategoryFilter("Semua"); }} className="flex items-center gap-1 px-3 py-2 rounded-lg border border-input text-sm hover:bg-muted transition-colors">
               <RotateCcw size={14} /> Reset
@@ -312,43 +374,38 @@ export default function ArchivePage() {
             </button>
           </div>
 
-          {/* Results */}
-          <div className="space-y-2">
-            {filtered.map((doc) => (
-              <div
-                key={doc.id}
-                className={`flex items-center gap-4 p-4 bg-card rounded-lg border transition cursor-pointer ${
-                  previewDoc?.id === doc.id ? "border-primary shadow-md" : "border-border hover:shadow"
-                }`}
-                onClick={() => setPreviewDoc(doc)}
-              >
-                <button onClick={(e) => { e.stopPropagation(); toggleFavorite(doc.id); }} className="shrink-0">
-                  <Star size={18} className={doc.favorite ? "fill-sakura-warning text-sakura-warning" : "text-muted-foreground hover:text-sakura-warning"} />
-                </button>
-                <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0">
-                  <FileIcon size={20} className="text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-foreground truncate">{doc.judul}</div>
-                  <div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.kelas}</div>
-                </div>
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
-                  doc.status === "Disetujui" ? "bg-sakura-success/20 text-sakura-success" :
-                  doc.status === "Menunggu" ? "bg-sakura-warning/20 text-sakura-warning" :
-                  doc.status === "Ditolak" ? "bg-destructive/20 text-destructive" :
-                  "bg-muted text-muted-foreground"
-                }`}>{doc.status}</span>
-              </div>
-            ))}
-            {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Tidak ada dokumen ditemukan.</p>}
-          </div>
+          {/* Results grouped by status */}
+          {statusFilter !== "Semua" ? (
+            <div className="space-y-2">
+              {filtered.map((doc) => renderDocCard(doc, false))}
+              {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Tidak ada dokumen ditemukan.</p>}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {STATUS_SECTIONS.map((section) => {
+                const docs = groupedDocs[section.key];
+                if (docs.length === 0) return null;
+                return (
+                  <div key={section.key}>
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border mb-3 ${section.bgColor}`}>
+                      <span className={`text-sm font-semibold ${section.color}`}>{section.label}</span>
+                      <span className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${section.badgeColor}`}>{docs.length}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {docs.map((doc) => renderDocCard(doc, section.opacity))}
+                    </div>
+                  </div>
+                );
+              })}
+              {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Tidak ada dokumen ditemukan.</p>}
+            </div>
+          )}
         </div>
 
         {/* Right - Side Preview */}
         {previewDoc && (
           <div className="w-[400px] shrink-0 border-l border-border bg-card overflow-y-auto">
             <div className="p-5 space-y-5">
-              {/* Header */}
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-foreground text-base">{previewDoc.judul}</h3>
@@ -366,7 +423,6 @@ export default function ArchivePage() {
                 "bg-muted text-muted-foreground"
               }`}>{previewDoc.status}</span>
 
-              {/* Metadata */}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <div className="text-muted-foreground text-xs">Kategori</div>
@@ -404,7 +460,6 @@ export default function ArchivePage() {
                 </div>
               )}
 
-              {/* Actions */}
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowPdfOverlay(true)}
@@ -420,7 +475,6 @@ export default function ArchivePage() {
                 </button>
               </div>
 
-              {/* Audit trail mini */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Clock size={14} className="text-primary" />
@@ -445,7 +499,6 @@ export default function ArchivePage() {
       </div>
       {detailDoc && <DocumentDetailModal document={detailDoc} onClose={() => setDetailDoc(null)} />}
       {showPdfOverlay && previewDoc && <PdfPreviewOverlay onClose={() => setShowPdfOverlay(false)} document={previewDoc} />}
-      {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8">
           <div className="fixed inset-0 bg-black/50" onClick={() => setShowUploadModal(false)} />

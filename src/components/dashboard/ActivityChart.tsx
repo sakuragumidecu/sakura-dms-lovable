@@ -3,6 +3,8 @@ import { getChartData, CHART_MONTHS } from "@/data/mockData";
 import { useState, useMemo } from "react";
 import { CalendarDays, Check } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 interface Props {
   onDateClick: (date: string, status?: string) => void;
@@ -15,6 +17,8 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
   const [period, setPeriod] = useState<Period>("weekly");
   const [selectedMonth, setSelectedMonth] = useState(CHART_MONTHS[0].value);
   const [monthOpen, setMonthOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
 
   const source = useMemo(() => getChartData(period, selectedMonth), [period, selectedMonth]);
   const monthLabel = CHART_MONTHS.find(m => m.value === selectedMonth)?.label || selectedMonth;
@@ -28,7 +32,7 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
     Menunggu: source.menunggu[i],
   }));
 
-  const handleLineClick = (status: string) => (payload: any) => {
+  const handleDotClick = (status: string) => (payload: any) => {
     if (payload?.payload?.date) {
       onDateClick(payload.payload.date, status);
     }
@@ -40,6 +44,14 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
     }
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    if (!date) return;
+    setSelectedDate(date);
+    setDatePickerOpen(false);
+    const dateStr = format(date, "yyyy-MM-dd");
+    onDateClick(dateStr);
+  };
+
   return (
     <div className="bg-card rounded-xl border border-border p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
@@ -48,6 +60,27 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
           <p className="text-xs text-muted-foreground">Klik pada titik grafik untuk melihat dokumen, klik legend untuk filter status</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {/* Date picker */}
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-1.5 border border-border rounded-md px-2.5 py-1.5 hover:bg-muted transition-colors">
+                <CalendarDays size={14} className="text-primary" />
+                <span className="text-xs font-medium text-foreground">
+                  {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Pilih Tanggal"}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 z-50 bg-popover" align="end" sideOffset={4}>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+
+          {/* Month filter */}
           <Popover open={monthOpen} onOpenChange={setMonthOpen}>
             <PopoverTrigger asChild>
               <button className="flex items-center gap-1.5 border border-border rounded-md px-2.5 py-1.5 hover:bg-muted transition-colors">
@@ -102,10 +135,10 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
             }}
           />
           <Legend onClick={handleLegendClick} wrapperStyle={{ cursor: "pointer" }} />
-          <Line type="monotone" dataKey="Upload" stroke="hsl(352 48% 28%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(352 48% 28%)" }} activeDot={{ r: 6, onClick: handleLineClick("Upload") }} />
-          <Line type="monotone" dataKey="Disetujui" stroke="hsl(155 54% 40%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(155 54% 40%)" }} activeDot={{ r: 6, onClick: handleLineClick("Disetujui") }} />
-          <Line type="monotone" dataKey="Ditolak" stroke="hsl(0 84% 60%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(0 84% 60%)" }} activeDot={{ r: 6, onClick: handleLineClick("Ditolak") }} />
-          <Line type="monotone" dataKey="Menunggu" stroke="hsl(35 86% 59%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(35 86% 59%)" }} activeDot={{ r: 6, onClick: handleLineClick("Menunggu") }} />
+          <Line type="monotone" dataKey="Upload" stroke="hsl(352 48% 28%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(352 48% 28%)" }} activeDot={{ r: 6, onClick: handleDotClick("Upload"), cursor: "pointer" }} />
+          <Line type="monotone" dataKey="Disetujui" stroke="hsl(155 54% 40%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(155 54% 40%)" }} activeDot={{ r: 6, onClick: handleDotClick("Disetujui"), cursor: "pointer" }} />
+          <Line type="monotone" dataKey="Ditolak" stroke="hsl(0 84% 60%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(0 84% 60%)" }} activeDot={{ r: 6, onClick: handleDotClick("Ditolak"), cursor: "pointer" }} />
+          <Line type="monotone" dataKey="Menunggu" stroke="hsl(35 86% 59%)" strokeWidth={2} dot={{ r: 4, fill: "hsl(35 86% 59%)" }} activeDot={{ r: 6, onClick: handleDotClick("Menunggu"), cursor: "pointer" }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

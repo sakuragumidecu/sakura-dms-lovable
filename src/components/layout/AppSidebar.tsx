@@ -42,6 +42,7 @@ export default function AppSidebar() {
           onClick={() => setCollapsed(!collapsed)}
           title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
           className="p-1.5 rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground transition-colors shrink-0"
+          style={{ display: "flex" }}
         >
           {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
         </button>

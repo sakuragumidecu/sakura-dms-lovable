@@ -50,14 +50,13 @@ export default function LoginPage() {
           Sistem manajemen arsip ijazah digital untuk SMP Negeri 4 Cikarang Barat
         </p>
         <div className="mt-12 space-y-3">
-          {["Upload Ijazah — Unggah dokumen ijazah dengan mudah", "Database Ijazah — Simpan dan kelola arsip digital", "Alur Persetujuan — Proses persetujuan yang transparan", "Arsip Digital — Arsipkan dokumen secara permanen"].map((t) => {
-            const [title, desc] = t.split(" — ");
+          {[["Upload Ijazah", "Unggah dokumen ijazah dengan mudah"], ["Database Ijazah", "Simpan dan kelola arsip digital"], ["Alur Persetujuan", "Proses persetujuan yang transparan"], ["Arsip Digital", "Arsipkan dokumen secara permanen"]].map(([title, desc]) => {
             return (
               <div key={title} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary-foreground/5">
                 <div className="w-2 h-2 rounded-full bg-accent shrink-0" />
                 <div>
                   <span className="text-primary-foreground font-semibold text-sm">{title}</span>
-                  <span className="text-primary-foreground/60 text-sm"> — {desc}</span>
+                  <span className="text-primary-foreground/60 text-sm"> · {desc}</span>
                 </div>
               </div>
             );
