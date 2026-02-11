@@ -246,24 +246,59 @@ export const KATEGORI_DETAIL_FIELDS: Record<string, { key: string; label: string
 
 export const TAHUN_AJARAN_OPTIONS = ["2023/2024", "2024/2025", "2025/2026"];
 
-export const CHART_DATA = {
-  labels: ["Sab, 3", "Min, 4", "Sen, 5", "Sel, 6", "Rab, 7", "Kam, 8", "Jum, 9"],
-  dates: ["2025-09-03", "2025-09-04", "2025-09-05", "2025-09-06", "2025-09-07", "2025-09-08", "2025-09-09"],
-  uploads: [3, 5, 2, 4, 6, 3, 2],
-  approvals: [1, 3, 2, 1, 2, 2, 1],
-  disetujui: [1, 2, 1, 1, 2, 1, 1],
-  ditolak: [0, 1, 1, 0, 0, 1, 0],
-  menunggu: [2, 2, 0, 3, 4, 1, 1],
-};
+export const CHART_MONTHS = [
+  { label: "September 2025", value: "2025-09" },
+  { label: "Agustus 2025", value: "2025-08" },
+  { label: "Juli 2025", value: "2025-07" },
+];
 
-export const CHART_DATA_MONTHLY = {
-  labels: Array.from({ length: 30 }, (_, i) => `${i + 1}`),
-  dates: Array.from({ length: 30 }, (_, i) => `2025-09-${String(i + 1).padStart(2, "0")}`),
-  uploads: [3, 5, 2, 4, 6, 3, 2, 4, 1, 3, 5, 2, 6, 3, 4, 2, 5, 3, 1, 4, 6, 2, 3, 5, 4, 2, 3, 1, 4, 5],
-  disetujui: [1, 2, 1, 1, 2, 1, 1, 2, 0, 1, 2, 1, 3, 1, 2, 1, 2, 1, 0, 1, 3, 1, 1, 2, 2, 1, 1, 0, 2, 2],
-  ditolak: [0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1],
-  menunggu: [2, 2, 0, 3, 4, 1, 1, 2, 0, 2, 2, 1, 3, 1, 2, 0, 3, 2, 0, 3, 3, 0, 2, 3, 1, 1, 1, 1, 2, 2],
-};
+const HARI = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+const BULAN_SHORT = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+function generateWeeklyData(monthStr: string) {
+  const [year, month] = monthStr.split("-").map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const startDay = Math.max(1, daysInMonth - 6);
+  const labels: string[] = [];
+  const dates: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(year, month - 1, startDay + i);
+    const dayName = HARI[d.getDay()];
+    const bulan = BULAN_SHORT[d.getMonth()];
+    labels.push(`${dayName}, ${d.getDate()} ${bulan} ${year}`);
+    dates.push(`${year}-${String(month).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`);
+  }
+  return {
+    labels, dates,
+    uploads: [3, 5, 2, 4, 6, 3, 2],
+    disetujui: [1, 2, 1, 1, 2, 1, 1],
+    ditolak: [0, 1, 1, 0, 0, 1, 0],
+    menunggu: [2, 2, 0, 3, 4, 1, 1],
+  };
+}
+
+function generateMonthlyData(monthStr: string) {
+  const [year, month] = monthStr.split("-").map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const bulan = BULAN_SHORT[month - 1];
+  const labels: string[] = [];
+  const dates: string[] = [];
+  for (let i = 1; i <= daysInMonth; i++) {
+    labels.push(`${i} ${bulan} ${year}`);
+    dates.push(`${year}-${String(month).padStart(2, "0")}-${String(i).padStart(2, "0")}`);
+  }
+  return {
+    labels, dates,
+    uploads: Array.from({ length: daysInMonth }, (_, i) => [3,5,2,4,6,3,2,4,1,3,5,2,6,3,4,2,5,3,1,4,6,2,3,5,4,2,3,1,4,5,2][i] ?? 2),
+    disetujui: Array.from({ length: daysInMonth }, (_, i) => [1,2,1,1,2,1,1,2,0,1,2,1,3,1,2,1,2,1,0,1,3,1,1,2,2,1,1,0,2,2,1][i] ?? 1),
+    ditolak: Array.from({ length: daysInMonth }, (_, i) => [0,1,1,0,0,1,0,0,1,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0][i] ?? 0),
+    menunggu: Array.from({ length: daysInMonth }, (_, i) => [2,2,0,3,4,1,1,2,0,2,2,1,3,1,2,0,3,2,0,3,3,0,2,3,1,1,1,1,2,2,1][i] ?? 1),
+  };
+}
+
+export function getChartData(period: "weekly" | "monthly", monthStr: string) {
+  return period === "weekly" ? generateWeeklyData(monthStr) : generateMonthlyData(monthStr);
+}
 
 /** Build dynamic folder tree from documents based on metadata */
 export function buildFolderTree(documents: Document[]): FolderNode[] {

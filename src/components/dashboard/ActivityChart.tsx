@@ -1,6 +1,6 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { CHART_DATA, CHART_DATA_MONTHLY } from "@/data/mockData";
-import { useState } from "react";
+import { getChartData, CHART_MONTHS } from "@/data/mockData";
+import { useState, useMemo } from "react";
 
 interface Props {
   onDateClick: (date: string) => void;
@@ -11,8 +11,9 @@ type Period = "weekly" | "monthly";
 
 export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
   const [period, setPeriod] = useState<Period>("weekly");
+  const [selectedMonth, setSelectedMonth] = useState(CHART_MONTHS[0].value);
 
-  const source = period === "weekly" ? CHART_DATA : CHART_DATA_MONTHLY;
+  const source = useMemo(() => getChartData(period, selectedMonth), [period, selectedMonth]);
 
   const data = source.labels.map((label, i) => ({
     name: label,
@@ -42,25 +43,36 @@ export default function ActivityChart({ onDateClick, onStatusClick }: Props) {
           <h3 className="text-base sm:text-lg font-bold text-foreground">📈 Aktivitas {period === "weekly" ? "Mingguan" : "Bulanan"}</h3>
           <p className="text-xs text-muted-foreground">Klik pada titik grafik untuk melihat dokumen, klik legend untuk filter status</p>
         </div>
-        <div className="flex gap-1 bg-muted rounded-lg p-1">
-          <button
-            onClick={() => setPeriod("weekly")}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${period === "weekly" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        <div className="flex flex-wrap items-center gap-2">
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="px-2 py-1.5 rounded-md text-xs font-medium border border-border bg-card text-foreground"
           >
-            Mingguan
-          </button>
-          <button
-            onClick={() => setPeriod("monthly")}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${period === "monthly" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-          >
-            Bulanan
-          </button>
+            {CHART_MONTHS.map((m) => (
+              <option key={m.value} value={m.value}>{m.label}</option>
+            ))}
+          </select>
+          <div className="flex gap-1 bg-muted rounded-lg p-1">
+            <button
+              onClick={() => setPeriod("weekly")}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${period === "weekly" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Mingguan
+            </button>
+            <button
+              onClick={() => setPeriod("monthly")}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${period === "monthly" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+            >
+              Bulanan
+            </button>
+          </div>
         </div>
       </div>
       <ResponsiveContainer width="100%" height={280}>
         <LineChart data={data} onClick={handleClick} style={{ cursor: "pointer" }}>
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(350 15% 90%)" />
-          <XAxis dataKey="name" tick={{ fontSize: 11 }} stroke="hsl(0 0% 49%)" />
+          <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="hsl(0 0% 49%)" angle={-25} textAnchor="end" height={60} interval={period === "monthly" ? 2 : 0} />
           <YAxis tick={{ fontSize: 12 }} stroke="hsl(0 0% 49%)" />
           <Tooltip
             contentStyle={{
