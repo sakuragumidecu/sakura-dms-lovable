@@ -5,6 +5,7 @@ import type { Document } from "@/data/mockData";
 interface Props {
   onClose: () => void;
   document: Document;
+  mode?: "master" | "distributed";
 }
 
 function buildDocumentHtml(doc: Document): string {
@@ -125,7 +126,7 @@ function buildDocumentHtml(doc: Document): string {
 </html>`;
 }
 
-export default function PdfPreviewOverlay({ onClose, document: doc }: Props) {
+export default function PdfPreviewOverlay({ onClose, document: doc, mode = "distributed" }: Props) {
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(true);
 
@@ -142,7 +143,14 @@ export default function PdfPreviewOverlay({ onClose, document: doc }: Props) {
     <div className="fixed inset-0 z-[100] bg-foreground/90 flex flex-col animate-fade-in">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border">
-        <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
+          {mode === "master" ? (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium shrink-0">Master File</span>
+          ) : (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border font-medium shrink-0">Distributed Copy</span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setZoom((z) => Math.max(50, z - 25))} className="p-2 rounded hover:bg-muted"><ZoomOut size={18} /></button>
           <span className="text-sm text-muted-foreground w-12 text-center">{zoom}%</span>
@@ -164,7 +172,7 @@ export default function PdfPreviewOverlay({ onClose, document: doc }: Props) {
           </div>
         ) : (
           <div
-            className="bg-white rounded-lg shadow-2xl transition-transform origin-top"
+            className="bg-white rounded-lg shadow-2xl transition-transform origin-top relative"
             style={{ transform: `scale(${zoom / 100})`, width: "794px", minHeight: "1123px" }}
           >
             <iframe
@@ -174,6 +182,11 @@ export default function PdfPreviewOverlay({ onClose, document: doc }: Props) {
               style={{ width: "794px", minHeight: "1123px", height: "1123px" }}
               sandbox="allow-same-origin"
             />
+            {mode === "distributed" && (
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center rounded-lg overflow-hidden">
+                <span className="text-6xl font-bold text-red-300/20 rotate-[-30deg] select-none whitespace-nowrap tracking-widest">DISTRIBUTED COPY</span>
+              </div>
+            )}
           </div>
         )}
       </div>
