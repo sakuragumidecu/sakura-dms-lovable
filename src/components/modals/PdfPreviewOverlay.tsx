@@ -5,10 +5,11 @@ import type { Document } from "@/data/mockData";
 interface Props {
   onClose: () => void;
   document: Document;
+  mode?: "master" | "distributed";
   isAdmin?: boolean;
 }
 
-function buildDocumentHtml(doc: Document): string {
+function buildDocumentHtml(doc: Document, mode: "master" | "distributed"): string {
   const siswa = doc.namaSiswa || "—";
   const nisn = doc.nisn || "—";
   const tahun = doc.tahunAjaran || "—";
@@ -52,14 +53,13 @@ function buildDocumentHtml(doc: Document): string {
   const isApproved = doc.status === "Disetujui" || doc.status === "Diarsipkan";
   const verifyUrl = `${window.location.origin}/verify/${doc.id}`;
 
-  // Generate QR code SVG inline for approved documents
-  const qrSection = isApproved
+  // QR section only for distributed copy of approved documents
+  const qrSection = (mode === "distributed" && isApproved)
     ? `
     <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:16px;">
       <div style="flex-shrink:0;">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
           <rect width="100" height="100" fill="white" stroke="#e2e8f0" stroke-width="2" rx="4"/>
-          <!-- Simplified QR pattern -->
           <rect x="10" y="10" width="24" height="24" fill="#1e293b" rx="2"/>
           <rect x="14" y="14" width="16" height="16" fill="white" rx="1"/>
           <rect x="18" y="18" width="8" height="8" fill="#1e293b" rx="1"/>
@@ -177,12 +177,12 @@ function buildDocumentHtml(doc: Document): string {
 </html>`;
 }
 
-export default function PdfPreviewOverlay({ onClose, document: doc, isAdmin = false }: Props) {
+export default function PdfPreviewOverlay({ onClose, document: doc, mode = "distributed", isAdmin = false }: Props) {
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(true);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
-  const htmlContent = useMemo(() => buildDocumentHtml(doc), [doc]);
+  const htmlContent = useMemo(() => buildDocumentHtml(doc, mode), [doc, mode]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 800);
@@ -195,7 +195,14 @@ export default function PdfPreviewOverlay({ onClose, document: doc, isAdmin = fa
     <div className="fixed inset-0 z-[100] bg-foreground/90 flex flex-col animate-fade-in">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border">
-        <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
+          {mode === "master" ? (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium shrink-0">Master File</span>
+          ) : (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border font-medium shrink-0">Distributed Copy</span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <button onClick={() => setZoom((z) => Math.max(50, z - 25))} className="p-2 rounded hover:bg-muted"><ZoomOut size={18} /></button>
           <span className="text-sm text-muted-foreground w-12 text-center">{zoom}%</span>
@@ -270,6 +277,11 @@ export default function PdfPreviewOverlay({ onClose, document: doc, isAdmin = fa
               style={{ width: "794px", minHeight: "1123px", height: "1123px" }}
               sandbox="allow-same-origin"
             />
+            {mode === "distributed" && (
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center rounded-lg overflow-hidden">
+                <span className="text-6xl font-bold text-muted-foreground/10 rotate-[-30deg] select-none whitespace-nowrap tracking-widest">DISTRIBUTED COPY</span>
+              </div>
+            )}
           </div>
         )}
       </div>

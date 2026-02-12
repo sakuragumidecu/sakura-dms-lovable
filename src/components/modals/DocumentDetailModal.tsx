@@ -1,4 +1,4 @@
-import { X, Eye, Download, Clock, FileText, CheckCircle, XCircle, Archive, QrCode, Shield } from "lucide-react";
+import { X, Eye, Clock, FileText, CheckCircle, XCircle, Archive, QrCode, Shield } from "lucide-react";
 import type { Document } from "@/data/mockData";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -45,6 +45,7 @@ function getActionBadgeClass(action: string): string {
 
 export default function DocumentDetailModal({ document: doc, onClose }: Props) {
   const [showPdf, setShowPdf] = useState(false);
+  const [previewMode, setPreviewMode] = useState<"master" | "distributed">("distributed");
   const [noteText, setNoteText] = useState("");
   const [rejectReason, setRejectReason] = useState("");
   const [showRejectForm, setShowRejectForm] = useState(false);
@@ -144,26 +145,22 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
 
             {/* Actions */}
             <div className="flex flex-wrap gap-3">
-              {/* Preview - single button, no dropdown */}
-              <button onClick={() => setShowPdf(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
-                <Eye size={16} /> Preview
-              </button>
-              {/* Download with role-based options */}
+              {/* Preview with role-based options */}
               {isAdmin ? (
                 <div className="relative group">
-                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
-                    <Download size={16} /> Download ▾
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                    <Eye size={16} /> Preview ▾
                   </button>
                   <div className="absolute top-full left-0 mt-1 w-52 bg-card border border-border rounded-lg shadow-lg z-10 hidden group-hover:block">
                     <button
-                      onClick={() => alert("Simulasi: Mengunduh Master File (editable version)")}
+                      onClick={() => { setPreviewMode("master"); setShowPdf(true); }}
                       className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted rounded-t-lg flex items-center gap-2"
                     >
                       <Shield size={14} className="text-primary" /> Master File
                       <span className="text-xs text-muted-foreground ml-auto">Editable</span>
                     </button>
                     <button
-                      onClick={() => alert("Simulasi: Mengunduh Distributed Copy (protected PDF)")}
+                      onClick={() => { setPreviewMode("distributed"); setShowPdf(true); }}
                       className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted rounded-b-lg flex items-center gap-2 border-t border-border"
                     >
                       <FileText size={14} className="text-muted-foreground" /> Distributed Copy
@@ -172,11 +169,8 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
                   </div>
                 </div>
               ) : (
-                <button
-                  onClick={() => alert("Simulasi: Mengunduh Distributed Copy (protected PDF dengan QR code)")}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-                >
-                  <Download size={16} /> Download
+                <button onClick={() => { setPreviewMode("distributed"); setShowPdf(true); }} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                  <Eye size={16} /> Preview
                 </button>
               )}
               {canApprove && (
@@ -287,7 +281,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
           </div>
         </div>
       </div>
-      {showPdf && <PdfPreviewOverlay onClose={() => setShowPdf(false)} document={doc} isAdmin={isAdmin} />}
+      {showPdf && <PdfPreviewOverlay onClose={() => setShowPdf(false)} document={doc} mode={previewMode} isAdmin={isAdmin} />}
     </>
   );
 }
