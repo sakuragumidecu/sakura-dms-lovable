@@ -33,6 +33,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
   const [fullPreviewZoom, setFullPreviewZoom] = useState(100);
   const [showDetailFields, setShowDetailFields] = useState(false);
   const [customJenis, setCustomJenis] = useState("");
+  const [customKategori, setCustomKategori] = useState("");
   const [customTahun, setCustomTahun] = useState("");
   const [detailData, setDetailData] = useState<Record<string, string>>({});
 
@@ -121,10 +122,12 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
     const jenis = form.jenisDokumen === "Lainnya" ? customJenis : form.jenisDokumen;
     const tahun = form.tahunAjaran === "Lainnya" ? customTahun : form.tahunAjaran;
 
+    const kategori = form.kategori === "Lainnya" ? customKategori : form.kategori;
+
     uploadDocument({
       nomorDokumen: form.nomorDokumen || `DOC-${Date.now()}`,
       judul: form.judul,
-      kategori: form.kategori || "Lainnya",
+      kategori: kategori || "Lainnya",
       kelas: form.kelas || "-",
       jenisDokumen: jenis,
       namaSiswa: form.namaSiswa,
@@ -288,10 +291,18 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
             {/* Kategori (above Jenis) */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Kategori Dokumen *</label>
-              <select required value={form.kategori} onChange={(e) => { update("kategori", e.target.value); update("jenisDokumen", ""); }} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select required value={form.kategori} onChange={(e) => { update("kategori", e.target.value); update("jenisDokumen", ""); setCustomKategori(""); }} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="">Pilih kategori</option>
                 {KATEGORI_OPTIONS.map((k) => <option key={k}>{k}</option>)}
               </select>
+              {form.kategori === "Lainnya" && (
+                <input
+                  value={customKategori}
+                  onChange={(e) => setCustomKategori(e.target.value)}
+                  placeholder="Ketik nama kategori..."
+                  className="w-full mt-2 px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              )}
             </div>
 
             {/* Jenis Dokumen (cascaded from kategori) */}
@@ -446,7 +457,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
             <p className="text-sm text-muted-foreground mb-4">Apakah Anda yakin semua data dokumen sudah benar? Dokumen akan masuk antrian persetujuan setelah diunggah.</p>
             <div className="p-3 rounded-lg bg-muted/50 border border-border text-sm space-y-1 mb-4">
               <div><span className="text-muted-foreground">Nama:</span> <span className="font-medium text-foreground">{form.judul}</span></div>
-              <div><span className="text-muted-foreground">Kategori:</span> <span className="font-medium text-foreground">{form.kategori}</span></div>
+              <div><span className="text-muted-foreground">Kategori:</span> <span className="font-medium text-foreground">{form.kategori === "Lainnya" ? customKategori : form.kategori}</span></div>
               <div><span className="text-muted-foreground">Jenis:</span> <span className="font-medium text-foreground">{form.jenisDokumen === "Lainnya" ? customJenis : form.jenisDokumen}</span></div>
               {file && <div><span className="text-muted-foreground">File:</span> <span className="font-medium text-foreground">{file.name}</span></div>}
             </div>
