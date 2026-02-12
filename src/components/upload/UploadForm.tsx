@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Upload, Camera, X, Eye, FileText, CalendarIcon, ChevronDown } from "lucide-react";
+import { Upload, Camera, X, Eye, FileText, CalendarIcon, ChevronDown, Maximize, ZoomIn, ZoomOut } from "lucide-react";
 import CameraScanModal from "@/components/scan/CameraScanModal";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -29,6 +29,8 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCameraScan, setShowCameraScan] = useState(false);
+  const [showFullPreview, setShowFullPreview] = useState(false);
+  const [fullPreviewZoom, setFullPreviewZoom] = useState(100);
   const [showDetailFields, setShowDetailFields] = useState(false);
   const [customJenis, setCustomJenis] = useState("");
   const [customTahun, setCustomTahun] = useState("");
@@ -219,7 +221,18 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
               <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><Eye size={18} className="text-primary" /> Pratinjau File</h3>
               {filePreview ? (
-                <img src={filePreview} alt="Preview" className="w-full rounded-lg max-h-64 object-contain bg-muted/30" />
+                <div className="relative group">
+                  <img src={filePreview} alt="Preview" className="w-full rounded-lg max-h-64 object-contain bg-muted/30" />
+                  <button
+                    type="button"
+                    onClick={() => setShowFullPreview(true)}
+                    className="absolute inset-0 flex items-center justify-center bg-foreground/0 group-hover:bg-foreground/40 transition-colors rounded-lg"
+                  >
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 px-4 py-2 rounded-lg bg-card/90 text-foreground text-sm font-medium shadow-lg">
+                      <Maximize size={16} /> Lihat Full Screen
+                    </span>
+                  </button>
+                </div>
               ) : (
                 <div className="flex flex-col items-center gap-3 py-8">
                   <FileText size={48} className="text-muted-foreground" />
@@ -229,6 +242,32 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
                   </button>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Fullscreen image preview overlay */}
+          {showFullPreview && filePreview && (
+            <div className="fixed inset-0 z-[100] bg-foreground/90 flex flex-col animate-fade-in">
+              <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border">
+                <span className="font-semibold text-sm text-foreground truncate max-w-md">{file?.name}</span>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setFullPreviewZoom((z) => Math.max(25, z - 25))} className="p-2 rounded hover:bg-muted"><ZoomOut size={18} /></button>
+                  <span className="text-sm text-muted-foreground w-12 text-center">{fullPreviewZoom}%</span>
+                  <button type="button" onClick={() => setFullPreviewZoom((z) => Math.min(300, z + 25))} className="p-2 rounded hover:bg-muted"><ZoomIn size={18} /></button>
+                  <button type="button" onClick={() => setFullPreviewZoom(100)} className="p-2 rounded hover:bg-muted"><Maximize size={18} /></button>
+                  <div className="w-px h-6 bg-border mx-1" />
+                  <button type="button" onClick={() => { setShowFullPreview(false); setFullPreviewZoom(100); }} className="p-2 rounded hover:bg-destructive/10 text-destructive"><X size={20} /></button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto flex items-center justify-center p-8" onClick={() => { setShowFullPreview(false); setFullPreviewZoom(100); }}>
+                <img
+                  src={filePreview}
+                  alt="Full preview"
+                  className="rounded-lg shadow-2xl transition-transform"
+                  style={{ transform: `scale(${fullPreviewZoom / 100})`, maxWidth: "90vw", maxHeight: "85vh", objectFit: "contain" }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
             </div>
           )}
         </div>
