@@ -17,6 +17,7 @@ import RoleManagementPage from "@/pages/RoleManagementPage";
 import UserManagementPage from "@/pages/UserManagementPage";
 import LogPage from "@/pages/LogPage";
 import SettingsPage from "@/pages/SettingsPage";
+import VerifyPage from "@/pages/VerifyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -34,6 +35,7 @@ function AppRoutes() {
       <Route path="/" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <HomePage />} />
       <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
       <Route path="/signup" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <SignUpPage />} />
+      <Route path="/verify/:id" element={<VerifyPage />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />

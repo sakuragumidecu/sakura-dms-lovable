@@ -1,9 +1,10 @@
-import { X, Eye, Download, Clock, FileText, CheckCircle, XCircle, Archive } from "lucide-react";
+import { X, Eye, Download, Clock, FileText, CheckCircle, XCircle, Archive, QrCode, Shield } from "lucide-react";
 import type { Document } from "@/data/mockData";
 import { format } from "date-fns";
 import { useState } from "react";
 import PdfPreviewOverlay from "./PdfPreviewOverlay";
 import { useApp } from "@/contexts/AppContext";
+import { QRCodeSVG } from "qrcode.react";
 
 interface Props {
   document: Document;
@@ -145,9 +146,37 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
               <button onClick={() => setShowPdf(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
                 <Eye size={16} /> Preview
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
-                <Download size={16} /> Download
-              </button>
+              {/* Download with role-based logic */}
+              {currentUser.role === "Admin/TU" ? (
+                <div className="relative group">
+                  <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors">
+                    <Download size={16} /> Download ▾
+                  </button>
+                  <div className="absolute top-full left-0 mt-1 w-52 bg-card border border-border rounded-lg shadow-lg z-10 hidden group-hover:block">
+                    <button
+                      onClick={() => alert("Simulasi: Mengunduh Master File (editable version)")}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted rounded-t-lg flex items-center gap-2"
+                    >
+                      <Shield size={14} className="text-primary" /> Master File
+                      <span className="text-xs text-muted-foreground ml-auto">Editable</span>
+                    </button>
+                    <button
+                      onClick={() => alert("Simulasi: Mengunduh Distributed Copy (protected PDF)")}
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted rounded-b-lg flex items-center gap-2 border-t border-border"
+                    >
+                      <FileText size={14} className="text-muted-foreground" /> Distributed Copy
+                      <span className="text-xs text-muted-foreground ml-auto">Protected</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => alert("Simulasi: Mengunduh Distributed Copy (protected PDF dengan QR code)")}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  <Download size={16} /> Download
+                </button>
+              )}
               {canApprove && (
                 <>
                   <button onClick={() => setShowApproveForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sakura-success/20 text-sakura-success text-sm font-semibold hover:bg-sakura-success/30 transition-colors">
@@ -223,6 +252,36 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
                 </div>
               )}
             </div>
+            {/* QR Code for verified documents */}
+            {(doc.status === "Disetujui" || doc.status === "Diarsipkan") && (
+              <div className="p-4 rounded-xl border border-border bg-muted/30">
+                <div className="flex items-center gap-2 mb-3">
+                  <QrCode size={18} className="text-primary" />
+                  <h3 className="font-bold text-foreground text-sm">QR Verifikasi</h3>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="bg-background p-2 rounded-lg border border-border">
+                    <QRCodeSVG
+                      value={`${window.location.origin}/verify/${doc.id}`}
+                      size={96}
+                      level="M"
+                      includeMargin={false}
+                    />
+                  </div>
+                  <div className="flex-1 text-sm space-y-1">
+                    <p className="text-muted-foreground text-xs">Scan QR code untuk memverifikasi keaslian dokumen ini.</p>
+                    <a
+                      href={`/verify/${doc.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary font-medium hover:underline"
+                    >
+                      Buka halaman verifikasi →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

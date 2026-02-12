@@ -3,32 +3,50 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "@/contexts/AppContext";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
+import OtpPage from "./OtpPage";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
+  const [otpStep, setOtpStep] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
   const { login } = useApp();
   const navigate = useNavigate();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email)) {
+    if (!email) {
+      setError("Masukkan email terlebih dahulu.");
+      return;
+    }
+    setPendingEmail(email);
+    setOtpStep(true);
+  };
+
+  const handleOtpVerified = () => {
+    if (login(pendingEmail)) {
       navigate("/dashboard");
     } else {
       setError("Email tidak ditemukan. Gunakan akun demo.");
+      setOtpStep(false);
     }
   };
 
   const quickLogin = (userEmail: string) => {
+    setPendingEmail(userEmail);
     setEmail(userEmail);
-    if (login(userEmail)) navigate("/dashboard");
+    setOtpStep(true);
   };
 
   const handleGoogleLogin = () => {
     alert("Fitur Masuk dengan Google memerlukan integrasi backend (OAuth). Saat ini hanya tersedia dalam mode simulasi.");
   };
+
+  if (otpStep) {
+    return <OtpPage email={pendingEmail} onVerified={handleOtpVerified} onBack={() => setOtpStep(false)} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -92,6 +110,14 @@ export default function LoginPage() {
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input type="checkbox" className="rounded border-input" /> Ingat saya
+              </label>
+              <button type="button" onClick={() => alert("Simulasi: Link reset password dikirim ke email")} className="text-sm text-primary font-medium hover:underline">
+                Lupa password?
+              </button>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity">

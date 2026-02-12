@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Upload, Camera, X, Eye, FileText, CalendarIcon, ChevronDown } from "lucide-react";
+import CameraScanModal from "@/components/scan/CameraScanModal";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
@@ -27,6 +28,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
   const [isDragOver, setIsDragOver] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCameraScan, setShowCameraScan] = useState(false);
   const [showDetailFields, setShowDetailFields] = useState(false);
   const [customJenis, setCustomJenis] = useState("");
   const [customTahun, setCustomTahun] = useState("");
@@ -158,14 +160,13 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
     }, 1000);
   };
 
-  const handleScanCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      stream.getTracks().forEach((t) => t.stop());
-      alert("Simulasi: Kamera terbuka. Pada implementasi nyata, ini akan menangkap gambar dokumen.");
-    } catch {
-      alert("Kamera tidak tersedia pada perangkat ini.");
-    }
+  const handleScanCamera = () => {
+    setShowCameraScan(true);
+  };
+
+  const handleScanComplete = (scannedFile: File) => {
+    handleFile(scannedFile);
+    setShowCameraScan(false);
   };
 
   const update = (key: string, val: string) => setForm((p) => ({ ...p, [key]: val }));
@@ -426,6 +427,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
         tanggalUpload: new Date().toISOString(), tanggalEdit: new Date().toISOString(),
         status: "Menunggu", versi: 1, fileUrl: "", auditTrail: [],
       }} />}
+      {showCameraScan && <CameraScanModal onClose={() => setShowCameraScan(false)} onComplete={handleScanComplete} />}
     </>
   );
 }
