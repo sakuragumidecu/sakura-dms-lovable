@@ -1,11 +1,11 @@
-import { X, Download, Printer, ZoomIn, ZoomOut, Maximize } from "lucide-react";
+import { X, Download, Printer, ZoomIn, ZoomOut, Maximize, Shield, FileText } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import type { Document } from "@/data/mockData";
 
 interface Props {
   onClose: () => void;
   document: Document;
-  mode?: "master" | "distributed";
+  isAdmin?: boolean;
 }
 
 function buildDocumentHtml(doc: Document): string {
@@ -47,6 +47,55 @@ function buildDocumentHtml(doc: Document): string {
             .join("")}
         </tbody>
       </table>`
+    : "";
+
+  const isApproved = doc.status === "Disetujui" || doc.status === "Diarsipkan";
+  const verifyUrl = `${window.location.origin}/verify/${doc.id}`;
+
+  // Generate QR code SVG inline for approved documents
+  const qrSection = isApproved
+    ? `
+    <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:16px;">
+      <div style="flex-shrink:0;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="80" height="80">
+          <rect width="100" height="100" fill="white" stroke="#e2e8f0" stroke-width="2" rx="4"/>
+          <!-- Simplified QR pattern -->
+          <rect x="10" y="10" width="24" height="24" fill="#1e293b" rx="2"/>
+          <rect x="14" y="14" width="16" height="16" fill="white" rx="1"/>
+          <rect x="18" y="18" width="8" height="8" fill="#1e293b" rx="1"/>
+          <rect x="66" y="10" width="24" height="24" fill="#1e293b" rx="2"/>
+          <rect x="70" y="14" width="16" height="16" fill="white" rx="1"/>
+          <rect x="74" y="18" width="8" height="8" fill="#1e293b" rx="1"/>
+          <rect x="10" y="66" width="24" height="24" fill="#1e293b" rx="2"/>
+          <rect x="14" y="70" width="16" height="16" fill="white" rx="1"/>
+          <rect x="18" y="74" width="8" height="8" fill="#1e293b" rx="1"/>
+          <rect x="40" y="10" width="6" height="6" fill="#1e293b"/>
+          <rect x="50" y="14" width="6" height="6" fill="#1e293b"/>
+          <rect x="40" y="24" width="6" height="6" fill="#1e293b"/>
+          <rect x="10" y="40" width="6" height="6" fill="#1e293b"/>
+          <rect x="20" y="46" width="6" height="6" fill="#1e293b"/>
+          <rect x="40" y="40" width="6" height="6" fill="#1e293b"/>
+          <rect x="50" y="46" width="6" height="6" fill="#1e293b"/>
+          <rect x="60" y="40" width="6" height="6" fill="#1e293b"/>
+          <rect x="46" y="54" width="6" height="6" fill="#1e293b"/>
+          <rect x="70" y="46" width="6" height="6" fill="#1e293b"/>
+          <rect x="80" y="50" width="6" height="6" fill="#1e293b"/>
+          <rect x="46" y="66" width="6" height="6" fill="#1e293b"/>
+          <rect x="56" y="72" width="6" height="6" fill="#1e293b"/>
+          <rect x="66" y="66" width="6" height="6" fill="#1e293b"/>
+          <rect x="80" y="76" width="6" height="6" fill="#1e293b"/>
+          <rect x="70" y="82" width="6" height="6" fill="#1e293b"/>
+          <rect x="82" y="86" width="6" height="6" fill="#1e293b"/>
+        </svg>
+      </div>
+      <div style="font-size:11px;color:#64748b;line-height:1.6;">
+        <div style="font-weight:bold;color:#1e293b;font-size:12px;margin-bottom:4px;">QR Verifikasi Dokumen</div>
+        <div>Scan QR code atau kunjungi:</div>
+        <div style="color:#2563eb;word-break:break-all;">${verifyUrl}</div>
+        <div style="margin-top:4px;">Status: <span style="color:#16a34a;font-weight:bold;">${doc.status}</span></div>
+        <div>ID: ${doc.nomorDokumen}</div>
+      </div>
+    </div>`
     : "";
 
   return `<!DOCTYPE html>
@@ -121,14 +170,17 @@ function buildDocumentHtml(doc: Document): string {
     </div>
   </div>
 
+  ${qrSection}
+
   <div class="stamp">Dokumen ini digenerate oleh sistem SAKURA — Secure Archiving and Keeping of Unified Records for Administration</div>
 </body>
 </html>`;
 }
 
-export default function PdfPreviewOverlay({ onClose, document: doc, mode = "distributed" }: Props) {
+export default function PdfPreviewOverlay({ onClose, document: doc, isAdmin = false }: Props) {
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(true);
+  const [showDownloadMenu, setShowDownloadMenu] = useState(false);
 
   const htmlContent = useMemo(() => buildDocumentHtml(doc), [doc]);
 
@@ -143,21 +195,57 @@ export default function PdfPreviewOverlay({ onClose, document: doc, mode = "dist
     <div className="fixed inset-0 z-[100] bg-foreground/90 flex flex-col animate-fade-in">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
-          {mode === "master" ? (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium shrink-0">Master File</span>
-          ) : (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border font-medium shrink-0">Distributed Copy</span>
-          )}
-        </div>
+        <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
         <div className="flex items-center gap-2">
           <button onClick={() => setZoom((z) => Math.max(50, z - 25))} className="p-2 rounded hover:bg-muted"><ZoomOut size={18} /></button>
           <span className="text-sm text-muted-foreground w-12 text-center">{zoom}%</span>
           <button onClick={() => setZoom((z) => Math.min(200, z + 25))} className="p-2 rounded hover:bg-muted"><ZoomIn size={18} /></button>
           <button onClick={() => setZoom(100)} className="p-2 rounded hover:bg-muted"><Maximize size={18} /></button>
           <div className="w-px h-6 bg-border mx-1" />
-          <button className="p-2 rounded hover:bg-muted"><Download size={18} /></button>
+          {/* Download button with role-based dropdown for Admin */}
+          <div className="relative">
+            {isAdmin ? (
+              <>
+                <button
+                  onClick={() => setShowDownloadMenu(!showDownloadMenu)}
+                  className="p-2 rounded hover:bg-muted flex items-center gap-1"
+                  title="Download"
+                >
+                  <Download size={18} />
+                  <span className="text-xs">▾</span>
+                </button>
+                {showDownloadMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowDownloadMenu(false)} />
+                    <div className="absolute top-full right-0 mt-1 w-52 bg-card border border-border rounded-lg shadow-lg z-20">
+                      <button
+                        onClick={() => { alert("Simulasi: Mengunduh Master File (editable version)"); setShowDownloadMenu(false); }}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted rounded-t-lg flex items-center gap-2"
+                      >
+                        <Shield size={14} className="text-primary" /> Master File
+                        <span className="text-xs text-muted-foreground ml-auto">Editable</span>
+                      </button>
+                      <button
+                        onClick={() => { alert("Simulasi: Mengunduh Distributed Copy (protected PDF)"); setShowDownloadMenu(false); }}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-muted rounded-b-lg flex items-center gap-2 border-t border-border"
+                      >
+                        <FileText size={14} className="text-muted-foreground" /> Distributed Copy
+                        <span className="text-xs text-muted-foreground ml-auto">Protected</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={() => alert("Simulasi: Mengunduh Distributed Copy (protected PDF dengan QR code)")}
+                className="p-2 rounded hover:bg-muted"
+                title="Download"
+              >
+                <Download size={18} />
+              </button>
+            )}
+          </div>
           <button className="p-2 rounded hover:bg-muted"><Printer size={18} /></button>
           <div className="w-px h-6 bg-border mx-1" />
           <button onClick={onClose} className="p-2 rounded hover:bg-destructive/10 text-destructive"><X size={20} /></button>
@@ -182,11 +270,6 @@ export default function PdfPreviewOverlay({ onClose, document: doc, mode = "dist
               style={{ width: "794px", minHeight: "1123px", height: "1123px" }}
               sandbox="allow-same-origin"
             />
-            {mode === "distributed" && (
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center rounded-lg overflow-hidden">
-                <span className="text-6xl font-bold text-red-300/20 rotate-[-30deg] select-none whitespace-nowrap tracking-widest">DISTRIBUTED COPY</span>
-              </div>
-            )}
           </div>
         )}
       </div>
