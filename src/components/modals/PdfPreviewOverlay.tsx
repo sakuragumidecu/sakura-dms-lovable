@@ -5,7 +5,6 @@ import type { Document } from "@/data/mockData";
 interface Props {
   onClose: () => void;
   document: Document;
-  mode?: "master" | "distributed";
   isAdmin?: boolean;
 }
 
@@ -177,12 +176,13 @@ function buildDocumentHtml(doc: Document, mode: "master" | "distributed"): strin
 </html>`;
 }
 
-export default function PdfPreviewOverlay({ onClose, document: doc, mode = "distributed", isAdmin = false }: Props) {
+export default function PdfPreviewOverlay({ onClose, document: doc, isAdmin = false }: Props) {
   const [zoom, setZoom] = useState(100);
   const [loading, setLoading] = useState(true);
   const [showDownloadMenu, setShowDownloadMenu] = useState(false);
+  const [viewMode, setViewMode] = useState<"master" | "distributed">("distributed");
 
-  const htmlContent = useMemo(() => buildDocumentHtml(doc, mode), [doc, mode]);
+  const htmlContent = useMemo(() => buildDocumentHtml(doc, viewMode), [doc, viewMode]);
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 800);
@@ -196,9 +196,31 @@ export default function PdfPreviewOverlay({ onClose, document: doc, mode = "dist
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="font-semibold text-sm text-foreground truncate max-w-md">{doc.judul}</span>
-          {mode === "master" ? (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-medium shrink-0">Master File</span>
+          <span className="font-semibold text-sm text-foreground truncate max-w-xs">{doc.judul}</span>
+          {/* View mode toggle for Admin */}
+          {isAdmin ? (
+            <div className="flex items-center rounded-lg border border-border overflow-hidden shrink-0">
+              <button
+                onClick={() => setViewMode("master")}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-colors ${
+                  viewMode === "master"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <Shield size={12} /> Master
+              </button>
+              <button
+                onClick={() => setViewMode("distributed")}
+                className={`flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-colors border-l border-border ${
+                  viewMode === "distributed"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                <FileText size={12} /> Distributed
+              </button>
+            </div>
           ) : (
             <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border font-medium shrink-0">Distributed Copy</span>
           )}
@@ -209,7 +231,7 @@ export default function PdfPreviewOverlay({ onClose, document: doc, mode = "dist
           <button onClick={() => setZoom((z) => Math.min(200, z + 25))} className="p-2 rounded hover:bg-muted"><ZoomIn size={18} /></button>
           <button onClick={() => setZoom(100)} className="p-2 rounded hover:bg-muted"><Maximize size={18} /></button>
           <div className="w-px h-6 bg-border mx-1" />
-          {/* Download button with role-based dropdown for Admin */}
+          {/* Download button */}
           <div className="relative">
             {isAdmin ? (
               <>
@@ -277,7 +299,7 @@ export default function PdfPreviewOverlay({ onClose, document: doc, mode = "dist
               style={{ width: "794px", minHeight: "1123px", height: "1123px" }}
               sandbox="allow-same-origin"
             />
-            {mode === "distributed" && (
+            {viewMode === "distributed" && (
               <div className="absolute inset-0 pointer-events-none flex items-center justify-center rounded-lg overflow-hidden">
                 <span className="text-6xl font-bold text-muted-foreground/10 rotate-[-30deg] select-none whitespace-nowrap tracking-widest">DISTRIBUTED COPY</span>
               </div>
