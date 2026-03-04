@@ -9,7 +9,7 @@ const FEATURES = [
   { icon: Smartphone, title: "Scan Mobile", desc: "Scan dokumen langsung dari perangkat mobile menggunakan kamera untuk kemudahan digitalisasi." },
   { icon: Shield, title: "Keamanan Data", desc: "Sistem keamanan berbasis Role-Based Access Control (RBAC) untuk melindungi data sensitif sekolah." },
   { icon: Archive, title: "Pengarsipan Terstruktur", desc: "Struktur folder berdasarkan tahun, kelas, dan jenis dokumen untuk pencarian yang mudah." },
-  { icon: Users, title: "Multi-Role", desc: "Dukungan akses untuk Administrator, Kepala Sekolah, Staff Administrasi, dan Guru." },
+  { icon: Users, title: "Multi-Role", desc: "Dukungan akses untuk Operator/TU, Kepala Sekolah, dan Guru." },
 ];
 
 export default function HomePage() {

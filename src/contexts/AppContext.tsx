@@ -203,13 +203,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addUser = (user: Omit<User, "id">) => {
-    if (currentUser.role !== "Admin/TU") return;
+    if (currentUser.role !== "Operator/TU") return;
     const newUser: User = { ...user, id: Date.now() };
     setUsers((prev) => [...prev, newUser]);
   };
 
   const updateUser = (userId: number, data: Partial<Omit<User, "id">>) => {
-    if (currentUser.role !== "Admin/TU") return;
+    if (currentUser.role !== "Operator/TU") return;
     setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, ...data } : u));
     if (currentUser.id === userId) {
       setCurrentUser((p) => ({ ...p, ...data }));
@@ -217,7 +217,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const deleteUser = (userId: number): boolean => {
-    if (currentUser.role !== "Admin/TU") return false;
+    if (currentUser.role !== "Operator/TU") return false;
     if (userId === currentUser.id) return false;
     setUsers((prev) => prev.filter((u) => u.id !== userId));
     return true;

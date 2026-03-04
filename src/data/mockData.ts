@@ -3,7 +3,7 @@ import avatarAdmin from "@/assets/avatar_admin.jpg";
 import avatarStaff from "@/assets/avatar_staff.jpg";
 import avatarTeacher from "@/assets/avatar_teacher.jpg";
 
-export type UserRole = "Admin/TU" | "Kepala Sekolah" | "Staff Administrasi" | "Guru";
+export type UserRole = "Operator/TU" | "Kepala Sekolah" | "Guru";
 
 export interface User {
   id: number;
@@ -59,21 +59,20 @@ export interface FolderNode {
 }
 
 export const USERS: User[] = [
-  { id: 1, nama: "Budi Santoso", email: "admin@sakura.sch.id", role: "Admin/TU", avatar: avatarAdmin, departemen: "Operator / TU" },
+  { id: 1, nama: "Budi Santoso", email: "admin@sakura.sch.id", role: "Operator/TU", avatar: avatarAdmin, departemen: "Operator / TU" },
   { id: 2, nama: "Dr. Siti Rahayu", email: "principal@sakura.sch.id", role: "Kepala Sekolah", avatar: avatarPrincipal, departemen: "Kepala Sekolah" },
-  { id: 3, nama: "Dewi Kartika", email: "staff@sakura.sch.id", role: "Staff Administrasi", avatar: avatarStaff, departemen: "Tata Usaha" },
-  { id: 4, nama: "Ahmad Fauzi", email: "teacher@sakura.sch.id", role: "Guru", avatar: avatarTeacher, departemen: "Guru Mata Pelajaran" },
+  { id: 3, nama: "Ahmad Fauzi", email: "teacher@sakura.sch.id", role: "Guru", avatar: avatarTeacher, departemen: "Guru Mata Pelajaran" },
 ];
 
 export const DOCUMENTS: Document[] = [
   {
     id: 1, nomorDokumen: "IJZ-2024-001", judul: "Ijazah - Ahmad Rizki", kategori: "Data Siswa", kelas: "Alumni 2024",
     jenisDokumen: "Ijazah SMP", namaSiswa: "Ahmad Rizki", nisn: "0012345678", tahunAjaran: "2023/2024",
-    pengunggah: { id: 3, nama: "Dewi Kartika", role: "Staff Administrasi", avatar: avatarStaff },
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
     tanggalUpload: "2025-08-22T15:49:05Z", tanggalEdit: "2025-08-23T10:12:00Z", status: "Disetujui", versi: 1,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
-      { time: "2025-08-22T15:49:05Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
+      { time: "2025-08-22T15:49:05Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-08-23T09:59:10Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Melihat dokumen" },
       { time: "2025-08-23T10:12:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
     ],
@@ -91,35 +90,35 @@ export const DOCUMENTS: Document[] = [
   {
     id: 3, nomorDokumen: "SK-2024-003", judul: "SK Pengangkatan Guru Tetap - Rina Wati", kategori: "Data Guru", kelas: "Guru",
     jenisDokumen: "Surat Keputusan (Arsip Surat)", tahunAjaran: "2024/2025",
-    pengunggah: { id: 3, nama: "Dewi Kartika", role: "Staff Administrasi", avatar: avatarStaff },
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
     tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Disetujui", versi: 2,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
-      { time: "2025-09-05T10:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-05T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-09-06T14:30:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
     ],
   },
   {
     id: 4, nomorDokumen: "IJZ-2024-002", judul: "Ijazah - Siti Nurhaliza", kategori: "Data Siswa", kelas: "Alumni 2024",
     jenisDokumen: "Ijazah SMP", namaSiswa: "Siti Nurhaliza", nisn: "0012345679", tahunAjaran: "2023/2024",
-    pengunggah: { id: 3, nama: "Dewi Kartika", role: "Staff Administrasi", avatar: avatarStaff },
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
     tanggalUpload: "2025-09-10T11:00:00Z", tanggalEdit: "2025-09-10T15:00:00Z", status: "Ditolak", versi: 1,
     fileUrl: "/mock/sample.pdf", catatan: "Format tidak sesuai standar",
     auditTrail: [
-      { time: "2025-09-10T11:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-10T11:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-09-10T15:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menolak dokumen: Format tidak sesuai standar" },
     ],
   },
   {
     id: 5, nomorDokumen: "ARS-2024-001", judul: "Arsip Data Siswa Kelas 8B", kategori: "Data Siswa", kelas: "Kelas 8B",
     jenisDokumen: "Surat Masuk dan Keluar Siswa", tahunAjaran: "2023/2024",
-    pengunggah: { id: 3, nama: "Dewi Kartika", role: "Staff Administrasi", avatar: avatarStaff },
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
     tanggalUpload: "2025-07-15T09:00:00Z", tanggalEdit: "2025-08-01T10:00:00Z", status: "Diarsipkan", versi: 1,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
-      { time: "2025-07-15T09:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
+      { time: "2025-07-15T09:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-07-20T10:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-      { time: "2025-08-01T10:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengarsipkan dokumen" },
+      { time: "2025-08-01T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengarsipkan dokumen" },
     ],
   },
   {
@@ -135,22 +134,22 @@ export const DOCUMENTS: Document[] = [
   {
     id: 7, nomorDokumen: "SK-2024-004", judul: "SK Mutasi Guru - Andi Prasetyo", kategori: "Data Guru", kelas: "Guru",
     jenisDokumen: "Surat Keputusan (Arsip Surat)", tahunAjaran: "2024/2025",
-    pengunggah: { id: 3, nama: "Dewi Kartika", role: "Staff Administrasi", avatar: avatarStaff },
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
     tanggalUpload: "2025-09-08T13:00:00Z", tanggalEdit: "2025-09-09T08:00:00Z", status: "Disetujui", versi: 1,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
-      { time: "2025-09-08T13:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-08T13:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-09-09T08:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
     ],
   },
   {
     id: 8, nomorDokumen: "LAP-2024-001", judul: "Laporan Keuangan Semester 1", kategori: "Keuangan", kelas: "Sekolah",
     jenisDokumen: "Laporan Keuangan", tahunAjaran: "2024/2025",
-    pengunggah: { id: 3, nama: "Dewi Kartika", role: "Staff Administrasi", avatar: avatarStaff },
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
     tanggalUpload: "2025-09-15T10:00:00Z", tanggalEdit: "2025-09-15T10:00:00Z", status: "Menunggu", versi: 1,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
-      { time: "2025-09-15T10:00:00Z", user: { nama: "Dewi Kartika", avatar: avatarStaff, role: "Staff Administrasi" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-15T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
     ],
   },
 ];
@@ -176,10 +175,9 @@ export const PERMISSIONS = [
 ];
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
-  "Admin/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
-  "Kepala Sekolah": ["dashboard.view", "documents.approve", "documents.reject", "audit.view", "profile.edit"],
-  "Staff Administrasi": ["dashboard.view", "documents.upload", "documents.archive", "profile.edit"],
-  "Guru": ["dashboard.view", "documents.upload", "documents.archive", "profile.edit"],
+  "Operator/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
+  "Kepala Sekolah": ["dashboard.view", "documents.approve", "documents.reject", "documents.archive", "audit.view", "profile.edit"],
+  "Guru": ["dashboard.view", "documents.archive", "profile.edit"],
 };
 
 // Kategori & Jenis Dokumen mapping

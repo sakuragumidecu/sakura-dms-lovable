@@ -5,10 +5,9 @@ import { useApp } from "@/contexts/AppContext";
 import { PERMISSIONS, type UserRole } from "@/data/mockData";
 
 const ROLES: { role: UserRole; desc: string }[] = [
-  { role: "Admin/TU", desc: "Akses penuh ke semua fitur sistem" },
-  { role: "Kepala Sekolah", desc: "Review dan persetujuan dokumen" },
-  { role: "Staff Administrasi", desc: "Upload dan lihat dokumen" },
-  { role: "Guru", desc: "Upload dan lihat dokumen" },
+  { role: "Operator/TU", desc: "Akses penuh ke semua fitur sistem" },
+  { role: "Kepala Sekolah", desc: "Monitor arsip dan persetujuan dokumen" },
+  { role: "Guru", desc: "Lihat dokumen arsip sesuai hak akses" },
 ];
 
 export default function RoleManagementPage() {

@@ -344,7 +344,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }: Upload
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Kelas</label>
-              <input value={form.kelas} onChange={(e) => update("kelas", e.target.value)} readOnly={!!targetFolder && currentUser.role !== "Admin/TU"} placeholder="Contoh: Kelas 7A / Alumni 2024" className={`w-full px-3 py-2.5 rounded-lg border border-input text-sm focus:outline-none focus:ring-2 focus:ring-ring ${targetFolder && currentUser.role !== "Admin/TU" ? "bg-muted/50 text-muted-foreground" : "bg-background"}`} />
+              <input value={form.kelas} onChange={(e) => update("kelas", e.target.value)} readOnly={!!targetFolder && currentUser.role !== "Operator/TU"} placeholder="Contoh: Kelas 7A / Alumni 2024" className={`w-full px-3 py-2.5 rounded-lg border border-input text-sm focus:outline-none focus:ring-2 focus:ring-ring ${targetFolder && currentUser.role !== "Operator/TU" ? "bg-muted/50 text-muted-foreground" : "bg-background"}`} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

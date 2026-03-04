@@ -157,7 +157,6 @@ export default function LoginPage() {
               {[
                 { label: "Operator / TU", email: "admin@sakura.sch.id" },
                 { label: "Kepala Sekolah", email: "principal@sakura.sch.id" },
-                { label: "Staff Administrasi", email: "staff@sakura.sch.id" },
                 { label: "Guru", email: "teacher@sakura.sch.id" },
               ].map((a) => (
                 <button key={a.email} onClick={() => quickLogin(a.email)} className="text-left p-2 rounded-lg border border-border hover:bg-muted text-xs transition-colors">

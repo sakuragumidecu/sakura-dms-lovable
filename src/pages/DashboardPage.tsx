@@ -27,7 +27,7 @@ export default function DashboardPage() {
 
   // For Staff/Guru, only show their own documents
   const visibleDocs = useMemo(() => {
-    if (currentUser.role === "Staff Administrasi" || currentUser.role === "Guru") {
+    if (currentUser.role === "Guru") {
       return documents.filter((d) => d.pengunggah.id === currentUser.id);
     }
     return documents;

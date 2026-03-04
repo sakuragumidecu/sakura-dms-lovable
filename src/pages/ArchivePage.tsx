@@ -39,7 +39,7 @@ export default function ArchivePage() {
   const [editingFolder, setEditingFolder] = useState<string | null>(null);
   const [editFolderName, setEditFolderName] = useState("");
 
-  const isAdmin = currentUser.role === "Admin/TU";
+  const isAdmin = currentUser.role === "Operator/TU";
 
   const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 

@@ -19,9 +19,8 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const ROLE_BADGE: Record<string, string> = {
-  "Admin/TU": "bg-primary/10 text-primary border border-primary/20",
+  "Operator/TU": "bg-primary/10 text-primary border border-primary/20",
   "Kepala Sekolah": "bg-sakura-success/10 text-sakura-success border border-sakura-success/20",
-  "Staff Administrasi": "bg-sakura-warning/10 text-sakura-warning border border-sakura-warning/30",
   "Guru": "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
   "Sistem": "bg-muted text-muted-foreground border border-border",
 };
@@ -51,7 +50,7 @@ export default function DocumentDetailModal({ document: doc, onClose }: Props) {
   const [showApproveForm, setShowApproveForm] = useState(false);
   const [approveComment, setApproveComment] = useState("");
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
-  const isAdmin = currentUser.role === "Admin/TU";
+  const isAdmin = currentUser.role === "Operator/TU";
 
   const handleAddNote = () => {
     if (!noteText.trim()) return;

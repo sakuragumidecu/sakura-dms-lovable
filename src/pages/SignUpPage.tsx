@@ -64,9 +64,9 @@ export default function SignUpPage() {
               <select required className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring appearance-none">
                 <option value="">Pilih departemen</option>
                 <option>Tata Usaha</option>
-                <option>Guru Mata Pelajaran</option>
+                <option>Guru</option>
                 <option>Kepala Sekolah</option>
-                <option>Operator / TU</option>
+                <option>Operator/TU</option>
               </select>
             </div>
           </div>

@@ -6,7 +6,7 @@ import UserProfileModal from "@/components/modals/UserProfileModal";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import avatarAdmin from "@/assets/avatar_admin.jpg";
 
-const ALL_ROLES: UserRole[] = ["Admin/TU", "Kepala Sekolah", "Staff Administrasi", "Guru"];
+const ALL_ROLES: UserRole[] = ["Operator/TU", "Kepala Sekolah", "Guru"];
 
 interface UserFormData {
   nama: string;
@@ -15,7 +15,7 @@ interface UserFormData {
   departemen: string;
 }
 
-const EMPTY_FORM: UserFormData = { nama: "", email: "", role: "Staff Administrasi", departemen: "" };
+const EMPTY_FORM: UserFormData = { nama: "", email: "", role: "Guru", departemen: "" };
 
 export default function UserManagementPage() {
   const { users, currentUser, addUser, updateUser, deleteUser } = useApp();
@@ -25,7 +25,7 @@ export default function UserManagementPage() {
   const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
   const [formData, setFormData] = useState<UserFormData>(EMPTY_FORM);
 
-  const isAdmin = currentUser.role === "Admin/TU";
+  const isAdmin = currentUser.role === "Operator/TU";
 
   const handleCreate = () => {
     if (!formData.nama.trim() || !formData.email.trim()) return;
