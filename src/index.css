@@ -15,39 +15,39 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 13%;
 
-    --primary: 340 55% 48%;
+    --primary: 345 42% 38%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 340 40% 95%;
-    --secondary-foreground: 340 55% 40%;
+    --secondary: 345 25% 95%;
+    --secondary-foreground: 345 42% 32%;
 
-    --muted: 340 30% 94%;
+    --muted: 345 18% 94%;
     --muted-foreground: 0 0% 49%;
 
-    --accent: 340 60% 58%;
+    --accent: 345 45% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 340 25% 90%;
-    --input: 340 25% 88%;
-    --ring: 340 55% 48%;
+    --border: 345 18% 90%;
+    --input: 345 18% 88%;
+    --ring: 345 42% 38%;
 
     --radius: 0.625rem;
 
     --sakura-success: 155 54% 40%;
     --sakura-warning: 35 86% 59%;
-    --sakura-soft: 340 50% 96%;
+    --sakura-soft: 345 35% 96%;
 
-    --sidebar-background: 340 50% 40%;
+    --sidebar-background: 345 40% 32%;
     --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 340 50% 40%;
-    --sidebar-accent: 340 45% 48%;
+    --sidebar-primary-foreground: 345 40% 32%;
+    --sidebar-accent: 345 35% 40%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 340 40% 50%;
-    --sidebar-ring: 340 55% 55%;
+    --sidebar-border: 345 30% 42%;
+    --sidebar-ring: 345 42% 45%;
   }
 
   .dark {
@@ -60,37 +60,37 @@
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 92%;
 
-    --primary: 340 50% 45%;
+    --primary: 345 38% 42%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 340 30% 18%;
-    --secondary-foreground: 340 30% 85%;
+    --secondary: 345 22% 18%;
+    --secondary-foreground: 345 22% 85%;
 
-    --muted: 340 15% 18%;
+    --muted: 345 12% 18%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 340 50% 42%;
+    --accent: 345 38% 40%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 340 15% 22%;
-    --input: 340 15% 25%;
-    --ring: 340 50% 45%;
+    --border: 345 12% 22%;
+    --input: 345 12% 25%;
+    --ring: 345 38% 42%;
 
     --sakura-success: 155 54% 45%;
     --sakura-warning: 35 86% 55%;
-    --sakura-soft: 340 25% 16%;
+    --sakura-soft: 345 18% 16%;
 
-    --sidebar-background: 340 45% 15%;
+    --sidebar-background: 345 38% 14%;
     --sidebar-foreground: 0 0% 92%;
     --sidebar-primary: 0 0% 100%;
-    --sidebar-primary-foreground: 340 45% 15%;
-    --sidebar-accent: 340 40% 22%;
+    --sidebar-primary-foreground: 345 38% 14%;
+    --sidebar-accent: 345 30% 22%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 340 35% 25%;
-    --sidebar-ring: 340 50% 38%;
+    --sidebar-border: 345 25% 24%;
+    --sidebar-ring: 345 38% 35%;
   }
 }
 
