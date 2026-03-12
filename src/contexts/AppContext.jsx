@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useRef } from "react";
 import { USERS, DOCUMENTS, ROLE_PERMISSIONS, INITIAL_NOTIFICATIONS, DOCUMENT_TYPES, CATEGORIES, FOLDERS, INITIAL_DOCUMENT_COUNTERS } from "@/data/mockData.js";
 
 const AppContext = createContext(null);
