@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/comp
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
-import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
+
 import UploadForm from "@/components/upload/UploadForm";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
