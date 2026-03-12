@@ -73,14 +73,14 @@ export default function AppSidebar() {
               key={item.path}
               onClick={() => navigate(item.path)}
               title={collapsed ? item.label : undefined}
-              className={`w-full flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl font-medium transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl font-medium transition-colors ${
                 active
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
               }`}
             >
-              <item.icon size={22} className="shrink-0" />
-              {!collapsed && <span className="text-[10.5px] leading-tight text-center">{item.label}</span>}
+              <item.icon size={20} className="shrink-0" />
+              {!collapsed && <span className="text-xs">{item.label}</span>}
             </button>
           );
         })}
