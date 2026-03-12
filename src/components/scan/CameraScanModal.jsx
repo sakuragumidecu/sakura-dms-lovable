@@ -1,5 +1,9 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { X, Camera, RotateCcw, Plus, Crop, Download, FileText, Image, Trash2, Check, Pencil } from "lucide-react";
+import {
+  X, Camera, RotateCcw, Plus, Crop, Download, FileText, Image,
+  Trash2, Check, Pencil, ZoomIn, ZoomOut, Maximize, ChevronUp,
+  ChevronDown, MoreVertical, ArrowUp, ArrowDown,
+} from "lucide-react";
 import CropOverlay from "./CropOverlay";
 
 export default function CameraScanModal({ onClose, onComplete }) {
@@ -12,7 +16,11 @@ export default function CameraScanModal({ onClose, onComplete }) {
   const [step, setStep] = useState("camera"); // camera | crop | review
   const [cropPageIndex, setCropPageIndex] = useState(0);
   const [cropArea, setCropArea] = useState({ x: 10, y: 10, w: 80, h: 80 });
+  const [zoomLevel, setZoomLevel] = useState(100);
+  const [activePageMenu, setActivePageMenu] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
+  // ── Camera ──
   const startCamera = useCallback(async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -39,56 +47,63 @@ export default function CameraScanModal({ onClose, onComplete }) {
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
-    const imageData = canvas.toDataURL("image/jpeg", 0.92);
-    setPages((prev) => [...prev, { id: Date.now(), imageData }]);
+    const v = videoRef.current, c = canvasRef.current;
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext("2d")?.drawImage(v, 0, 0);
+    setPages((p) => [...p, { id: Date.now(), imageData: c.toDataURL("image/jpeg", 0.92) }]);
   };
 
+  // ── Crop ──
   const applyCrop = () => {
     const page = pages[cropPageIndex];
     if (!page) return;
     const img = new window.Image();
     img.onload = () => {
-      const canvas = document.createElement("canvas");
+      const cv = document.createElement("canvas");
       const sx = (cropArea.x / 100) * img.width;
       const sy = (cropArea.y / 100) * img.height;
       const sw = (cropArea.w / 100) * img.width;
       const sh = (cropArea.h / 100) * img.height;
-      canvas.width = sw;
-      canvas.height = sh;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-      const cropped = canvas.toDataURL("image/jpeg", 0.92);
+      cv.width = sw; cv.height = sh;
+      cv.getContext("2d")?.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+      const cropped = cv.toDataURL("image/jpeg", 0.92);
       setPages((prev) => prev.map((p) => (p.id === page.id ? { ...p, cropped } : p)));
       setStep("review");
     };
     img.src = page.imageData;
   };
 
-  const deletePage = (index) => {
+  // ── Page management ──
+  const confirmDelete = (index) => setDeleteConfirm(index);
+  const executeDelete = (index) => {
     setPages((prev) => {
       const next = prev.filter((_, i) => i !== index);
-      if (next.length === 0) {
-        setStep("camera");
-        startCamera();
-      }
+      if (next.length === 0) { setStep("camera"); startCamera(); }
       return next;
     });
+    setDeleteConfirm(null);
+    setActivePageMenu(null);
+  };
+
+  const movePage = (index, dir) => {
+    setPages((prev) => {
+      const arr = [...prev];
+      const target = index + dir;
+      if (target < 0 || target >= arr.length) return arr;
+      [arr[index], arr[target]] = [arr[target], arr[index]];
+      return arr;
+    });
+    setActivePageMenu(null);
   };
 
   const openCrop = (index) => {
     setCropPageIndex(index);
     setCropArea({ x: 10, y: 10, w: 80, h: 80 });
     setStep("crop");
+    setActivePageMenu(null);
   };
 
+  // ── Convert ──
   const handleConvert = () => {
     if (pages.length === 0) return;
     const page = pages[0];
@@ -104,21 +119,28 @@ export default function CameraScanModal({ onClose, onComplete }) {
     onComplete(file);
   };
 
-  // ===== CAMERA STEP =====
+  // ── Zoom ──
+  const zoomIn = () => setZoomLevel((z) => Math.min(z + 25, 300));
+  const zoomOut = () => setZoomLevel((z) => Math.max(z - 25, 50));
+  const fitWidth = () => setZoomLevel(100);
+
+  // ═══════════════════════════════════════════
+  // CAMERA STEP
+  // ═══════════════════════════════════════════
   const renderCamera = () => (
     <>
-      <div className="relative bg-foreground/5 rounded-xl overflow-hidden aspect-[4/3]">
+      <div className="relative bg-muted/20 rounded-xl overflow-hidden" style={{ aspectRatio: "4/3" }}>
         {isCameraActive ? (
           <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-muted-foreground text-sm">Memulai kamera...</p>
+            <p className="text-sm text-muted-foreground">Memulai kamera...</p>
           </div>
         )}
         <div className="absolute inset-4 border-2 border-dashed border-primary/40 rounded-lg pointer-events-none" />
       </div>
       <canvas ref={canvasRef} className="hidden" />
-      <div className="flex items-center justify-center gap-4 py-3">
+      <div className="flex items-center justify-center py-3">
         <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity shadow-lg">
           <Camera size={24} />
         </button>
@@ -144,7 +166,9 @@ export default function CameraScanModal({ onClose, onComplete }) {
     </>
   );
 
-  // ===== CROP STEP =====
+  // ═══════════════════════════════════════════
+  // CROP STEP
+  // ═══════════════════════════════════════════
   const renderCrop = () => {
     const page = pages[cropPageIndex];
     if (!page) return null;
@@ -152,16 +176,15 @@ export default function CameraScanModal({ onClose, onComplete }) {
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Crop size={14} className="text-primary" />
-          <span>Seret kotak atau sudut untuk memilih area potong pada halaman {cropPageIndex + 1}</span>
+          <span>Seret kotak atau sudut untuk memilih area potong — Halaman {cropPageIndex + 1}</span>
         </div>
 
-        {/* Crop overlay - main preview */}
         <div className="rounded-lg border border-border overflow-hidden bg-muted/10">
           <CropOverlay imageUrl={page.imageData} cropArea={cropArea} onChange={setCropArea} />
         </div>
 
         {/* Manual slider controls */}
-        <div className="grid grid-cols-4 gap-3 p-3 rounded-lg bg-muted/20 border border-border">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 rounded-lg bg-muted/20 border border-border">
           {[
             { key: "x", label: "X (Posisi)" },
             { key: "y", label: "Y (Posisi)" },
@@ -181,7 +204,6 @@ export default function CameraScanModal({ onClose, onComplete }) {
           ))}
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-2">
           <button onClick={applyCrop} className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
             <Check size={14} /> Terapkan Potong
@@ -194,125 +216,211 @@ export default function CameraScanModal({ onClose, onComplete }) {
     );
   };
 
-  // ===== REVIEW STEP (print-preview style) =====
+  // ═══════════════════════════════════════════
+  // REVIEW STEP — Validation Preview
+  // ═══════════════════════════════════════════
   const renderReview = () => {
     const isPdf = outputFormat === "pdf";
+    const estimatedSize = pages.length * 0.3; // rough MB estimate
 
     return (
-      <div className="flex flex-col sm:flex-row gap-4 min-h-0">
-        {/* Left: scrollable page previews */}
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1" style={{ maxHeight: "65vh" }}>
-          {pages.map((page, i) => (
-            <div key={page.id} className="relative group">
-              {/* Page preview - document style */}
-              <div className={`bg-background border rounded-lg overflow-hidden ${
-                isPdf
-                  ? "border-border shadow-md p-4"
-                  : "border-border shadow-sm"
-              }`}>
-                {isPdf && (
-                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
-                    <FileText size={12} className="text-primary" />
-                    <span className="text-xs text-muted-foreground font-medium">
-                      Halaman {i + 1} dari {pages.length}
-                    </span>
-                  </div>
-                )}
-                <img
-                  src={page.cropped || page.imageData}
-                  alt={`Halaman ${i + 1}`}
-                  className="w-full h-auto object-contain rounded"
-                />
-              </div>
-
-              {/* Per-page controls */}
-              <div className="flex items-center justify-between mt-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Halaman {i + 1}
-                </span>
-                <div className="flex gap-1.5">
-                  <button
-                    onClick={() => openCrop(i)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs border border-input hover:bg-muted transition-colors"
-                  >
-                    <Crop size={12} /> Potong
-                  </button>
-                  <button
-                    onClick={() => deletePage(i)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
-                  >
-                    <Trash2 size={12} /> Hapus
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+      <div className="flex flex-col gap-3 min-h-0">
+        {/* Toolbar — zoom & page nav only, NO print/download */}
+        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-muted/30 border border-border shrink-0">
+          <div className="flex items-center gap-1">
+            <button onClick={zoomOut} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Perkecil">
+              <ZoomOut size={16} />
+            </button>
+            <span className="text-xs font-medium text-muted-foreground min-w-[3rem] text-center">{zoomLevel}%</span>
+            <button onClick={zoomIn} className="p-1.5 rounded-md hover:bg-muted transition-colors" title="Perbesar">
+              <ZoomIn size={16} />
+            </button>
+            <div className="w-px h-4 bg-border mx-1" />
+            <button onClick={fitWidth} className="p-1.5 rounded-md hover:bg-muted transition-colors text-xs flex items-center gap-1" title="Sesuaikan Lebar">
+              <Maximize size={14} /> <span className="hidden sm:inline">Sesuaikan Lebar</span>
+            </button>
+          </div>
+          <span className="text-xs text-muted-foreground font-medium">
+            {pages.length} Halaman
+          </span>
         </div>
 
-        {/* Right: settings panel */}
-        <div className="sm:w-52 shrink-0 space-y-3">
-          {/* Format selection */}
-          <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-3">
-            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Disimpan Sebagai</h4>
-            <div className="flex flex-row sm:flex-col gap-2">
-              {[
-                { fmt: "pdf", icon: FileText, label: "PDF" },
-                { fmt: "png", icon: Image, label: "PNG" },
-                { fmt: "jpg", icon: Image, label: "JPG" },
-              ].map(({ fmt, icon: Icon, label }) => (
-                <button
-                  key={fmt}
-                  onClick={() => setOutputFormat(fmt)}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors w-full justify-center sm:justify-start ${
-                    outputFormat === fmt
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "border-input hover:bg-muted"
+        {/* Main content: split layout */}
+        <div className="flex flex-col sm:flex-row gap-4 min-h-0 flex-1">
+          {/* Left: scrollable page previews */}
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1" style={{ maxHeight: "58vh" }}>
+            {pages.map((page, i) => (
+              <div key={page.id} className="relative group">
+                {/* Page container */}
+                <div
+                  className={`relative bg-background border rounded-lg overflow-hidden transition-all ${
+                    isPdf ? "border-border shadow-md" : "border-border shadow-sm"
                   }`}
+                  style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: "top center" }}
                 >
-                  <Icon size={14} />
-                  {label}
-                </button>
-              ))}
+                  {isPdf && (
+                    <div className="flex items-center gap-2 px-4 pt-3 pb-2 border-b border-border/50">
+                      <FileText size={12} className="text-primary" />
+                      <span className="text-xs text-muted-foreground font-medium">
+                        Halaman {i + 1} dari {pages.length}
+                      </span>
+                    </div>
+                  )}
+                  <div className={isPdf ? "p-4" : ""}>
+                    <img
+                      src={page.cropped || page.imageData}
+                      alt={`Halaman ${i + 1}`}
+                      className="w-full h-auto object-contain rounded"
+                    />
+                  </div>
+
+                  {/* Per-page overlay controls — visible on hover / tap */}
+                  <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="relative">
+                      <button
+                        onClick={() => setActivePageMenu(activePageMenu === i ? null : i)}
+                        className="p-1.5 rounded-md bg-background/90 border border-border shadow-sm hover:bg-muted transition-colors"
+                      >
+                        <MoreVertical size={14} />
+                      </button>
+
+                      {activePageMenu === i && (
+                        <div className="absolute right-0 top-8 bg-card border border-border rounded-lg shadow-lg py-1 min-w-[160px] z-50">
+                          <button
+                            onClick={() => openCrop(i)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-muted transition-colors text-left"
+                          >
+                            <Pencil size={12} /> Edit Scan
+                          </button>
+                          <button
+                            onClick={() => openCrop(i)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-muted transition-colors text-left"
+                          >
+                            <Crop size={12} /> Potong
+                          </button>
+                          {pages.length > 1 && i > 0 && (
+                            <button
+                              onClick={() => movePage(i, -1)}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-muted transition-colors text-left"
+                            >
+                              <ArrowUp size={12} /> Pindah ke Atas
+                            </button>
+                          )}
+                          {pages.length > 1 && i < pages.length - 1 && (
+                            <button
+                              onClick={() => movePage(i, 1)}
+                              className="flex items-center gap-2 w-full px-3 py-2 text-xs hover:bg-muted transition-colors text-left"
+                            >
+                              <ArrowDown size={12} /> Pindah ke Bawah
+                            </button>
+                          )}
+                          <div className="border-t border-border my-1" />
+                          <button
+                            onClick={() => confirmDelete(i)}
+                            className="flex items-center gap-2 w-full px-3 py-2 text-xs text-destructive hover:bg-destructive/10 transition-colors text-left"
+                          >
+                            <Trash2 size={12} /> Hapus Halaman
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick action bar below page */}
+                <div className="flex items-center justify-between mt-1.5 px-1">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Halaman {i + 1}
+                  </span>
+                  <div className="flex gap-1">
+                    <button onClick={() => openCrop(i)} className="flex items-center gap-1 px-2 py-1 rounded-md text-xs border border-input hover:bg-muted transition-colors">
+                      <Crop size={11} /> Potong
+                    </button>
+                    <button onClick={() => confirmDelete(i)} className="flex items-center gap-1 px-2 py-1 rounded-md text-xs border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors">
+                      <Trash2 size={11} /> Hapus
+                    </button>
+                  </div>
+                </div>
+
+                {/* Delete confirmation inline */}
+                {deleteConfirm === i && (
+                  <div className="mt-2 p-3 rounded-lg border border-destructive/30 bg-destructive/5">
+                    <p className="text-xs text-foreground mb-2">Hapus halaman ini?</p>
+                    <div className="flex gap-2">
+                      <button onClick={() => executeDelete(i)} className="px-3 py-1.5 rounded-md bg-destructive text-destructive-foreground text-xs font-medium hover:opacity-90">
+                        Hapus
+                      </button>
+                      <button onClick={() => setDeleteConfirm(null)} className="px-3 py-1.5 rounded-md border border-input text-xs font-medium hover:bg-muted">
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Right: settings panel */}
+          <div className="sm:w-52 shrink-0 space-y-3">
+            {/* Format selection */}
+            <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-3">
+              <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Simpan Sebagai</h4>
+              <div className="flex flex-row sm:flex-col gap-2">
+                {[
+                  { fmt: "pdf", icon: FileText, label: "PDF" },
+                  { fmt: "png", icon: Image, label: "PNG" },
+                  { fmt: "jpg", icon: Image, label: "JPG" },
+                ].map(({ fmt, icon: Icon, label }) => (
+                  <button
+                    key={fmt}
+                    onClick={() => setOutputFormat(fmt)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors w-full justify-center sm:justify-start ${
+                      outputFormat === fmt
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-input hover:bg-muted"
+                    }`}
+                  >
+                    <Icon size={14} /> {label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Options */}
-          <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-2">
-            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Opsi</h4>
-            <button
-              onClick={() => { setStep("camera"); startCamera(); }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors"
-            >
-              <Plus size={12} /> Tambah Halaman
-            </button>
-            {pages.length > 0 && (
-              <button
-                onClick={() => openCrop(0)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors"
-              >
-                <Pencil size={12} /> Edit & Potong
+            {/* Summary */}
+            <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-1.5">
+              <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Ringkasan</h4>
+              <p className="text-xs text-muted-foreground">Format: <span className="font-medium text-foreground">{outputFormat.toUpperCase()}</span></p>
+              <p className="text-xs text-muted-foreground">Halaman: <span className="font-medium text-foreground">{pages.length}</span></p>
+              <p className="text-xs text-muted-foreground">Ukuran: <span className="font-medium text-foreground">~{(estimatedSize).toFixed(1)} MB</span></p>
+            </div>
+
+            {/* Options */}
+            <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-2">
+              <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Opsi</h4>
+              <button onClick={() => { setStep("camera"); startCamera(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors">
+                <Plus size={12} /> Tambah Halaman
               </button>
-            )}
+              <button onClick={() => { setPages([]); setStep("camera"); startCamera(); }} className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors">
+                <RotateCcw size={12} /> Ulangi Pindai
+              </button>
+            </div>
+
+            {/* Main action */}
             <button
-              onClick={() => { setPages([]); setStep("camera"); startCamera(); }}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors"
+              onClick={handleConvert}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
             >
-              <RotateCcw size={12} /> Ulangi Pindai
+              <Download size={16} /> Simpan & Gunakan untuk Unggah
             </button>
           </div>
-
-          {/* Main action button */}
-          <button
-            onClick={handleConvert}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
-          >
-            <Download size={16} /> Simpan & Gunakan untuk Unggah
-          </button>
         </div>
       </div>
     );
   };
 
+  // ═══════════════════════════════════════════
+  // MODAL SHELL
+  // ═══════════════════════════════════════════
   const subtitle = step === "camera"
     ? "Ambil foto dokumen"
     : step === "crop"
@@ -320,8 +428,8 @@ export default function CameraScanModal({ onClose, onComplete }) {
     : `${pages.length} halaman dipindai`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 backdrop-blur-sm p-2 sm:p-4">
-      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 backdrop-blur-sm p-2 sm:p-4" onClick={(e) => { if (activePageMenu !== null) setActivePageMenu(null); }}>
+      <div className="bg-card rounded-2xl shadow-2xl w-full max-w-3xl max-h-[95vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-border shrink-0">
           <div className="flex items-center gap-3">
