@@ -57,9 +57,6 @@ export default function DashboardPage() {
             onSelectDoc={setDetailDoc}
           />
         )}
-        {activeTab === "dokumen" && (
-          <DokumenTab documents={visibleDocs} onSelectDoc={setDetailDoc} toggleFavorite={toggleFavorite} />
-        )}
         {activeTab === "persetujuan" && (
           <PersetujuanTab
             documents={documents}

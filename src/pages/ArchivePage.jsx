@@ -551,7 +551,7 @@ export default function ArchivePage() {
             </div>
           </ResizablePanel>
 
-          {/* Right - Side Preview */}
+          {/* Right - Detail Panel (inline, not floating) */}
           {previewDoc && (
             <>
               <ResizableHandle />
@@ -607,7 +607,7 @@ export default function ArchivePage() {
                         <div className="font-medium text-foreground">{previewDoc.pengunggah.nama}</div>
                       </div>
                       <div>
-                        <div className="text-muted-foreground text-xs">Upload</div>
+                        <div className="text-muted-foreground text-xs">Tanggal Unggah</div>
                         <div className="font-medium text-foreground">{format(new Date(previewDoc.tanggalUpload), "dd/MM/yyyy")}</div>
                       </div>
                     </div>
@@ -620,16 +620,10 @@ export default function ArchivePage() {
 
                     <div className="flex gap-2">
                       <button
-                        onClick={() => setShowPdfOverlay(true)}
+                        onClick={() => setDetailDoc(previewDoc)}
                         className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
                       >
-                        <Eye size={16} /> Preview
-                      </button>
-                      <button
-                        onClick={() => setDetailDoc(previewDoc)}
-                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border border-border text-sm font-medium hover:bg-muted transition-colors"
-                      >
-                        <FileIcon size={16} /> Detail
+                        <FileIcon size={16} /> Lihat Detail Lengkap
                       </button>
                     </div>
 
