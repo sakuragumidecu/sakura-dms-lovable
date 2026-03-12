@@ -118,7 +118,7 @@ export default function CameraScanModal({ onClose, onComplete }) {
         <div className="absolute inset-4 border-2 border-dashed border-primary/40 rounded-lg pointer-events-none" />
       </div>
       <canvas ref={canvasRef} className="hidden" />
-      <div className="flex items-center justify-center gap-4 py-2">
+      <div className="flex items-center justify-center gap-4 py-3">
         <button onClick={capturePhoto} className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity shadow-lg">
           <Camera size={24} />
         </button>
@@ -126,15 +126,15 @@ export default function CameraScanModal({ onClose, onComplete }) {
       {pages.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-foreground">{pages.length} halaman terscan</span>
+            <span className="text-sm font-semibold text-foreground">{pages.length} halaman dipindai</span>
             <button onClick={() => { stopCamera(); setStep("review"); }} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
-              <Check size={14} /> Selesai Scan
+              <Check size={14} /> Selesai Pindai
             </button>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2">
             {pages.map((page, i) => (
               <div key={page.id} className="relative shrink-0">
-                <img src={page.cropped || page.imageData} alt={`Page ${i + 1}`} className="w-20 h-28 object-cover rounded-lg border border-border" />
+                <img src={page.cropped || page.imageData} alt={`Halaman ${i + 1}`} className="w-20 h-28 object-cover rounded-lg border border-border" />
                 <span className="absolute bottom-1 left-1 text-xs bg-foreground/70 text-background px-1.5 py-0.5 rounded font-medium">{i + 1}</span>
               </div>
             ))}
@@ -149,17 +149,24 @@ export default function CameraScanModal({ onClose, onComplete }) {
     const page = pages[cropPageIndex];
     if (!page) return null;
     return (
-      <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">
-          Seret sudut kotak untuk memilih area crop pada halaman {cropPageIndex + 1}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Crop size={14} className="text-primary" />
+          <span>Seret kotak atau sudut untuk memilih area potong pada halaman {cropPageIndex + 1}</span>
         </div>
-        <CropOverlay imageUrl={page.imageData} cropArea={cropArea} onChange={setCropArea} />
-        <div className="grid grid-cols-4 gap-2">
+
+        {/* Crop overlay - main preview */}
+        <div className="rounded-lg border border-border overflow-hidden bg-muted/10">
+          <CropOverlay imageUrl={page.imageData} cropArea={cropArea} onChange={setCropArea} />
+        </div>
+
+        {/* Manual slider controls */}
+        <div className="grid grid-cols-4 gap-3 p-3 rounded-lg bg-muted/20 border border-border">
           {[
-            { key: "x", label: "X" },
-            { key: "y", label: "Y" },
-            { key: "w", label: "W" },
-            { key: "h", label: "H" },
+            { key: "x", label: "X (Posisi)" },
+            { key: "y", label: "Y (Posisi)" },
+            { key: "w", label: "Lebar" },
+            { key: "h", label: "Tinggi" },
           ].map(({ key, label }) => (
             <div key={key} className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground">{label}</label>
@@ -173,11 +180,13 @@ export default function CameraScanModal({ onClose, onComplete }) {
             </div>
           ))}
         </div>
+
+        {/* Action buttons */}
         <div className="flex gap-2">
-          <button onClick={applyCrop} className="flex-1 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90">
-            <Check size={14} className="inline mr-1.5" /> Terapkan Crop
+          <button onClick={applyCrop} className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity">
+            <Check size={14} /> Terapkan Potong
           </button>
-          <button onClick={() => setStep("review")} className="px-4 py-2.5 rounded-lg border border-input text-sm font-medium hover:bg-muted">
+          <button onClick={() => setStep("review")} className="px-4 py-2.5 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors">
             Batal
           </button>
         </div>
@@ -186,94 +195,129 @@ export default function CameraScanModal({ onClose, onComplete }) {
   };
 
   // ===== REVIEW STEP (print-preview style) =====
-  const renderReview = () => (
-    <div className="flex flex-col sm:flex-row gap-4 min-h-0">
-      {/* Left: scrollable page previews */}
-      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
-        {pages.map((page, i) => (
-          <div key={page.id} className="relative group">
-            <div className="bg-background border border-border rounded-lg shadow-sm overflow-hidden">
-              <img
-                src={page.cropped || page.imageData}
-                alt={`Halaman ${i + 1}`}
-                className="w-full h-auto object-contain"
-              />
-            </div>
-            {/* Page number & per-page controls */}
-            <div className="flex items-center justify-between mt-2">
-              <span className="text-xs font-medium text-muted-foreground">Halaman {i + 1}</span>
-              <div className="flex gap-1.5">
-                <button
-                  onClick={() => openCrop(i)}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-input hover:bg-muted transition-colors"
-                >
-                  <Crop size={12} /> Crop
-                </button>
-                <button
-                  onClick={() => deletePage(i)}
-                  className="flex items-center gap-1 px-2 py-1 rounded text-xs border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
-                >
-                  <Trash2 size={12} /> Hapus
-                </button>
+  const renderReview = () => {
+    const isPdf = outputFormat === "pdf";
+
+    return (
+      <div className="flex flex-col sm:flex-row gap-4 min-h-0">
+        {/* Left: scrollable page previews */}
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1" style={{ maxHeight: "65vh" }}>
+          {pages.map((page, i) => (
+            <div key={page.id} className="relative group">
+              {/* Page preview - document style */}
+              <div className={`bg-background border rounded-lg overflow-hidden ${
+                isPdf
+                  ? "border-border shadow-md p-4"
+                  : "border-border shadow-sm"
+              }`}>
+                {isPdf && (
+                  <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/50">
+                    <FileText size={12} className="text-primary" />
+                    <span className="text-xs text-muted-foreground font-medium">
+                      Halaman {i + 1} dari {pages.length}
+                    </span>
+                  </div>
+                )}
+                <img
+                  src={page.cropped || page.imageData}
+                  alt={`Halaman ${i + 1}`}
+                  className="w-full h-auto object-contain rounded"
+                />
+              </div>
+
+              {/* Per-page controls */}
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Halaman {i + 1}
+                </span>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => openCrop(i)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs border border-input hover:bg-muted transition-colors"
+                  >
+                    <Crop size={12} /> Potong
+                  </button>
+                  <button
+                    onClick={() => deletePage(i)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+                  >
+                    <Trash2 size={12} /> Hapus
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Right: settings panel */}
-      <div className="sm:w-52 shrink-0 space-y-4">
-        <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-3">
-          <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Disimpan sebagai</h4>
-          <div className="flex flex-row sm:flex-col gap-2">
-            {["pdf", "png", "jpg"].map((fmt) => (
+        {/* Right: settings panel */}
+        <div className="sm:w-52 shrink-0 space-y-3">
+          {/* Format selection */}
+          <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-3">
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Disimpan Sebagai</h4>
+            <div className="flex flex-row sm:flex-col gap-2">
+              {[
+                { fmt: "pdf", icon: FileText, label: "PDF" },
+                { fmt: "png", icon: Image, label: "PNG" },
+                { fmt: "jpg", icon: Image, label: "JPG" },
+              ].map(({ fmt, icon: Icon, label }) => (
+                <button
+                  key={fmt}
+                  onClick={() => setOutputFormat(fmt)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors w-full justify-center sm:justify-start ${
+                    outputFormat === fmt
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-input hover:bg-muted"
+                  }`}
+                >
+                  <Icon size={14} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-2">
+            <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Opsi</h4>
+            <button
+              onClick={() => { setStep("camera"); startCamera(); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors"
+            >
+              <Plus size={12} /> Tambah Halaman
+            </button>
+            {pages.length > 0 && (
               <button
-                key={fmt}
-                onClick={() => setOutputFormat(fmt)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border transition-colors w-full justify-center sm:justify-start ${
-                  outputFormat === fmt
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "border-input hover:bg-muted"
-                }`}
+                onClick={() => openCrop(0)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors"
               >
-                {fmt === "pdf" ? <FileText size={14} /> : <Image size={14} />}
-                {fmt.toUpperCase()}
+                <Pencil size={12} /> Edit & Potong
               </button>
-            ))}
+            )}
+            <button
+              onClick={() => { setPages([]); setStep("camera"); startCamera(); }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full transition-colors"
+            >
+              <RotateCcw size={12} /> Ulangi Pindai
+            </button>
           </div>
-        </div>
 
-        <div className="p-3 rounded-xl border border-border bg-muted/30 space-y-2">
-          <h4 className="text-xs font-semibold text-foreground uppercase tracking-wide">Opsi</h4>
+          {/* Main action button */}
           <button
-            onClick={() => { setStep("camera"); startCamera(); }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full"
+            onClick={handleConvert}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
           >
-            <Plus size={12} /> Tambah Halaman
-          </button>
-          <button
-            onClick={() => { setPages([]); setStep("camera"); startCamera(); }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-input text-xs hover:bg-muted w-full"
-          >
-            <RotateCcw size={12} /> Ulang Semua
+            <Download size={16} /> Simpan & Gunakan untuk Unggah
           </button>
         </div>
-
-        <button
-          onClick={handleConvert}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm hover:opacity-90 transition-opacity"
-        >
-          <Download size={16} /> Convert & Upload
-        </button>
       </div>
-    </div>
-  );
+    );
+  };
 
   const subtitle = step === "camera"
     ? "Ambil foto dokumen"
     : step === "crop"
-    ? `Crop halaman ${cropPageIndex + 1}`
-    : `${pages.length} halaman terscan`;
+    ? `Potong halaman ${cropPageIndex + 1}`
+    : `${pages.length} halaman dipindai`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 backdrop-blur-sm p-2 sm:p-4">
@@ -283,7 +327,7 @@ export default function CameraScanModal({ onClose, onComplete }) {
           <div className="flex items-center gap-3">
             <Camera size={20} className="text-primary" />
             <div>
-              <h2 className="font-bold text-foreground text-sm sm:text-base">Scan Dokumen</h2>
+              <h2 className="font-bold text-foreground text-sm sm:text-base">Pindai Dokumen</h2>
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             </div>
           </div>
