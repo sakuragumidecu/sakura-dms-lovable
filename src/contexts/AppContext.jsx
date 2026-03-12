@@ -16,6 +16,7 @@ export const AppProvider = ({ children }) => {
   const [rolePermissions, setRolePermissions] = useState(ROLE_PERMISSIONS);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [documentCounters, setDocumentCounters] = useState(INITIAL_DOCUMENT_COUNTERS);
+  const countersRef = useRef(documentCounters);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const generateDocumentNumber = (typeId) => {
@@ -23,15 +24,19 @@ export const AppProvider = ({ children }) => {
     if (!docType) return `DOC-${Date.now()}`;
     const prefix = docType.code_prefix;
     const year = new Date().getFullYear();
-    let nextSeq = 1;
-    setDocumentCounters((prev) => {
-      const existing = prev.find((c) => c.prefix === prefix && c.year === year);
-      if (existing) {
-        nextSeq = existing.last_seq + 1;
-        return prev.map((c) => (c.prefix === prefix && c.year === year ? { ...c, last_seq: nextSeq } : c));
-      }
-      return [...prev, { prefix, year, last_seq: 1 }];
-    });
+    const counters = countersRef.current;
+    const existing = counters.find((c) => c.prefix === prefix && c.year === year);
+    let nextSeq;
+    let updated;
+    if (existing) {
+      nextSeq = existing.last_seq + 1;
+      updated = counters.map((c) => (c.prefix === prefix && c.year === year ? { ...c, last_seq: nextSeq } : c));
+    } else {
+      nextSeq = 1;
+      updated = [...counters, { prefix, year, last_seq: 1 }];
+    }
+    countersRef.current = updated;
+    setDocumentCounters(updated);
     return `${prefix}/${year}/${String(nextSeq).padStart(3, "0")}`;
   };
 
