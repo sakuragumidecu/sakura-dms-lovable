@@ -22,34 +22,53 @@ export default function AppSidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
   return (
-    <aside className={`${collapsed ? "w-[78px]" : "w-[180px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300 relative`}>
-      {/* Collapse toggle — top-right edge */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
-        className="absolute top-3 right-0 translate-x-1/2 z-10 p-1 rounded-full bg-sidebar border border-sidebar-border text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors shadow-sm"
-      >
-        {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
-      </button>
+    <aside className={`${collapsed ? "w-[72px]" : "w-[190px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300`}>
+      {/* Header — grid: collapse icon | logo */}
+      <div className="px-3 pt-4 pb-3">
+        <div className={`flex items-center ${collapsed ? "justify-center" : "gap-2"}`}>
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
+            className="p-1.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors shrink-0"
+          >
+            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+          {!collapsed && (
+            <button
+              onClick={() => navigate("/home")}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer min-w-0"
+            >
+              <img src={logoSakura} alt="SAKURA" className="w-9 h-9 rounded-full bg-sidebar-accent shrink-0" />
+            </button>
+          )}
+        </div>
 
-      {/* Branding — clickable */}
-      <button onClick={() => navigate("/home")} className="flex flex-col items-center pt-6 pb-4 px-3 hover:opacity-80 transition-opacity cursor-pointer">
-        <img src={logoSakura} alt="SAKURA" className="w-12 h-12 rounded-full bg-sidebar-accent shrink-0" />
+        {/* Logo centered when collapsed */}
+        {collapsed && (
+          <button
+            onClick={() => navigate("/home")}
+            className="mt-2 flex justify-center hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            <img src={logoSakura} alt="SAKURA" className="w-9 h-9 rounded-full bg-sidebar-accent" />
+          </button>
+        )}
+
+        {/* Title & description */}
         {!collapsed && (
-          <div className="text-center mt-3">
-            <div className="text-sidebar-primary font-bold text-lg leading-tight tracking-wide">SAKURA</div>
-            <p className="text-sidebar-foreground/60 text-[10px] leading-relaxed mt-1.5 px-2">
+          <button onClick={() => navigate("/home")} className="mt-3 text-left hover:opacity-80 transition-opacity cursor-pointer w-full">
+            <div className="text-sidebar-primary font-bold text-base leading-tight tracking-wide">SAKURA</div>
+            <p className="text-sidebar-foreground/55 text-[9.5px] leading-relaxed mt-1">
               Secure Archiving and Keeping of Unified Records for Administration
             </p>
-          </div>
+          </button>
         )}
-      </button>
+      </div>
 
-      {/* Divider below branding */}
+      {/* Divider */}
       <div className="mx-4 h-px bg-sidebar-border" />
 
-      {/* Main nav — stacked: large icon on top, label below */}
-      <nav className="flex-1 px-3 mt-3 space-y-2">
+      {/* Nav items — icon stacked above label */}
+      <nav className="flex-1 px-2 mt-2 space-y-1">
         {visibleItems.map((item) => {
           const active = location.pathname === item.path;
           return (
@@ -57,33 +76,33 @@ export default function AppSidebar() {
               key={item.path}
               onClick={() => navigate(item.path)}
               title={collapsed ? item.label : undefined}
-              className={`w-full flex flex-col items-center gap-1.5 px-2 py-3.5 rounded-xl font-medium transition-colors ${
+              className={`w-full flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl font-medium transition-colors ${
                 active
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
               }`}
             >
-              <item.icon size={30} className="shrink-0" />
-              {!collapsed && <span className="text-[11px] leading-tight text-center">{item.label}</span>}
+              <item.icon size={22} className="shrink-0" />
+              {!collapsed && <span className="text-[10.5px] leading-tight text-center">{item.label}</span>}
             </button>
           );
         })}
 
         {/* Divider */}
-        <div className="!my-4 mx-2 h-px bg-sidebar-border" />
+        <div className="!my-3 mx-2 h-px bg-sidebar-border" />
 
         {/* Pengaturan Sistem */}
         <button
           onClick={() => navigate("/settings")}
           title={collapsed ? "Pengaturan Sistem" : undefined}
-          className={`w-full flex flex-col items-center gap-1.5 px-2 py-3.5 rounded-xl font-medium transition-colors ${
+          className={`w-full flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl font-medium transition-colors ${
             location.pathname === "/settings"
               ? "bg-sidebar-accent text-sidebar-accent-foreground"
               : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
           }`}
         >
-          <Settings size={30} className="shrink-0" />
-          {!collapsed && <span className="text-[11px] leading-tight text-center">Pengaturan Sistem</span>}
+          <Settings size={22} className="shrink-0" />
+          {!collapsed && <span className="text-[10.5px] leading-tight text-center">Pengaturan Sistem</span>}
         </button>
       </nav>
 
