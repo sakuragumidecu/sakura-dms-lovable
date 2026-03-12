@@ -96,7 +96,10 @@ export default function ArchivePage() {
   const filtered = useMemo(() => {
     let docs = accessibleDocuments;
     if (showFavorites) docs = docs.filter((d) => d.favorite);
-    if (selectedFolder) docs = docs.filter((d) => docMatchesFolder(d, selectedFolder));
+    if (selectedFolder) {
+      const folderHasChildren = currentSubfolders.length > 0;
+      docs = docs.filter((d) => docMatchesFolderStrict(d, selectedFolder, folderHasChildren));
+    }
     if (statusFilter !== "Semua") docs = docs.filter((d) => d.status === statusFilter);
     if (categoryFilter !== "Semua") docs = docs.filter((d) => d.kategori === categoryFilter);
     if (search) {
@@ -104,7 +107,7 @@ export default function ArchivePage() {
       docs = docs.filter((d) => d.judul.toLowerCase().includes(q) || d.nomorDokumen.toLowerCase().includes(q) || d.pengunggah.nama.toLowerCase().includes(q));
     }
     return docs;
-  }, [accessibleDocuments, search, statusFilter, categoryFilter, selectedFolder, showFavorites]);
+  }, [accessibleDocuments, search, statusFilter, categoryFilter, selectedFolder, showFavorites, currentSubfolders]);
 
   const groupedDocs = useMemo(() => {
     const groups = {};
