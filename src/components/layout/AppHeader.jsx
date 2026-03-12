@@ -1,4 +1,4 @@
-import { Bell, X, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut, KeyRound } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
@@ -94,6 +94,12 @@ export default function AppHeader({ title, subtitle }) {
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors"
               >
                 <User size={16} className="text-muted-foreground" /> Profil Saya
+              </button>
+              <button
+                onClick={() => { setShowDropdown(false); navigate("/change-password"); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-foreground hover:bg-muted transition-colors"
+              >
+                <KeyRound size={16} className="text-muted-foreground" /> Ubah Password
               </button>
               <div className="border-t border-border" />
               <button

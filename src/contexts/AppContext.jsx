@@ -168,6 +168,21 @@ export const AppProvider = ({ children }) => {
     if (currentUser.id === userId) setCurrentUser((p) => ({ ...p, ...data }));
   };
 
+  // Self-update profile (any logged-in user can update their own name)
+  const updateProfile = (data) => {
+    const allowed = { nama: data.nama };
+    setUsers((prev) => prev.map((u) => u.id === currentUser.id ? { ...u, ...allowed } : u));
+    setCurrentUser((p) => ({ ...p, ...allowed }));
+  };
+
+  // Change password (mock — compares against stored password)
+  const changePassword = (currentPw, newPw) => {
+    const user = users.find((u) => u.id === currentUser.id);
+    if ((user.password || "password123") !== currentPw) return false;
+    setUsers((prev) => prev.map((u) => u.id === currentUser.id ? { ...u, password: newPw } : u));
+    return true;
+  };
+
   const deleteUser = (userId) => {
     if (currentUser.role !== "Operator/TU") return false;
     if (userId === currentUser.id) return false;
@@ -181,7 +196,7 @@ export const AppProvider = ({ children }) => {
       login, logout, updateUserRole, updateUserAvatar, togglePermission, addAuditNote,
       hasPermission, approveDocument, rejectDocument, uploadDocument, archiveDocument,
       toggleFavorite, markNotificationRead, markAllNotificationsRead,
-      addUser, updateUser, deleteUser, generateDocumentNumber,
+      addUser, updateUser, deleteUser, generateDocumentNumber, updateProfile, changePassword,
     }}>
       {children}
     </AppContext.Provider>
