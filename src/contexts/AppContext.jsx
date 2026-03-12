@@ -181,7 +181,7 @@ export const AppProvider = ({ children }) => {
       login, logout, updateUserRole, updateUserAvatar, togglePermission, addAuditNote,
       hasPermission, approveDocument, rejectDocument, uploadDocument, archiveDocument,
       toggleFavorite, markNotificationRead, markAllNotificationsRead,
-      addUser, updateUser, deleteUser, generateDocumentNumber, getFolderForCategory,
+      addUser, updateUser, deleteUser, generateDocumentNumber,
     }}>
       {children}
     </AppContext.Provider>
