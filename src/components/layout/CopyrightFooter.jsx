@@ -1,8 +1,8 @@
 export default function CopyrightFooter() {
   return (
-    <footer className="mt-8 shrink-0">
-      <div className="border-t border-border/50 mx-6" />
-      <p className="py-5 text-center text-xs text-muted-foreground">
+    <footer className="mt-auto shrink-0 px-8 pb-6 pt-10">
+      <div className="border-t border-border/40" />
+      <p className="pt-5 text-center text-xs text-muted-foreground">
         © 2026 SAKURA · Developed by Group 5
       </p>
     </footer>
