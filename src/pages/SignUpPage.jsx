@@ -39,7 +39,8 @@ export default function SignUpPage() {
           <button type="submit" className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-90 transition-opacity">Daftar Akun</button>
         </form>
         <p className="text-center text-sm text-muted-foreground mt-6">Sudah punya akun?{" "}<button onClick={() => navigate("/login")} className="text-primary font-semibold hover:underline">Masuk di sini</button></p>
-        <p className="text-center text-xs text-muted-foreground/60 mt-4">© 2026 SAKURA · Developed by Group 5</p>
+        <div className="border-t border-border/50 mt-6" />
+        <p className="text-center text-xs text-muted-foreground py-4">© 2026 SAKURA · Developed by Group 5</p>
       </div>
     </div>
   );
