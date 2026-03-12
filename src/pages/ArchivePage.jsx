@@ -723,13 +723,18 @@ export default function ArchivePage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="folder-name">Nama Folder</Label>
+              <Label htmlFor="folder-name">Nama Folder <span className="text-destructive">*</span></Label>
               <Input id="folder-name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} placeholder="Masukkan nama folder" autoFocus />
+              {newFolderName !== undefined && newFolderName.trim() === "" && <p className="text-sm text-destructive">Nama folder wajib diisi</p>}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="folder-desc">Deskripsi Folder <span className="text-muted-foreground text-xs">(opsional)</span></Label>
+              <Textarea id="folder-desc" value={newFolderDesc} onChange={(e) => setNewFolderDesc(e.target.value)} placeholder="Masukkan deskripsi folder" rows={3} />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateFolderModal(false)}>Batal</Button>
-            <Button onClick={handleCreateFolder} disabled={!newFolderName.trim()}>Buat Folder</Button>
+            <Button onClick={handleCreateFolder} disabled={!newFolderName.trim()}>Simpan Folder</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
