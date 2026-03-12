@@ -1,244 +1,94 @@
 
-# Rencana Revisi & Perbaikan Sistem SAKURA DMS
 
-## Ringkasan
-
-10 area perubahan besar mencakup sidebar, dashboard, upload dokumen, arsip, detail dokumen, manajemen user, login, pengaturan, dan alur persetujuan.
-
----
-
-## 1. Sidebar - Collapse Button di Atas
-
-**File**: `src/components/layout/AppSidebar.tsx`
-
-- Pindahkan tombol collapse/expand dari bagian bawah sidebar ke bagian **atas** (di samping logo SAKURA)
-- Arah panah tetap jelas: `PanelLeftClose` untuk collapse, `PanelLeft` untuk expand
-
----
-
-## 2. Dashboard - Filter Aktivitas & Grafik Interaktif
-
-### a. Filter Mingguan/Bulanan
-
-**File**: `src/components/dashboard/ActivityChart.tsx`
-
-- Tambah toggle button "Mingguan" / "Bulanan" di header chart
-- Untuk bulanan, generate data 30 hari dari mock data
-- Chart title berubah sesuai filter yang aktif
-
-### b. Grafik Status (Disetujui/Ditolak/Menunggu)
-
-- Tambah 3 line baru pada grafik: Disetujui, Ditolak, Menunggu (selain Upload dan Persetujuan yang sudah ada)
-- Atau ganti line yang ada menjadi 3 status tersebut
-
-### c. Klik Titik Grafik
-
-- Sudah ada `onDateClick` handler, perbaiki agar benar-benar menampilkan daftar dokumen sesuai tanggal yang diklik
-
-### d. Klik Status
-
-- Klik pada status di legend grafik menampilkan daftar dokumen dengan filter status tersebut
-
-**File**: `src/data/mockData.ts` - Tambah data chart bulanan
-
----
-
-## 3. Upload Dokumen - Redesign Form dengan Kategori Dinamis
-
-**File**: `src/components/upload/UploadForm.tsx`
-
-### a. Filter Dropdown Jenis Dokumen Baru
-
-Ganti opsi jenis dokumen menjadi:
-- Surat Masuk dan Keluar Siswa
-- Surat Pindah Siswa
-- Sertifikat Guru
-- Sertifikat Prestasi Siswa
-- Ijazah SMP
-- Surat Keterangan Hasil Ujian (SKHU)
-- Rekapitulasi Absensi Siswa dan Guru
-- Surat Keputusan (Arsip Surat)
-- Inventaris Sarana Prasarana
-- Lainnya (input text manual jika dipilih)
-
-### b. Kategori di Atas Jenis Dokumen
-
-- Pindahkan **Kategori** di atas **Jenis Dokumen**
-- Opsi kategori: Data Siswa, Data Guru, Sarana Prasarana Sekolah, Surat Menyurat, Keuangan, Lainnya
-- Setiap kategori memiliki jenis dokumen yang relevan (filter cascade)
-
-### c. Data Detail Opsional (Next Page)
-
-- Setelah metadata utama, tambah tombol "Tambah Data Detail (Opsional)" yang expand/collapse
-- Berisi field tambahan sesuai kategori (mis. untuk Data Siswa: NIS, Tempat Lahir, dll.)
-- Tidak wajib diisi
-
-### d. Filter Folder Tujuan
-
-- Tambah dropdown "Masukkan ke Folder" yang menampilkan folder dari arsip dokumen
-- Auto-mapping berdasarkan jenis dokumen tetap berjalan
-
-### e. Tanggal dengan Date Picker
-
-- Tanggal Upload: tambah icon kalender yang bisa diklik untuk memilih tanggal
-- Tahun Ajaran: ubah jadi dropdown dengan opsi 2023/2024, 2024/2025, 2025/2026, dan "Lainnya" (input manual)
-
-### f. Konfirmasi Upload
-
-- Saat klik Upload: tampilkan dialog konfirmasi "Apakah Anda yakin data sudah benar?"
-- Setelah submit berhasil: toast notifikasi dengan tombol "Lihat di Arsip Dokumen" yang navigasi ke `/archive`
-
-### g. Preview Sesuai File
-
-- Preview menampilkan file yang benar-benar di-upload (untuk image: sudah ada, untuk PDF: tampilkan nama file, bukan dummy)
-
----
-
-## 4. Arsip Dokumen
-
-**File**: `src/pages/ArchivePage.tsx`
-
-- Hapus field "Tambah catatan admin..." dari panel preview samping (tidak perlu catatan di setiap dokumen di semua role)
-
----
-
-## 5. Detail Dokumen - Perbaikan UI
-
-**File**: `src/components/modals/DocumentDetailModal.tsx`
-
-- Role pengunggah: ganti tanda hubung (--) menjadi **badge/border** dengan warna khusus (misal: bg-primary/10 text-primary rounded-full px-2)
-- Status aksi (Mengunggah, Menyetujui, dll.): tampilkan dalam **badge bordered** dengan warna khusus sesuai aksi
-- Hapus penggunaan tanda "—" sebagai pemisah, ganti dengan border/badge styling
-
----
-
-## 6. Manajemen User - CRUD Lengkap
-
-**File**: `src/pages/UserManagementPage.tsx`
-
-- **Create**: Tambah tombol "Tambah User" yang membuka modal form (Nama, Email, Role, Departemen)
-- **Read**: Sudah ada (tabel user)
-- **Update**: Tambah tombol "Edit" yang membuka modal edit semua field user
-- **Delete**: Tambah tombol "Hapus" dengan konfirmasi dialog
-- Semua aksi CRUD hanya bisa dilakukan oleh Admin/TU
-- Tambah kolom Aksi yang lebih lengkap
-
-**File**: `src/contexts/AppContext.tsx` - Tambah fungsi `addUser`, `updateUser`, `deleteUser`
-
----
-
-## 7. Login - Tambah Google Login
-
-**File**: `src/pages/LoginPage.tsx`
-
-- Tambah tombol "Masuk dengan Google" di bawah form login (dengan ikon Google)
-- Tombol ini simulasi saja (alert bahwa fitur memerlukan backend)
-- Styling: border button dengan logo Google, teks "Masuk dengan Google"
-- Tambah divider "atau" antara form login dan tombol Google
-
----
-
-## 8. Pengaturan Sistem - Simplifikasi
-
-**File**: `src/pages/SettingsPage.tsx`
-
-- Hapus section "Export JSON" dari Reset & Export
-- Hapus pengaturan frekuensi notifikasi
-- Section "Reset & Export" diganti menjadi "Reset Sistem" saja
-- Tombol: "Reset ke Default" saja
-
----
-
-## 9. Alur Persetujuan - Simplifikasi
-
-**File**: `src/pages/ApprovalPage.tsx`
-
-- Hapus step "Review & Annotate" dan "Verifikasi & Tanda Tangan" dari workflow visual
-- Workflow menjadi: Staff/Guru Upload -> Antrian Persetujuan -> Disetujui/Ditolak
-- Tombol "Approve" diganti teks menjadi **"Setujui"**
-- Modal konfirmasi: ganti dari biometrik menjadi konfirmasi sederhana "Apakah Anda yakin ingin menyetujui dokumen ini?"
-- Hapus ikon Fingerprint dan referensi tanda tangan digital
-- Hapus tombol "Review & Annotate" dari card actions
-- Approval by system: setelah disetujui, dokumen otomatis masuk arsip (status langsung "Diarsipkan")
-
-**File**: `src/pages/DashboardPage.tsx` (tab Persetujuan)
-- Sama: ganti "Approve" menjadi "Setujui", simplifikasi modal konfirmasi
-
----
-
-## 10. Pratinjau Dokumen
-
-**File**: `src/components/modals/PdfPreviewOverlay.tsx`
-
-- Pastikan preview bisa fullscreen (overlay/ngambang)
-- Tetap ada tombol close
-- Preview harus sesuai file yang di-upload (bukan dummy)
-
----
-
-## Detail Teknis
-
-### File yang Diubah
-
-```text
-src/components/layout/AppSidebar.tsx          - Collapse button ke atas
-src/components/dashboard/ActivityChart.tsx     - Filter + status lines
-src/components/upload/UploadForm.tsx           - Redesign form upload
-src/components/modals/DocumentDetailModal.tsx  - Badge styling
-src/pages/ArchivePage.tsx                      - Hapus catatan
-src/pages/UserManagementPage.tsx               - CRUD user
-src/pages/LoginPage.tsx                        - Google login button
-src/pages/SettingsPage.tsx                     - Simplifikasi
-src/pages/ApprovalPage.tsx                     - Simplifikasi workflow
-src/pages/DashboardPage.tsx                    - Tab persetujuan update
-src/contexts/AppContext.tsx                    - addUser, updateUser, deleteUser
-src/data/mockData.ts                           - Chart data + kategori baru
+# Plan: Update Upload Module to Match MySQL Schema
+
+## Overview
+Replace the hardcoded category/document-type data with a new schema-aligned data structure that mirrors the MySQL tables (`categories`, `document_types`, `document_counters`, `folders`). Add auto-generation of document numbers using prefix/year/sequence format. Update folder structure to match categories.
+
+Since there's no backend API connected yet, I'll create the schema-aligned mock data that mirrors the MySQL tables exactly, so when the backend is ready, you just swap mock imports for API calls.
+
+## Files to Change
+
+### 1. `src/data/mockData.js` — Replace category/type constants with schema-aligned tables
+
+Replace `KATEGORI_OPTIONS`, `KATEGORI_JENIS_MAP`, and `KATEGORI_DETAIL_FIELDS` with:
+
+```javascript
+// Mirror of `categories` table
+export const CATEGORIES = [
+  { category_id: 1, category_name: "Data Siswa" },
+  { category_id: 2, category_name: "Data Guru" },
+  { category_id: 3, category_name: "Sarana Prasarana" },
+  { category_id: 4, category_name: "Surat Menyurat" },
+];
+
+// Mirror of `document_types` table
+export const DOCUMENT_TYPES = [
+  { type_id: 1, category_id: 1, type_name: "Buku Klapper", code_prefix: "BKL" },
+  { type_id: 2, category_id: 1, type_name: "Buku Induk Register Peserta Didik", code_prefix: "BIR" },
+  { type_id: 3, category_id: 1, type_name: "Surat Keterangan Hasil Ujian (SKHU)", code_prefix: "SKH" },
+  { type_id: 4, category_id: 1, type_name: "Ijazah SMP", code_prefix: "IJZ" },
+  { type_id: 5, category_id: 2, type_name: "Buku Induk Pegawai", code_prefix: "BIP" },
+  { type_id: 6, category_id: 2, type_name: "Sertifikat Pendidik", code_prefix: "SRP" },
+  { type_id: 7, category_id: 2, type_name: "Catatan Diklat", code_prefix: "CDK" },
+  { type_id: 8, category_id: 3, type_name: "Buku Inventaris Barang dan Penghapusan Barang", code_prefix: "BIB" },
+  { type_id: 9, category_id: 3, type_name: "Buku Pemeliharaan & Perbaikan", code_prefix: "BPP" },
+  { type_id: 10, category_id: 4, type_name: "Buku Agenda Surat Masuk", code_prefix: "ASM" },
+  { type_id: 11, category_id: 4, type_name: "Buku Agenda Surat Keluar", code_prefix: "ASK" },
+  { type_id: 12, category_id: 4, type_name: "Kumpulan Surat Keputusan (SK)", code_prefix: "KSK" },
+];
+
+// Mirror of `document_counters` table (mutable state)
+export const INITIAL_DOCUMENT_COUNTERS = [];
+
+// Mirror of `folders` table
+export const FOLDERS = [
+  { folder_id: 1, folder_name: "Data Siswa", parent_id: null },
+  { folder_id: 2, folder_name: "Data Guru", parent_id: null },
+  { folder_id: 3, folder_name: "Sarana Prasarana", parent_id: null },
+  { folder_id: 4, folder_name: "Surat Menyurat", parent_id: null },
+];
 ```
 
-### Kategori & Jenis Dokumen Mapping
+Also update existing `DOCUMENTS` mock data to include `category_id`, `type_id`, `folder_id` fields. Keep `KATEGORI_OPTIONS` as a derived export for backward compatibility with ArchivePage.
 
-```text
-Data Siswa:
-  - Surat Masuk dan Keluar Siswa
-  - Surat Pindah Siswa
-  - Ijazah SMP
-  - SKHU
-  - Rekapitulasi Absensi Siswa dan Guru
+### 2. `src/contexts/AppContext.jsx` — Add counter state + auto-number generator
 
-Data Guru:
-  - Sertifikat Guru
-  - Surat Keputusan (Arsip Surat)
+- Add `documentCounters` state initialized from `INITIAL_DOCUMENT_COUNTERS`
+- Add `generateDocumentNumber(typeId)` function that:
+  1. Looks up `code_prefix` from `DOCUMENT_TYPES`
+  2. Gets current year
+  3. Finds/creates counter entry, increments sequence
+  4. Returns formatted `PREFIX/YEAR/001`
+- Add `getFolderForCategory(categoryId)` helper
+- Update `uploadDocument` to accept `category_id`, `type_id`, auto-assign `folder_id`
 
-Sarana Prasarana Sekolah:
-  - Inventaris Sarana Prasarana
+### 3. `src/components/upload/UploadForm.jsx` — Update dropdowns + auto-number
 
-Surat Menyurat:
-  - Surat Masuk dan Keluar Siswa
-  - Surat Pindah Siswa
+- Replace `KATEGORI_OPTIONS` import with `CATEGORIES`
+- Replace `KATEGORI_JENIS_MAP` import with `DOCUMENT_TYPES`
+- Category dropdown renders from `CATEGORIES` array
+- Jenis Dokumen dropdown filters `DOCUMENT_TYPES` by selected `category_id`
+- When a document type is selected, auto-generate `nomorDokumen` via `generateDocumentNumber()`
+- Make `nomorDokumen` field read-only (auto-generated)
+- Remove "Lainnya" option from Kategori (only 4 fixed categories per schema)
+- Remove `customKategori` state (no longer needed)
+- Auto-set `folderTujuan` based on selected category → matching folder
+- On submit, pass `category_id`, `type_id`, `folder_id` to `uploadDocument`
 
-Keuangan:
-  - (field manual)
+### 4. `src/pages/ArchivePage.jsx` — Update category filter
 
-Lainnya:
-  - Sertifikat Prestasi Siswa
-  - Lainnya (input manual)
-```
+- Derive `KATEGORI_OPTIONS` from `CATEGORIES` for the filter dropdown (backward compatible)
 
-### Workflow Persetujuan Baru (3 Step)
+## What stays the same
+- All UI layout, colors, fonts, spacing, component structure
+- Existing document display, approval flow, audit trail
+- All other pages untouched
+- `buildFolderTree` / `docMatchesFolder` helpers (updated to also work with new folder structure)
 
-```text
-1. Staff/Guru Upload
-2. Antrian Persetujuan
-3. Disetujui / Ditolak
-```
+## Sequence
+1. Update `mockData.js` with new schema data
+2. Update `AppContext.jsx` with counter logic
+3. Update `UploadForm.jsx` with new dropdown binding + auto-number
+4. Update `ArchivePage.jsx` category filter import
 
-### User CRUD Functions
-
-```text
-addUser(user: Omit<User, "id">)      - Generate ID, tambah ke state
-updateUser(id, partial)                - Update field user
-deleteUser(id)                         - Hapus dari state (tidak bisa hapus diri sendiri)
-```
-
-## 11. Website Responsive
-- Website bisa responsif dengan baik dan tidak hancur baik itu dekstop maupun di mobile. Karena nantinya akan dipakai juga di MOBILE, terlebih untuk scan mobile.
