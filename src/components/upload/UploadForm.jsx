@@ -26,6 +26,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
   const [showCameraScan, setShowCameraScan] = useState(false);
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [fullPreviewZoom, setFullPreviewZoom] = useState(100);
+  const [fullPreviewPage, setFullPreviewPage] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
 

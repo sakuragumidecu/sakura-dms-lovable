@@ -104,21 +104,46 @@ export default function CameraScanModal({ onClose, onComplete }) {
   };
 
   // ── Convert ──
-  const handleConvert = () => {
+  const handleConvert = async () => {
     if (pages.length === 0) return;
-    const page = pages[0];
-    const data = page.cropped || page.imageData;
-    const byteString = atob(data.split(",")[1]);
-    const mimeType = outputFormat === "png" ? "image/png" : outputFormat === "jpg" ? "image/jpeg" : "application/pdf";
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-    for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
-    const ext = outputFormat === "pdf" ? "pdf" : outputFormat;
-    const blob = new Blob([ab], { type: outputFormat === "pdf" ? "image/jpeg" : mimeType });
-    const file = new File([blob], `scan-${Date.now()}.${ext}`, { type: mimeType });
-    // Pass scanned page images for validation preview (avoids PDF viewer)
     const pageImages = pages.map((p) => p.cropped || p.imageData);
-    onComplete(file, pageImages);
+    const ext = outputFormat === "pdf" ? "pdf" : outputFormat;
+    const mimeType = outputFormat === "png" ? "image/png" : outputFormat === "jpg" ? "image/jpeg" : "application/pdf";
+
+    if (outputFormat === "pdf" || pages.length > 1) {
+      // Combine all pages into one vertical canvas
+      const imgs = await Promise.all(pageImages.map((src) => new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.src = src;
+      })));
+      const totalWidth = Math.max(...imgs.map((im) => im.width));
+      const totalHeight = imgs.reduce((sum, im) => sum + Math.round(im.height * (totalWidth / im.width)), 0);
+      const canvas = document.createElement("canvas");
+      canvas.width = totalWidth;
+      canvas.height = totalHeight;
+      const ctx = canvas.getContext("2d");
+      let yOffset = 0;
+      for (const im of imgs) {
+        const scaledH = Math.round(im.height * (totalWidth / im.width));
+        ctx.drawImage(im, 0, yOffset, totalWidth, scaledH);
+        yOffset += scaledH;
+      }
+      canvas.toBlob((blob) => {
+        const file = new File([blob], `scan-${Date.now()}.${ext}`, { type: mimeType });
+        onComplete(file, pageImages);
+      }, outputFormat === "png" ? "image/png" : "image/jpeg", 0.92);
+    } else {
+      // Single page — export directly
+      const data = pageImages[0];
+      const byteString = atob(data.split(",")[1]);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+      const blob = new Blob([ab], { type: mimeType });
+      const file = new File([blob], `scan-${Date.now()}.${ext}`, { type: mimeType });
+      onComplete(file, pageImages);
+    }
   };
 
   // ── Zoom ──
