@@ -263,7 +263,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
                   <div className="text-sm font-medium text-foreground truncate">{file.name}</div>
                   <div className="text-xs text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</div>
                 </div>
-                <button type="button" onClick={() => { setFile(null); setFilePreview(null); }} className="p-1 hover:bg-muted rounded"><X size={16} /></button>
+                <button type="button" onClick={() => { setFile(null); setFilePreview(null); setScanPageImages([]); }} className="p-1 hover:bg-muted rounded"><X size={16} /></button>
               </div>
             )}
           </div>
