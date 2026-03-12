@@ -46,6 +46,8 @@ function AppRoutes() {
         <Route path="/roles" element={<RoleManagementPage />} />
         <Route path="/logs" element={<LogPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
