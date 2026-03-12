@@ -95,7 +95,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.judul) return;
+    if (!form.judul || !form.nomorDokumen) return;
     setShowConfirm(true);
   };
 
