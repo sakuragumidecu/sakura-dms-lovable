@@ -1,4 +1,4 @@
-import { Bell, X, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut, KeyRound } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { useState, useRef, useEffect } from "react";
 import { format } from "date-fns";
