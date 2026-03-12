@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, Plus, Pencil, Trash2, Monitor } from "lucide-react";
+import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, Plus, Pencil, Trash2, Monitor, MoreVertical, FolderPlus, FilePlus, ArrowRightLeft } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
@@ -9,6 +9,12 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { buildFolderTree, docMatchesFolder, KATEGORI_OPTIONS } from "@/data/mockData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 const STATUS_SECTIONS = [
   { key: "Menunggu", label: "Belum Disetujui", color: "text-sakura-warning", bgColor: "bg-sakura-warning/10 border-sakura-warning/20", badgeColor: "bg-sakura-warning/20 text-sakura-warning", opacity: true },
@@ -18,7 +24,7 @@ const STATUS_SECTIONS = [
 ];
 
 export default function ArchivePage() {
-  const { documents, toggleFavorite, currentUser } = useApp();
+  const { documents, toggleFavorite, currentUser, customFolders, createFolder, editFolder, deleteFolder, editDocument, moveDocument, deleteDocument } = useApp();
   const { settings } = useSettings();
   const { toast } = useToast();
   const [search, setSearch] = useState("");
@@ -32,12 +38,30 @@ export default function ArchivePage() {
   const [showPdfOverlay, setShowPdfOverlay] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
+  // CRUD modal states
+  const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [createFolderParent, setCreateFolderParent] = useState(null);
+  const [newFolderName, setNewFolderName] = useState("");
+  const [newFolderDesc, setNewFolderDesc] = useState("");
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTarget, setEditTarget] = useState(null); // { type: 'folder'|'file', data }
+  const [editName, setEditName] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null); // { type: 'folder'|'file', id, name }
+
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [moveTarget, setMoveTarget] = useState(null);
+  const [moveDestination, setMoveDestination] = useState("");
+
+  const [contextMenu, setContextMenu] = useState(null); // { x, y, type, data }
+
   const isAdmin = currentUser.role === "Operator/TU";
 
-  // Build folder tree from schema-aligned FOLDERS table
   const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 
-  // Auto-expand first category on mount
   useMemo(() => {
     if (folderTree.length > 0 && expandedFolders.size === 0) {
       setExpandedFolders(new Set([folderTree[0].path]));
@@ -74,10 +98,8 @@ export default function ArchivePage() {
     return groups;
   }, [filtered]);
 
-  // Build breadcrumb from structured path
   const breadcrumbParts = useMemo(() => {
     if (!selectedFolder) return null;
-    // Walk the tree to find names for the path
     const findPath = (nodes, targetPath, trail = []) => {
       for (const node of nodes) {
         if (node.path === targetPath) return [...trail, { label: node.name, path: node.path }];
@@ -91,10 +113,87 @@ export default function ArchivePage() {
     return findPath(folderTree, selectedFolder) || [{ label: selectedFolder, path: selectedFolder }];
   }, [selectedFolder, folderTree]);
 
-  // Count documents in a folder (for badge)
   const countDocsInFolder = (folderPath) => {
     return documents.filter((d) => docMatchesFolder(d, folderPath)).length;
   };
+
+  // Flatten folder tree for move modal
+  const flattenTree = (nodes, depth = 0) => {
+    const result = [];
+    nodes.forEach((node) => {
+      result.push({ path: node.path, name: node.name, depth });
+      if (node.children) result.push(...flattenTree(node.children, depth + 1));
+    });
+    return result;
+  };
+  const allFolders = useMemo(() => flattenTree(folderTree), [folderTree]);
+
+  // --- CRUD Handlers ---
+  const handleCreateFolder = () => {
+    if (!newFolderName.trim()) return;
+    createFolder(newFolderName.trim(), createFolderParent, newFolderDesc.trim());
+    toast({ title: "Berhasil", description: `Folder '${newFolderName.trim()}' berhasil dibuat` });
+    setNewFolderName("");
+    setNewFolderDesc("");
+    setShowCreateFolderModal(false);
+    setCreateFolderParent(null);
+  };
+
+  const handleEdit = () => {
+    if (!editName.trim()) return;
+    if (editTarget.type === "folder") {
+      editFolder(editTarget.data.id, { name: editName.trim(), description: editDesc.trim() });
+      toast({ title: "Berhasil", description: `Folder '${editName.trim()}' berhasil diperbarui` });
+    } else {
+      editDocument(editTarget.data.id, { judul: editName.trim() });
+      toast({ title: "Berhasil", description: `Dokumen '${editName.trim()}' berhasil diperbarui` });
+    }
+    setShowEditModal(false);
+    setEditTarget(null);
+  };
+
+  const handleDelete = () => {
+    if (deleteTarget.type === "folder") {
+      deleteFolder(deleteTarget.id);
+      toast({ title: "Berhasil", description: `Folder '${deleteTarget.name}' berhasil dihapus` });
+    } else {
+      deleteDocument(deleteTarget.id);
+      if (previewDoc?.id === deleteTarget.id) setPreviewDoc(null);
+      toast({ title: "Berhasil", description: `Dokumen '${deleteTarget.name}' berhasil dihapus` });
+    }
+    setShowDeleteConfirm(false);
+    setDeleteTarget(null);
+  };
+
+  const handleMove = () => {
+    if (!moveDestination || !moveTarget) return;
+    moveDocument(moveTarget.id, moveDestination);
+    toast({ title: "Berhasil", description: `Dokumen '${moveTarget.judul}' berhasil dipindahkan` });
+    setShowMoveModal(false);
+    setMoveTarget(null);
+    setMoveDestination("");
+  };
+
+  const openEditDoc = (doc) => {
+    setEditTarget({ type: "file", data: doc });
+    setEditName(doc.judul);
+    setEditDesc("");
+    setShowEditModal(true);
+  };
+
+  const openDeleteDoc = (doc) => {
+    setDeleteTarget({ type: "file", id: doc.id, name: doc.judul });
+    setShowDeleteConfirm(true);
+  };
+
+  const openMoveDoc = (doc) => {
+    setMoveTarget(doc);
+    setMoveDestination("");
+    setShowMoveModal(true);
+  };
+
+  // Close context menu on click outside
+  const handlePageClick = () => setContextMenu(null);
 
   const renderFolder = (folder, depth = 0) => {
     const isExpanded = expandedFolders.has(folder.path);
@@ -131,6 +230,20 @@ export default function ArchivePage() {
               <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full shrink-0">{docCount}</span>
             )}
           </button>
+          {isAdmin && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setContextMenu({
+                  x: e.clientX, y: e.clientY, type: "folder",
+                  data: folder, parentPath: folder.path,
+                });
+              }}
+              className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-muted transition-opacity shrink-0"
+            >
+              <MoreVertical size={14} className="text-muted-foreground" />
+            </button>
+          )}
         </div>
         {isExpanded && folder.children.map((child) => renderFolder(child, depth + 1))}
       </div>
@@ -140,7 +253,7 @@ export default function ArchivePage() {
   const renderDocCard = (doc, dimmed) => (
     <div
       key={doc.id}
-      className={`flex items-center gap-4 p-4 bg-card rounded-lg border transition cursor-pointer ${
+      className={`group flex items-center gap-4 p-4 bg-card rounded-lg border transition cursor-pointer ${
         previewDoc?.id === doc.id ? "border-primary shadow-md" : "border-border hover:shadow"
       } ${dimmed ? "opacity-50" : ""}`}
       onClick={() => setPreviewDoc(doc)}
@@ -161,11 +274,22 @@ export default function ArchivePage() {
         doc.status === "Ditolak" ? "bg-destructive/20 text-destructive" :
         "bg-muted text-muted-foreground"
       }`}>{doc.status}</span>
+      {isAdmin && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setContextMenu({ x: e.clientX, y: e.clientY, type: "file", data: doc });
+          }}
+          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-muted transition-opacity shrink-0"
+        >
+          <MoreVertical size={16} className="text-muted-foreground" />
+        </button>
+      )}
     </div>
   );
 
   return (
-    <>
+    <div onClick={handlePageClick}>
       <AppHeader title="Arsip Dokumen" subtitle="SMP Negeri 4 Cikarang Barat" />
       <div className="flex flex-1 animate-fade-in overflow-hidden">
         {/* Left - Folder tree */}
@@ -191,6 +315,22 @@ export default function ArchivePage() {
           >
             <Star size={14} className="text-sakura-warning" /> Favorit
           </button>
+
+          {/* Create New Folder button - after Favorit */}
+          {isAdmin && (
+            <button
+              onClick={() => {
+                setCreateFolderParent(null);
+                setNewFolderName("");
+                setNewFolderDesc("");
+                setShowCreateFolderModal(true);
+              }}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 mt-2 rounded-lg border border-dashed border-primary/40 text-sm font-medium text-primary hover:bg-primary/5 transition-colors"
+            >
+              <FolderPlus size={16} /> Buat Folder Baru
+            </button>
+          )}
+
           {folderTree.map((folder) => renderFolder(folder))}
         </div>
 
@@ -214,17 +354,42 @@ export default function ArchivePage() {
             </div>
           )}
 
-          <div>
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              {showFavorites ? (
-                <><Star size={20} className="text-sakura-warning fill-sakura-warning" /> Dokumen Favorit</>
-              ) : selectedFolder ? (
-                <><Folder size={20} className="text-sakura-warning" /> {breadcrumbParts ? breadcrumbParts[breadcrumbParts.length - 1]?.label : "Folder"}</>
-              ) : (
-                "Semua Dokumen Arsip"
-              )}
-            </h2>
-            <p className="text-sm text-muted-foreground">{filtered.length} dokumen ditemukan</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                {showFavorites ? (
+                  <><Star size={20} className="text-sakura-warning fill-sakura-warning" /> Dokumen Favorit</>
+                ) : selectedFolder ? (
+                  <><Folder size={20} className="text-sakura-warning" /> {breadcrumbParts ? breadcrumbParts[breadcrumbParts.length - 1]?.label : "Folder"}</>
+                ) : (
+                  "Semua Dokumen Arsip"
+                )}
+              </h2>
+              <p className="text-sm text-muted-foreground">{filtered.length} dokumen ditemukan</p>
+            </div>
+            {/* In-folder actions for admin */}
+            {isAdmin && selectedFolder && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setCreateFolderParent(selectedFolder);
+                    setNewFolderName("");
+                    setNewFolderDesc("");
+                    setShowCreateFolderModal(true);
+                  }}
+                >
+                  <FolderPlus size={14} className="mr-1.5" /> Sub-folder
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setShowUploadModal(true)}
+                >
+                  <FilePlus size={14} className="mr-1.5" /> Upload File
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Filters */}
@@ -356,6 +521,21 @@ export default function ArchivePage() {
                 </button>
               </div>
 
+              {/* Admin actions for the previewed document */}
+              {isAdmin && (
+                <div className="flex gap-2 pt-1">
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => openEditDoc(previewDoc)}>
+                    <Pencil size={14} className="mr-1.5" /> Edit
+                  </Button>
+                  <Button variant="outline" size="sm" className="flex-1" onClick={() => openMoveDoc(previewDoc)}>
+                    <ArrowRightLeft size={14} className="mr-1.5" /> Pindahkan
+                  </Button>
+                  <Button variant="destructive" size="sm" className="flex-1" onClick={() => openDeleteDoc(previewDoc)}>
+                    <Trash2 size={14} className="mr-1.5" /> Hapus
+                  </Button>
+                </div>
+              )}
+
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Clock size={14} className="text-primary" />
@@ -378,6 +558,175 @@ export default function ArchivePage() {
           </div>
         )}
       </div>
+
+      {/* Context Menu (floating) */}
+      {contextMenu && (
+        <div
+          className="fixed z-[100] bg-popover border border-border rounded-lg shadow-lg py-1 min-w-[180px] animate-in fade-in zoom-in-95"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.type === "folder" && (
+            <>
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => {
+                  setCreateFolderParent(contextMenu.data.path);
+                  setNewFolderName("");
+                  setNewFolderDesc("");
+                  setShowCreateFolderModal(true);
+                  setContextMenu(null);
+                }}
+              >
+                <FolderPlus size={15} className="text-muted-foreground" /> Buat Sub-folder
+              </button>
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => {
+                  setShowUploadModal(true);
+                  setContextMenu(null);
+                }}
+              >
+                <FilePlus size={15} className="text-muted-foreground" /> Upload File
+              </button>
+              <div className="border-t border-border my-1" />
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                onClick={() => {
+                  setDeleteTarget({ type: "folder", id: contextMenu.data.folder_id || contextMenu.data.id, name: contextMenu.data.name });
+                  setShowDeleteConfirm(true);
+                  setContextMenu(null);
+                }}
+              >
+                <Trash2 size={15} /> Hapus Folder
+              </button>
+            </>
+          )}
+          {contextMenu.type === "file" && (
+            <>
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => { openEditDoc(contextMenu.data); setContextMenu(null); }}
+              >
+                <Pencil size={15} className="text-muted-foreground" /> Edit
+              </button>
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => { openMoveDoc(contextMenu.data); setContextMenu(null); }}
+              >
+                <ArrowRightLeft size={15} className="text-muted-foreground" /> Pindahkan ke Folder
+              </button>
+              <div className="border-t border-border my-1" />
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                onClick={() => { openDeleteDoc(contextMenu.data); setContextMenu(null); }}
+              >
+                <Trash2 size={15} /> Hapus
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Create Folder Modal */}
+      <Dialog open={showCreateFolderModal} onOpenChange={setShowCreateFolderModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Buat Folder Baru</DialogTitle>
+            <DialogDescription>
+              {createFolderParent ? "Membuat sub-folder di dalam folder yang dipilih" : "Membuat folder baru di root arsip"}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="folder-name">Nama Folder</Label>
+              <Input id="folder-name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} placeholder="Masukkan nama folder" autoFocus />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="folder-desc">Deskripsi (Opsional)</Label>
+              <Textarea id="folder-desc" value={newFolderDesc} onChange={(e) => setNewFolderDesc(e.target.value)} placeholder="Deskripsi singkat tentang folder ini" rows={3} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateFolderModal(false)}>Batal</Button>
+            <Button onClick={handleCreateFolder} disabled={!newFolderName.trim()}>Buat Folder</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit {editTarget?.type === "folder" ? "Folder" : "Dokumen"}</DialogTitle>
+            <DialogDescription>Perbarui informasi {editTarget?.type === "folder" ? "folder" : "dokumen"}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>Nama</Label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} autoFocus />
+            </div>
+            {editTarget?.type === "folder" && (
+              <div className="space-y-2">
+                <Label>Deskripsi</Label>
+                <Textarea value={editDesc} onChange={(e) => setEditDesc(e.target.value)} rows={3} />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditModal(false)}>Batal</Button>
+            <Button onClick={handleEdit} disabled={!editName.trim()}>Simpan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Move to Folder Modal */}
+      <Dialog open={showMoveModal} onOpenChange={setShowMoveModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pindahkan Dokumen</DialogTitle>
+            <DialogDescription>Pilih folder tujuan untuk dokumen "{moveTarget?.judul}"</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2 max-h-[300px] overflow-y-auto">
+            {allFolders.map((f) => (
+              <button
+                key={f.path}
+                onClick={() => setMoveDestination(f.path)}
+                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors text-left ${
+                  moveDestination === f.path ? "bg-primary/10 border border-primary text-primary font-medium" : "hover:bg-muted border border-transparent"
+                }`}
+                style={{ paddingLeft: `${12 + f.depth * 16}px` }}
+              >
+                <Folder size={15} className={moveDestination === f.path ? "text-primary" : "text-muted-foreground"} />
+                {f.name}
+              </button>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMoveModal(false)}>Batal</Button>
+            <Button onClick={handleMove} disabled={!moveDestination}>Pindahkan</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.type === "folder"
+                ? `Folder "${deleteTarget?.name}" akan dihapus. Tindakan ini tidak dapat dibatalkan.`
+                : `Dokumen "${deleteTarget?.name}" akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Hapus</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {detailDoc && <DocumentDetailModal document={detailDoc} onClose={() => setDetailDoc(null)} />}
       {showPdfOverlay && previewDoc && <PdfPreviewOverlay onClose={() => setShowPdfOverlay(false)} document={previewDoc} />}
       {showUploadModal && (
@@ -398,6 +747,6 @@ export default function ArchivePage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

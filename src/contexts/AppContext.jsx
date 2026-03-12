@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef } from "react";
-import { USERS, DOCUMENTS, ROLE_PERMISSIONS, INITIAL_NOTIFICATIONS, DOCUMENT_TYPES, INITIAL_DOCUMENT_COUNTERS } from "@/data/mockData.js";
+import { USERS, DOCUMENTS, ROLE_PERMISSIONS, INITIAL_NOTIFICATIONS, DOCUMENT_TYPES, INITIAL_DOCUMENT_COUNTERS, FOLDERS } from "@/data/mockData.js";
 
 const AppContext = createContext(null);
 
@@ -18,6 +18,62 @@ export const AppProvider = ({ children }) => {
   const [documentCounters, setDocumentCounters] = useState(INITIAL_DOCUMENT_COUNTERS);
   const countersRef = useRef(documentCounters);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [customFolders, setCustomFolders] = useState([]);
+  const nextFolderIdRef = useRef(1000);
+
+  // --- Folder CRUD ---
+  const createFolder = (folderName, parentPath = null, description = "") => {
+    const id = nextFolderIdRef.current++;
+    const newFolder = { id, name: folderName, parentPath, description, isCustom: true, createdAt: new Date().toISOString() };
+    setCustomFolders((prev) => [...prev, newFolder]);
+    return newFolder;
+  };
+
+  const editFolder = (folderId, data) => {
+    setCustomFolders((prev) => prev.map((f) => f.id === folderId ? { ...f, ...data } : f));
+  };
+
+  const deleteFolder = (folderId) => {
+    setCustomFolders((prev) => prev.filter((f) => f.id !== folderId));
+  };
+
+  // --- Document CRUD ---
+  const editDocument = (docId, data) => {
+    setDocuments((prev) => prev.map((d) => d.id === docId ? { ...d, ...data, tanggalEdit: new Date().toISOString() } : d));
+  };
+
+  const moveDocument = (docId, newFolderPath) => {
+    // Parse the folder path to extract category/type/year
+    const parts = newFolderPath.split("/");
+    const catPart = parts.find((p) => p.startsWith("cat:"));
+    const typePart = parts.find((p) => p.startsWith("type:"));
+    const yearPart = parts.find((p) => p.startsWith("year:"));
+    const catId = catPart ? Number(catPart.split(":")[1]) : null;
+    const typeId = typePart ? Number(typePart.split(":")[1]) : null;
+    const year = yearPart ? yearPart.split(":")[1] : null;
+
+    if (!catId) return;
+
+    const cat = FOLDERS.find((f) => f.category_id === catId && f.parent_id === null);
+    const docType = typeId ? DOCUMENT_TYPES.find((t) => t.type_id === typeId) : null;
+
+    setDocuments((prev) => prev.map((d) => {
+      if (d.id !== docId) return d;
+      return {
+        ...d,
+        category_id: catId,
+        kategori: cat?.folder_name || d.kategori,
+        type_id: typeId || d.type_id,
+        jenisDokumen: docType?.type_name || d.jenisDokumen,
+        tahunAjaran: year || d.tahunAjaran,
+        tanggalEdit: new Date().toISOString(),
+      };
+    }));
+  };
+
+  const deleteDocument = (docId) => {
+    setDocuments((prev) => prev.filter((d) => d.id !== docId));
+  };
 
   const generateDocumentNumber = (typeId) => {
     const docType = DOCUMENT_TYPES.find((t) => t.type_id === typeId);
@@ -192,11 +248,12 @@ export const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider value={{
-      currentUser, users, documents, rolePermissions, notifications, isLoggedIn,
+      currentUser, users, documents, rolePermissions, notifications, isLoggedIn, customFolders,
       login, logout, updateUserRole, updateUserAvatar, togglePermission, addAuditNote,
       hasPermission, approveDocument, rejectDocument, uploadDocument, archiveDocument,
       toggleFavorite, markNotificationRead, markAllNotificationsRead,
       addUser, updateUser, deleteUser, generateDocumentNumber, updateProfile, changePassword,
+      createFolder, editFolder, deleteFolder, editDocument, moveDocument, deleteDocument,
     }}>
       {children}
     </AppContext.Provider>
