@@ -66,25 +66,73 @@ export const FOLDERS = [
 // Backward-compatible derived exports
 export const KATEGORI_OPTIONS = CATEGORIES.map((c) => c.category_name);
 
-export const KATEGORI_DETAIL_FIELDS = {
-  "Data Siswa": [
+// Dynamic form field definitions per category (maps to separate DB tables)
+// category_id → fields definition
+export const CATEGORY_FORM_FIELDS = {
+  // Data Siswa → student_records table
+  1: [
+    { key: "namaSiswa", label: "Nama Siswa", placeholder: "Nama lengkap siswa", required: true },
     { key: "nis", label: "NIS", placeholder: "Nomor Induk Siswa" },
+    { key: "nisn", label: "NISN", placeholder: "00xxxxxxxx" },
+    { key: "kelas", label: "Kelas", placeholder: "Contoh: Kelas 7A / Alumni 2024" },
+    { key: "tahunAjaran", label: "Tahun Ajaran", type: "tahun_ajaran" },
     { key: "tempatLahir", label: "Tempat Lahir", placeholder: "Contoh: Bekasi" },
-    { key: "tanggalLahir", label: "Tanggal Lahir", placeholder: "DD/MM/YYYY" },
-    { key: "namaOrangTua", label: "Nama Orang Tua/Wali", placeholder: "Nama lengkap" },
-    { key: "alamat", label: "Alamat", placeholder: "Alamat lengkap" },
+    { key: "tanggalLahir", label: "Tanggal Lahir", placeholder: "DD/MM/YYYY", type: "date" },
+    { key: "jenisKelamin", label: "Jenis Kelamin", type: "select", options: ["Laki-laki", "Perempuan"] },
+    { key: "namaOrangTua", label: "Nama Orang Tua", placeholder: "Nama lengkap orang tua/wali" },
+    { key: "noHpOrangTua", label: "No HP Orang Tua", placeholder: "08xxxxxxxxxx" },
   ],
-  "Data Guru": [
+  // Data Guru → teacher_records table
+  2: [
+    { key: "namaGuru", label: "Nama Guru", placeholder: "Nama lengkap guru", required: true },
     { key: "nip", label: "NIP", placeholder: "Nomor Induk Pegawai" },
-    { key: "bidangStudi", label: "Bidang Studi", placeholder: "Contoh: Matematika" },
-    { key: "jabatan", label: "Jabatan", placeholder: "Contoh: Guru Tetap" },
+    { key: "nuptk", label: "NUPTK", placeholder: "Nomor Unik Pendidik" },
+    { key: "mataPelajaran", label: "Mata Pelajaran", placeholder: "Contoh: Matematika" },
+    { key: "pendidikanTerakhir", label: "Pendidikan Terakhir", placeholder: "Contoh: S1 Pendidikan" },
+    { key: "statusKepegawaian", label: "Status Kepegawaian", type: "select", options: ["PNS", "PPPK", "Honorer", "GTT"] },
   ],
-  "Sarana Prasarana": [
-    { key: "kodeBarang", label: "Kode Barang", placeholder: "Contoh: INV-001" },
+  // Sarana Prasarana → inventory_items table
+  3: [
+    { key: "kodeBarang", label: "Kode Barang", placeholder: "Contoh: INV-001", required: true },
+    { key: "namaBarang", label: "Nama Barang", placeholder: "Contoh: Meja Guru" },
+    { key: "jumlah", label: "Jumlah", placeholder: "Contoh: 10", type: "number" },
+    { key: "tahunPengadaan", label: "Tahun Pengadaan", placeholder: "Contoh: 2024" },
+    { key: "kondisi", label: "Kondisi", type: "select", options: ["Baik", "Rusak Ringan", "Rusak Berat"] },
     { key: "lokasi", label: "Lokasi", placeholder: "Contoh: Ruang Lab IPA" },
-    { key: "kondisi", label: "Kondisi", placeholder: "Baik / Rusak Ringan / Rusak Berat" },
   ],
 };
+
+// Surat Menyurat has sub-type specific fields (maps to different tables per type)
+export const SURAT_TYPE_FORM_FIELDS = {
+  // Buku Agenda Surat Masuk (type_id: 10) → incoming_letters table
+  10: [
+    { key: "nomorAgenda", label: "Nomor Agenda", placeholder: "Contoh: 001/SM/2026", required: true },
+    { key: "nomorSurat", label: "Nomor Surat", placeholder: "Nomor surat masuk" },
+    { key: "tanggalSurat", label: "Tanggal Surat", placeholder: "DD/MM/YYYY", type: "date" },
+    { key: "tanggalDiterima", label: "Tanggal Diterima", placeholder: "DD/MM/YYYY", type: "date" },
+    { key: "pengirim", label: "Pengirim", placeholder: "Contoh: Dinas Pendidikan" },
+    { key: "perihal", label: "Perihal", placeholder: "Perihal surat" },
+  ],
+  // Buku Agenda Surat Keluar (type_id: 11) → outgoing_letters table
+  11: [
+    { key: "nomorAgenda", label: "Nomor Agenda", placeholder: "Contoh: 001/SK/2026", required: true },
+    { key: "nomorSurat", label: "Nomor Surat", placeholder: "Nomor surat keluar" },
+    { key: "tanggalSurat", label: "Tanggal Surat", placeholder: "DD/MM/YYYY", type: "date" },
+    { key: "tujuan", label: "Tujuan", placeholder: "Contoh: Dinas Pendidikan Kab. Bekasi" },
+    { key: "perihal", label: "Perihal", placeholder: "Perihal surat" },
+    { key: "penandatangan", label: "Penandatangan", placeholder: "Nama penandatangan" },
+  ],
+  // Kumpulan Surat Keputusan (type_id: 12) → sk_records table
+  12: [
+    { key: "nomorSK", label: "Nomor SK", placeholder: "Contoh: 001/SK/2026", required: true },
+    { key: "tanggalSK", label: "Tanggal SK", placeholder: "DD/MM/YYYY", type: "date" },
+    { key: "tentang", label: "Tentang", placeholder: "Contoh: Pengangkatan Guru Tetap" },
+    { key: "penandatangan", label: "Penandatangan", placeholder: "Nama penandatangan" },
+  ],
+};
+
+// Keep backward compat
+export const KATEGORI_DETAIL_FIELDS = {};
 
 export const TAHUN_AJARAN_OPTIONS = ["2023/2024", "2024/2025", "2025/2026"];
 
