@@ -92,6 +92,23 @@ export default function ArchivePage() {
     });
   };
 
+  // Get subfolders of the currently selected folder for grid display (moved before filtered)
+  const currentSubfolders = useMemo(() => {
+    if (!selectedFolder) return folderTree; // show root folders
+    const findNode = (nodes, targetPath) => {
+      for (const node of nodes) {
+        if (node.path === targetPath) return node;
+        if (node.children) {
+          const found = findNode(node.children, targetPath);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const node = findNode(folderTree, selectedFolder);
+    return node?.children || [];
+  }, [selectedFolder, folderTree]);
+
   const filtered = useMemo(() => {
     let docs = accessibleDocuments;
     if (showFavorites) docs = docs.filter((d) => d.favorite);
@@ -135,23 +152,6 @@ export default function ArchivePage() {
   const countDocsInFolder = (folderPath) => {
     return documents.filter((d) => docMatchesFolder(d, folderPath)).length;
   };
-
-  // Get subfolders of the currently selected folder for grid display
-  const currentSubfolders = useMemo(() => {
-    if (!selectedFolder) return folderTree; // show root folders
-    const findNode = (nodes, targetPath) => {
-      for (const node of nodes) {
-        if (node.path === targetPath) return node;
-        if (node.children) {
-          const found = findNode(node.children, targetPath);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    const node = findNode(folderTree, selectedFolder);
-    return node?.children || [];
-  }, [selectedFolder, folderTree]);
 
   // Flatten folder tree for move modal
   const flattenTree = (nodes, depth = 0) => {
