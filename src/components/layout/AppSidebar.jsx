@@ -27,23 +27,21 @@ export default function AppSidebar() {
       <div className="px-3 pt-4 pb-3">
         <div className={`flex items-center ${collapsed ? "justify-center" : "gap-2"}`}>
           <button
-            onClick={() => setCollapsed(!collapsed)}
-            title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
-            className="p-1.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors shrink-0"
-          >
-            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-          </button>
-          <button
             onClick={() => navigate("/home")}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer min-w-0"
           >
             <img src={logoSakura} alt="SAKURA" className="w-8 h-8 rounded-full bg-sidebar-accent shrink-0" />
             {!collapsed && (
-              <div className="text-left min-w-0">
-                <div className="text-sidebar-primary font-bold text-sm leading-tight tracking-wide">SAKURA</div>
-                
-              </div>
+              <div className="text-sidebar-primary font-bold text-sm leading-tight tracking-wide">SAKURA</div>
             )}
+          </button>
+          {!collapsed && <div className="flex-1" />}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
+            className="p-1.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors shrink-0"
+          >
+            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
           </button>
         </div>
 
