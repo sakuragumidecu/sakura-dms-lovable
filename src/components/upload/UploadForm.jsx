@@ -28,6 +28,25 @@ export default function UploadForm({ onSuccess, onCancel }) {
   const [fullPreviewZoom, setFullPreviewZoom] = useState(100);
   const [fullPreviewPage, setFullPreviewPage] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+
+  // Rotate a scanned page by 90° CW using canvas (modifies actual image data)
+  const rotatePage = useCallback((pageIndex) => {
+    const src = scanPageImages[pageIndex];
+    if (!src) return;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.height;
+      canvas.height = img.width;
+      const ctx = canvas.getContext("2d");
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      const rotated = canvas.toDataURL("image/jpeg", 0.92);
+      setScanPageImages((prev) => prev.map((p, i) => (i === pageIndex ? rotated : p)));
+    };
+    img.src = src;
+  }, [scanPageImages]);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
 
   const [form, setForm] = useState({
