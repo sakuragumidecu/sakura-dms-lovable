@@ -22,7 +22,16 @@ export default function AppSidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
   return (
-    <aside className={`${collapsed ? "w-[78px]" : "w-[180px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300`}>
+    <aside className={`${collapsed ? "w-[78px]" : "w-[180px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300 relative`}>
+      {/* Collapse toggle — top-right edge */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
+        className="absolute top-3 right-0 translate-x-1/2 z-10 p-1 rounded-full bg-sidebar border border-sidebar-border text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors shadow-sm"
+      >
+        {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
+      </button>
+
       {/* Branding */}
       <div className="flex flex-col items-center pt-6 pb-4 px-3">
         <img src={logoSakura} alt="SAKURA" className="w-12 h-12 rounded-full bg-sidebar-accent shrink-0" />
@@ -34,13 +43,6 @@ export default function AppSidebar() {
             </p>
           </div>
         )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
-          className="mt-3 p-1.5 rounded-lg text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground transition-colors"
-        >
-          {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-        </button>
       </div>
 
       {/* Divider below branding */}
