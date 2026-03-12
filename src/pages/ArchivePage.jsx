@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, FolderPlus, Plus, Pencil, Trash2, Monitor } from "lucide-react";
+import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, Plus, Pencil, Trash2, Monitor } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
@@ -31,75 +31,18 @@ export default function ArchivePage() {
   const [previewDoc, setPreviewDoc] = useState(null);
   const [showPdfOverlay, setShowPdfOverlay] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [showCreateFolder, setShowCreateFolder] = useState(false);
-  const [newFolderName, setNewFolderName] = useState("");
-  const [customFolders, setCustomFolders] = useState([]);
-  const [createFolderParent, setCreateFolderParent] = useState(null);
-  const [editingFolder, setEditingFolder] = useState(null);
-  const [editFolderName, setEditFolderName] = useState("");
 
   const isAdmin = currentUser.role === "Operator/TU";
 
+  // Build folder tree from schema-aligned FOLDERS table
   const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 
-  const fullTree = useMemo(() => {
-    const tree = JSON.parse(JSON.stringify(folderTree));
-    customFolders.forEach((cf) => {
-      const parts = cf.split("/");
-      let currentLevel = tree;
-      let currentPath = "";
-      parts.forEach((part, i) => {
-        currentPath = i === 0 ? part : `${currentPath}/${part}`;
-        let existing = currentLevel.find((n) => n.path === currentPath);
-        if (!existing) {
-          existing = { name: part, path: currentPath, children: [] };
-          currentLevel.push(existing);
-        }
-        currentLevel = existing.children;
-      });
-    });
-    return tree;
-  }, [folderTree, customFolders]);
-
+  // Auto-expand first category on mount
   useMemo(() => {
-    if (fullTree.length > 0 && expandedFolders.size === 0) {
-      setExpandedFolders(new Set([fullTree[0].path]));
+    if (folderTree.length > 0 && expandedFolders.size === 0) {
+      setExpandedFolders(new Set([folderTree[0].path]));
     }
-  }, [fullTree]);
-
-  const handleCreateFolder = (parentPath) => {
-    if (!newFolderName.trim()) return;
-    const folderPath = parentPath ? `${parentPath}/${newFolderName.trim()}` : newFolderName.trim();
-    setCustomFolders((prev) => [...prev, folderPath]);
-    toast({ title: "Folder dibuat", description: `Folder "${newFolderName.trim()}" berhasil dibuat.` });
-    setNewFolderName("");
-    setShowCreateFolder(false);
-    setCreateFolderParent(null);
-  };
-
-  const handleDeleteFolder = (path) => {
-    setCustomFolders((prev) => prev.filter((f) => f !== path && !f.startsWith(path + "/")));
-    if (selectedFolder === path) setSelectedFolder(null);
-    toast({ title: "Folder dihapus", description: `Folder berhasil dihapus.` });
-  };
-
-  const handleRenameFolder = (oldPath) => {
-    if (!editFolderName.trim()) return;
-    const parts = oldPath.split("/");
-    parts[parts.length - 1] = editFolderName.trim();
-    const newPath = parts.join("/");
-    setCustomFolders((prev) => prev.map((f) => {
-      if (f === oldPath) return newPath;
-      if (f.startsWith(oldPath + "/")) return newPath + f.slice(oldPath.length);
-      return f;
-    }));
-    if (selectedFolder === oldPath) setSelectedFolder(newPath);
-    toast({ title: "Folder diubah", description: `Folder berhasil diubah nama.` });
-    setEditingFolder(null);
-    setEditFolderName("");
-  };
-
-  const isCustomFolder = (path) => customFolders.includes(path);
+  }, [folderTree]);
 
   const toggleExpand = (path) => {
     setExpandedFolders((prev) => {
@@ -131,105 +74,64 @@ export default function ArchivePage() {
     return groups;
   }, [filtered]);
 
+  // Build breadcrumb from structured path
   const breadcrumbParts = useMemo(() => {
     if (!selectedFolder) return null;
-    const parts = selectedFolder.split("/");
-    return parts.map((part, i) => ({
-      label: part,
-      path: parts.slice(0, i + 1).join("/"),
-    }));
-  }, [selectedFolder]);
+    // Walk the tree to find names for the path
+    const findPath = (nodes, targetPath, trail = []) => {
+      for (const node of nodes) {
+        if (node.path === targetPath) return [...trail, { label: node.name, path: node.path }];
+        if (targetPath.startsWith(node.path + "/")) {
+          const result = findPath(node.children, targetPath, [...trail, { label: node.name, path: node.path }]);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    return findPath(folderTree, selectedFolder) || [{ label: selectedFolder, path: selectedFolder }];
+  }, [selectedFolder, folderTree]);
+
+  // Count documents in a folder (for badge)
+  const countDocsInFolder = (folderPath) => {
+    return documents.filter((d) => docMatchesFolder(d, folderPath)).length;
+  };
 
   const renderFolder = (folder, depth = 0) => {
     const isExpanded = expandedFolders.has(folder.path);
     const hasChildren = folder.children.length > 0;
     const isSelected = selectedFolder === folder.path;
-    const isEditing = editingFolder === folder.path;
-    const isCreatingHere = createFolderParent === folder.path;
-    const custom = isCustomFolder(folder.path);
+    const docCount = countDocsInFolder(folder.path);
 
     return (
       <div key={folder.path}>
-        {isEditing ? (
-          <div className="flex gap-1 px-2 py-1" style={{ paddingLeft: `${12 + depth * 20}px` }}>
-            <input
-              value={editFolderName}
-              onChange={(e) => setEditFolderName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleRenameFolder(folder.path)}
-              placeholder="Nama baru"
-              className="flex-1 min-w-0 px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-              autoFocus
-            />
-            <button onClick={() => handleRenameFolder(folder.path)} className="px-2 py-1.5 rounded bg-primary text-primary-foreground text-xs font-medium">OK</button>
-            <button onClick={() => { setEditingFolder(null); setEditFolderName(""); }} className="px-2 py-1.5 rounded border border-input text-xs">✕</button>
-          </div>
-        ) : (
-          <div className="group flex items-center" style={{ paddingLeft: `${12 + depth * 20}px` }}>
-            <button
-              onClick={() => {
-                if (hasChildren) toggleExpand(folder.path);
-                setSelectedFolder(folder.path);
-                setShowFavorites(false);
-                setPreviewDoc(null);
-              }}
-              className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-0 ${
-                isSelected ? "bg-secondary text-primary" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              {hasChildren ? (
-                isExpanded ? <ChevronDown size={14} className="shrink-0" /> : <ChevronRight size={14} className="shrink-0" />
-              ) : (
-                <span className="w-3.5 shrink-0" />
-              )}
-              {isExpanded && hasChildren ? (
-                <FolderOpen size={16} className="text-sakura-warning shrink-0" />
-              ) : (
-                <Folder size={16} className={`shrink-0 ${hasChildren ? "text-muted-foreground" : "text-sakura-warning"}`} />
-              )}
-              <span className="truncate">{folder.name}</span>
-            </button>
-            {isAdmin && (
-              <div className="hidden group-hover:flex items-center gap-0.5 shrink-0 pr-1">
-                <button
-                  onClick={(e) => { e.stopPropagation(); setCreateFolderParent(folder.path); setNewFolderName(""); setExpandedFolders((prev) => new Set([...prev, folder.path])); }}
-                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-primary" title="Buat subfolder"
-                >
-                  <Plus size={14} />
-                </button>
-                {custom && (
-                  <>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setEditingFolder(folder.path); setEditFolderName(folder.name); }}
-                      className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-primary" title="Ubah nama"
-                    >
-                      <Pencil size={13} />
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleDeleteFolder(folder.path); }}
-                      className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive" title="Hapus folder"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  </>
-                )}
-              </div>
+        <div className="group flex items-center" style={{ paddingLeft: `${12 + depth * 20}px` }}>
+          <button
+            onClick={() => {
+              if (hasChildren) toggleExpand(folder.path);
+              setSelectedFolder(folder.path);
+              setShowFavorites(false);
+              setPreviewDoc(null);
+            }}
+            className={`flex-1 flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors min-w-0 ${
+              isSelected ? "bg-secondary text-primary" : "text-foreground hover:bg-muted"
+            }`}
+          >
+            {hasChildren ? (
+              isExpanded ? <ChevronDown size={14} className="shrink-0" /> : <ChevronRight size={14} className="shrink-0" />
+            ) : (
+              <span className="w-3.5 shrink-0" />
             )}
-          </div>
-        )}
-        {isCreatingHere && (
-          <div className="flex gap-1 px-2 py-1" style={{ paddingLeft: `${12 + (depth + 1) * 20}px` }}>
-            <input
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreateFolder(folder.path)}
-              placeholder="Nama folder baru"
-              className="flex-1 min-w-0 px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-              autoFocus
-            />
-            <button onClick={() => handleCreateFolder(folder.path)} className="px-2 py-1.5 rounded bg-primary text-primary-foreground text-xs font-medium">OK</button>
-            <button onClick={() => { setCreateFolderParent(null); setNewFolderName(""); }} className="px-2 py-1.5 rounded border border-input text-xs">✕</button>
-          </div>
-        )}
+            {isExpanded && hasChildren ? (
+              <FolderOpen size={16} className="text-sakura-warning shrink-0" />
+            ) : (
+              <Folder size={16} className={`shrink-0 ${hasChildren ? "text-muted-foreground" : "text-sakura-warning"}`} />
+            )}
+            <span className="truncate">{folder.name}</span>
+            {docCount > 0 && (
+              <span className="ml-auto text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full shrink-0">{docCount}</span>
+            )}
+          </button>
+        </div>
         {isExpanded && folder.children.map((child) => renderFolder(child, depth + 1))}
       </div>
     );
@@ -251,7 +153,7 @@ export default function ArchivePage() {
       </div>
       <div className="flex-1 min-w-0">
         <div className="font-semibold text-sm text-foreground truncate">{doc.judul}</div>
-        <div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.kelas}</div>
+        <div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.jenisDokumen}</div>
       </div>
       <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${
         doc.status === "Disetujui" ? "bg-sakura-success/20 text-sakura-success" :
@@ -272,15 +174,6 @@ export default function ArchivePage() {
             <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
               <Folder size={16} className="text-sakura-warning" /> Struktur Folder
             </h3>
-            {isAdmin && (
-              <button
-                onClick={() => { setShowCreateFolder(true); setCreateFolderParent(null); setNewFolderName(""); }}
-                className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-primary transition-colors"
-                title="Buat folder baru"
-              >
-                <Plus size={16} />
-              </button>
-            )}
           </div>
           <button
             onClick={() => { setSelectedFolder(null); setShowFavorites(false); setPreviewDoc(null); }}
@@ -298,21 +191,7 @@ export default function ArchivePage() {
           >
             <Star size={14} className="text-sakura-warning" /> Favorit
           </button>
-          {isAdmin && showCreateFolder && createFolderParent === null && (
-            <div className="flex gap-1 px-2 mb-1">
-              <input
-                value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleCreateFolder()}
-                placeholder="Nama folder baru"
-                className="flex-1 min-w-0 px-2 py-1.5 rounded border border-input bg-background text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-                autoFocus
-              />
-              <button onClick={() => handleCreateFolder()} className="px-2 py-1.5 rounded bg-primary text-primary-foreground text-xs font-medium">OK</button>
-              <button onClick={() => { setShowCreateFolder(false); setNewFolderName(""); }} className="px-2 py-1.5 rounded border border-input text-xs">✕</button>
-            </div>
-          )}
-          {fullTree.map((folder) => renderFolder(folder))}
+          {folderTree.map((folder) => renderFolder(folder))}
         </div>
 
         {/* Center - Document list */}
@@ -340,7 +219,7 @@ export default function ArchivePage() {
               {showFavorites ? (
                 <><Star size={20} className="text-sakura-warning fill-sakura-warning" /> Dokumen Favorit</>
               ) : selectedFolder ? (
-                <><Folder size={20} className="text-sakura-warning" /> {selectedFolder.includes("/") ? selectedFolder.split("/").pop() : selectedFolder}</>
+                <><Folder size={20} className="text-sakura-warning" /> {breadcrumbParts ? breadcrumbParts[breadcrumbParts.length - 1]?.label : "Folder"}</>
               ) : (
                 "Semua Dokumen Arsip"
               )}
@@ -425,9 +304,15 @@ export default function ArchivePage() {
                   <div className="font-medium text-foreground">{previewDoc.kategori}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground text-xs">Kelas</div>
-                  <div className="font-medium text-foreground">{previewDoc.kelas}</div>
+                  <div className="text-muted-foreground text-xs">Jenis Dokumen</div>
+                  <div className="font-medium text-foreground">{previewDoc.jenisDokumen}</div>
                 </div>
+                {previewDoc.kelas && previewDoc.kelas !== "-" && (
+                  <div>
+                    <div className="text-muted-foreground text-xs">Kelas</div>
+                    <div className="font-medium text-foreground">{previewDoc.kelas}</div>
+                  </div>
+                )}
                 {previewDoc.namaSiswa && (
                   <div>
                     <div className="text-muted-foreground text-xs">Nama Siswa</div>
@@ -501,13 +386,12 @@ export default function ArchivePage() {
           <div className="relative z-10 w-full max-w-5xl max-h-[90vh] overflow-y-auto bg-background rounded-2xl shadow-2xl border border-border p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-lg font-bold text-foreground">Upload Dokumen {selectedFolder ? `ke ${selectedFolder}` : ""}</h2>
+                <h2 className="text-lg font-bold text-foreground">Upload Dokumen</h2>
                 <p className="text-sm text-muted-foreground">Form upload identik dengan halaman Upload Dokumen</p>
               </div>
               <button onClick={() => setShowUploadModal(false)} className="p-2 rounded-lg hover:bg-muted"><X size={20} /></button>
             </div>
             <UploadForm
-              targetFolder={selectedFolder || undefined}
               onSuccess={() => setShowUploadModal(false)}
               onCancel={() => setShowUploadModal(false)}
             />

@@ -7,11 +7,11 @@ import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { CATEGORIES, DOCUMENT_TYPES, KATEGORI_DETAIL_FIELDS, TAHUN_AJARAN_OPTIONS, buildFolderTree, flattenFolderPaths } from "@/data/mockData";
+import { CATEGORIES, DOCUMENT_TYPES, KATEGORI_DETAIL_FIELDS, TAHUN_AJARAN_OPTIONS, getAutoFolderPath, getFolderIdForDocument } from "@/data/mockData";
 import { Calendar } from "@/components/ui/calendar";
 
 export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
-  const { uploadDocument, currentUser, documents, generateDocumentNumber, getFolderForCategory } = useApp();
+  const { uploadDocument, currentUser, generateDocumentNumber } = useApp();
   const { settings } = useSettings();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -31,21 +31,18 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [selectedTypeId, setSelectedTypeId] = useState(null);
 
-  const parsedTahun = targetFolder?.split("/")[0] || "";
-  const parsedKelas = targetFolder?.split("/")[1] || "";
-
   const [form, setForm] = useState({
     nomorDokumen: "",
     judul: "",
     jenisDokumen: "",
     kategori: "",
-    kelas: parsedKelas,
+    kelas: "",
     namaSiswa: "",
     nisn: "",
-    tahunAjaran: parsedTahun || "2024/2025",
+    tahunAjaran: "2024/2025",
     catatan: "",
     tanggalUpload: new Date(),
-    folderTujuan: targetFolder || "",
+    folderTujuan: "",
   });
 
   const jenisOptions = useMemo(() => {
@@ -57,22 +54,12 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
     return KATEGORI_DETAIL_FIELDS[form.kategori] || [];
   }, [form.kategori]);
 
-  const folderPaths = useMemo(() => {
-    const tree = buildFolderTree(documents);
-    return flattenFolderPaths(tree);
-  }, [documents]);
-
-  useEffect(() => {
-    if (targetFolder) return;
-    if (!settings.folderMapping.enabled || !form.jenisDokumen) return;
-    const mapping = settings.folderMapping.mappings.find((m) => m.jenisDokumen === form.jenisDokumen);
-    if (mapping) {
-      const folderPath = form.tahunAjaran
-        ? `${form.tahunAjaran.split("/").pop()}/${mapping.targetFolder}`
-        : mapping.targetFolder;
-      setForm((p) => ({ ...p, folderTujuan: folderPath }));
-    }
-  }, [form.jenisDokumen, form.tahunAjaran, settings.folderMapping, targetFolder]);
+  // Auto-update folder path when category, type, or tahun changes
+  const autoFolderDisplay = useMemo(() => {
+    if (!selectedCategoryId || !selectedTypeId) return "";
+    const tahun = form.tahunAjaran === "Lainnya" ? customTahun : form.tahunAjaran;
+    return getAutoFolderPath(selectedCategoryId, selectedTypeId, tahun);
+  }, [selectedCategoryId, selectedTypeId, form.tahunAjaran, customTahun]);
 
   const handleFile = (f) => {
     const maxSize = 10 * 1024 * 1024;
@@ -110,7 +97,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
 
   const confirmUpload = () => {
     const tahun = form.tahunAjaran === "Lainnya" ? customTahun : form.tahunAjaran;
-    const folder = getFolderForCategory(selectedCategoryId);
+    const folderId = getFolderIdForDocument(selectedCategoryId, selectedTypeId);
 
     uploadDocument({
       nomorDokumen: form.nomorDokumen || `DOC-${Date.now()}`,
@@ -118,8 +105,9 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
       kategori: form.kategori || "-",
       category_id: selectedCategoryId,
       type_id: selectedTypeId,
-      folder_id: folder?.folder_id || null,
+      folder_id: folderId,
       kelas: form.kelas || "-",
+      class_info: form.kelas || "-",
       jenisDokumen: form.jenisDokumen,
       namaSiswa: form.namaSiswa,
       nisn: form.nisn,
@@ -128,7 +116,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
       tanggalUpload: form.tanggalUpload.toISOString(),
       fileUrl: filePreview || "/mock/sample.pdf",
       catatan: form.catatan || undefined,
-      folderTujuan: form.folderTujuan || undefined,
+      folderTujuan: autoFolderDisplay || undefined,
     });
 
     setShowConfirm(false);
@@ -148,7 +136,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
       setFile(null);
       setFilePreview(null);
       setDetailData({});
-      setForm({ nomorDokumen: "", judul: "", jenisDokumen: "", kategori: "", kelas: parsedKelas, namaSiswa: "", nisn: "", tahunAjaran: parsedTahun || "2024/2025", catatan: "", tanggalUpload: new Date(), folderTujuan: targetFolder || "" });
+      setForm({ nomorDokumen: "", judul: "", jenisDokumen: "", kategori: "", kelas: "", namaSiswa: "", nisn: "", tahunAjaran: "2024/2025", catatan: "", tanggalUpload: new Date(), folderTujuan: "" });
       setSelectedCategoryId(null);
       setSelectedTypeId(null);
       onSuccess?.();
@@ -170,11 +158,11 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
     <>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
-          {(targetFolder || form.folderTujuan) && (
+          {autoFolderDisplay && (
             <div className="p-3 rounded-lg bg-secondary/50 border border-border text-sm">
               <span className="text-muted-foreground">Masukkan ke folder: </span>
-              <span className="font-semibold text-primary">{targetFolder || form.folderTujuan}</span>
-              <span className="text-muted-foreground">{!targetFolder && form.folderTujuan ? " (auto-mapping)" : ""}</span>
+              <span className="font-semibold text-primary">{autoFolderDisplay}</span>
+              <span className="text-muted-foreground"> (auto-mapping)</span>
             </div>
           )}
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
@@ -272,11 +260,6 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
                 update("kategori", cat?.category_name || "");
                 update("jenisDokumen", "");
                 update("nomorDokumen", "");
-                // Auto-set folder
-                if (cat) {
-                  const folder = getFolderForCategory(catId);
-                  if (folder) update("folderTujuan", folder.folder_name);
-                }
               }} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="">Pilih kategori</option>
                 {CATEGORIES.map((c) => <option key={c.category_id} value={c.category_id}>{c.category_name}</option>)}
@@ -290,7 +273,6 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
                 const docType = DOCUMENT_TYPES.find((t) => t.type_id === typeId);
                 setSelectedTypeId(typeId || null);
                 update("jenisDokumen", docType?.type_name || "");
-                // Auto-generate document number
                 if (typeId) {
                   const docNum = generateDocumentNumber(typeId);
                   update("nomorDokumen", docNum);
@@ -303,15 +285,12 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Masukkan ke Folder</label>
-              <select value={form.folderTujuan} onChange={(e) => update("folderTujuan", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="">Auto-mapping</option>
-                {folderPaths.map((p) => <option key={p} value={p}>{p}</option>)}
-              </select>
+              <input readOnly value={autoFolderDisplay || "Otomatis berdasarkan kategori & jenis dokumen"} className="w-full px-3 py-2.5 rounded-lg border border-input bg-muted/50 text-sm text-muted-foreground cursor-not-allowed" />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Kelas</label>
-              <input value={form.kelas} onChange={(e) => update("kelas", e.target.value)} readOnly={!!targetFolder && currentUser.role !== "Operator/TU"} placeholder="Contoh: Kelas 7A / Alumni 2024" className={`w-full px-3 py-2.5 rounded-lg border border-input text-sm focus:outline-none focus:ring-2 focus:ring-ring ${targetFolder && currentUser.role !== "Operator/TU" ? "bg-muted/50 text-muted-foreground" : "bg-background"}`} />
+              <input value={form.kelas} onChange={(e) => update("kelas", e.target.value)} placeholder="Contoh: Kelas 7A / Alumni 2024" className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -394,6 +373,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
               <div><span className="text-muted-foreground">Kategori:</span> <span className="font-medium text-foreground">{form.kategori}</span></div>
               <div><span className="text-muted-foreground">Jenis:</span> <span className="font-medium text-foreground">{form.jenisDokumen}</span></div>
               <div><span className="text-muted-foreground">Nomor:</span> <span className="font-medium text-foreground">{form.nomorDokumen}</span></div>
+              <div><span className="text-muted-foreground">Folder:</span> <span className="font-medium text-foreground">{autoFolderDisplay}</span></div>
               {file && <div><span className="text-muted-foreground">File:</span> <span className="font-medium text-foreground">{file.name}</span></div>}
             </div>
             <div className="flex gap-2 justify-end">

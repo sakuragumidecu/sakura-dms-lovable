@@ -9,122 +9,6 @@ export const USERS = [
   { id: 3, nama: "Ahmad Fauzi", email: "teacher@sakura.sch.id", role: "Guru", avatar: avatarTeacher, departemen: "Guru Mata Pelajaran" },
 ];
 
-export const DOCUMENTS = [
-  {
-    id: 1, nomorDokumen: "IJZ-2024-001", judul: "Ijazah - Ahmad Rizki", kategori: "Data Siswa", kelas: "Alumni 2024",
-    jenisDokumen: "Ijazah SMP", namaSiswa: "Ahmad Rizki", nisn: "0012345678", tahunAjaran: "2023/2024",
-    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-08-22T15:49:05Z", tanggalEdit: "2025-08-23T10:12:00Z", status: "Disetujui", versi: 1,
-    fileUrl: "/mock/sample.pdf",
-    auditTrail: [
-      { time: "2025-08-22T15:49:05Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
-      { time: "2025-08-23T09:59:10Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Melihat dokumen" },
-      { time: "2025-08-23T10:12:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-    ],
-  },
-  {
-    id: 2, nomorDokumen: "NLI-2024-015", judul: "Laporan Nilai Semester Ganjil Kelas 7A", kategori: "Data Siswa", kelas: "Kelas 7A",
-    jenisDokumen: "Rekapitulasi Absensi Siswa dan Guru", namaSiswa: "Kelas 7A", nisn: "-", tahunAjaran: "2024/2025",
-    pengunggah: { id: 4, nama: "Ahmad Fauzi", role: "Guru", avatar: avatarTeacher },
-    tanggalUpload: "2025-09-01T08:24:00Z", tanggalEdit: "2025-09-01T09:54:00Z", status: "Menunggu", versi: 1,
-    fileUrl: "/mock/sample.pdf", catatan: "Dokumen sensitif - perlu review",
-    auditTrail: [
-      { time: "2025-09-01T08:24:00Z", user: { nama: "Ahmad Fauzi", avatar: avatarTeacher, role: "Guru" }, action: "Mengunggah dokumen" },
-    ],
-  },
-  {
-    id: 3, nomorDokumen: "SK-2024-003", judul: "SK Pengangkatan Guru Tetap - Rina Wati", kategori: "Data Guru", kelas: "Guru",
-    jenisDokumen: "Surat Keputusan (Arsip Surat)", tahunAjaran: "2024/2025",
-    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Disetujui", versi: 2,
-    fileUrl: "/mock/sample.pdf",
-    auditTrail: [
-      { time: "2025-09-05T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
-      { time: "2025-09-06T14:30:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-    ],
-  },
-  {
-    id: 4, nomorDokumen: "IJZ-2024-002", judul: "Ijazah - Siti Nurhaliza", kategori: "Data Siswa", kelas: "Alumni 2024",
-    jenisDokumen: "Ijazah SMP", namaSiswa: "Siti Nurhaliza", nisn: "0012345679", tahunAjaran: "2023/2024",
-    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-10T11:00:00Z", tanggalEdit: "2025-09-10T15:00:00Z", status: "Ditolak", versi: 1,
-    fileUrl: "/mock/sample.pdf", catatan: "Format tidak sesuai standar",
-    auditTrail: [
-      { time: "2025-09-10T11:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
-      { time: "2025-09-10T15:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menolak dokumen: Format tidak sesuai standar" },
-    ],
-  },
-  {
-    id: 5, nomorDokumen: "ARS-2024-001", judul: "Arsip Data Siswa Kelas 8B", kategori: "Data Siswa", kelas: "Kelas 8B",
-    jenisDokumen: "Surat Masuk dan Keluar Siswa", tahunAjaran: "2023/2024",
-    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-07-15T09:00:00Z", tanggalEdit: "2025-08-01T10:00:00Z", status: "Diarsipkan", versi: 1,
-    fileUrl: "/mock/sample.pdf",
-    auditTrail: [
-      { time: "2025-07-15T09:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
-      { time: "2025-07-20T10:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-      { time: "2025-08-01T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengarsipkan dokumen" },
-    ],
-  },
-  {
-    id: 6, nomorDokumen: "NLI-2024-016", judul: "Laporan Nilai UTS Kelas 9C", kategori: "Data Siswa", kelas: "Kelas 9C",
-    jenisDokumen: "Rekapitulasi Absensi Siswa dan Guru", namaSiswa: "Kelas 9C", nisn: "-", tahunAjaran: "2024/2025",
-    pengunggah: { id: 4, nama: "Ahmad Fauzi", role: "Guru", avatar: avatarTeacher },
-    tanggalUpload: "2025-09-12T07:30:00Z", tanggalEdit: "2025-09-12T07:30:00Z", status: "Menunggu", versi: 1,
-    fileUrl: "/mock/sample.pdf",
-    auditTrail: [
-      { time: "2025-09-12T07:30:00Z", user: { nama: "Ahmad Fauzi", avatar: avatarTeacher, role: "Guru" }, action: "Mengunggah dokumen" },
-    ],
-  },
-  {
-    id: 7, nomorDokumen: "SK-2024-004", judul: "SK Mutasi Guru - Andi Prasetyo", kategori: "Data Guru", kelas: "Guru",
-    jenisDokumen: "Surat Keputusan (Arsip Surat)", tahunAjaran: "2024/2025",
-    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-08T13:00:00Z", tanggalEdit: "2025-09-09T08:00:00Z", status: "Disetujui", versi: 1,
-    fileUrl: "/mock/sample.pdf",
-    auditTrail: [
-      { time: "2025-09-08T13:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
-      { time: "2025-09-09T08:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-    ],
-  },
-  {
-    id: 8, nomorDokumen: "LAP-2024-001", judul: "Laporan Keuangan Semester 1", kategori: "Keuangan", kelas: "Sekolah",
-    jenisDokumen: "Laporan Keuangan", tahunAjaran: "2024/2025",
-    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-15T10:00:00Z", tanggalEdit: "2025-09-15T10:00:00Z", status: "Menunggu", versi: 1,
-    fileUrl: "/mock/sample.pdf",
-    auditTrail: [
-      { time: "2025-09-15T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
-    ],
-  },
-];
-
-export const INITIAL_NOTIFICATIONS = [
-  { id: 1, message: "Dokumen 'Laporan Nilai UTS Kelas 9C' menunggu persetujuan", time: "2025-09-12T07:30:00Z", read: false, type: "upload", docId: 6 },
-  { id: 2, message: "Dokumen 'Laporan Keuangan Semester 1' menunggu persetujuan", time: "2025-09-15T10:00:00Z", read: false, type: "upload", docId: 8 },
-  { id: 3, message: "Dokumen 'Ijazah - Siti Nurhaliza' telah ditolak", time: "2025-09-10T15:00:00Z", read: true, type: "rejection", docId: 4 },
-];
-
-export const PERMISSIONS = [
-  { key: "dashboard.view", label: "Dashboard" },
-  { key: "documents.upload", label: "Upload Dokumen" },
-  { key: "documents.approve", label: "Setujui Dokumen" },
-  { key: "documents.reject", label: "Tolak Dokumen" },
-  { key: "documents.archive", label: "Akses Arsip" },
-  { key: "documents.edit", label: "Edit Dokumen" },
-  { key: "users.manage", label: "Kelola User" },
-  { key: "roles.manage", label: "Kelola Role" },
-  { key: "audit.view", label: "Log Sistem" },
-  { key: "audit.addNote", label: "Tambah Catatan Jejak Aktivitas" },
-  { key: "profile.edit", label: "Pengaturan Profil" },
-];
-
-export const ROLE_PERMISSIONS = {
-  "Operator/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
-  "Kepala Sekolah": ["dashboard.view", "documents.approve", "documents.reject", "documents.archive", "audit.view", "profile.edit"],
-  "Guru": ["dashboard.view", "documents.archive", "profile.edit"],
-};
-
 // ===== Schema-aligned tables (mirrors MySQL) =====
 
 // Mirror of `categories` table
@@ -154,12 +38,29 @@ export const DOCUMENT_TYPES = [
 // Mirror of `document_counters` table (mutable state managed in AppContext)
 export const INITIAL_DOCUMENT_COUNTERS = [];
 
-// Mirror of `folders` table
+// Mirror of `folders` table — hierarchical: categories → document types (→ tahun_ajaran for Data Siswa)
 export const FOLDERS = [
-  { folder_id: 1, folder_name: "Data Siswa", parent_id: null },
-  { folder_id: 2, folder_name: "Data Guru", parent_id: null },
-  { folder_id: 3, folder_name: "Sarana Prasarana", parent_id: null },
-  { folder_id: 4, folder_name: "Surat Menyurat", parent_id: null },
+  // Root category folders
+  { folder_id: 1, folder_name: "Data Siswa", parent_id: null, category_id: 1, type_id: null },
+  { folder_id: 2, folder_name: "Data Guru", parent_id: null, category_id: 2, type_id: null },
+  { folder_id: 3, folder_name: "Sarana Prasarana", parent_id: null, category_id: 3, type_id: null },
+  { folder_id: 4, folder_name: "Surat Menyurat", parent_id: null, category_id: 4, type_id: null },
+  // Data Siswa sub-folders (document types)
+  { folder_id: 10, folder_name: "Buku Klapper", parent_id: 1, category_id: 1, type_id: 1 },
+  { folder_id: 11, folder_name: "Buku Induk Register Peserta Didik", parent_id: 1, category_id: 1, type_id: 2 },
+  { folder_id: 12, folder_name: "Surat Keterangan Hasil Ujian (SKHU)", parent_id: 1, category_id: 1, type_id: 3 },
+  { folder_id: 13, folder_name: "Ijazah SMP", parent_id: 1, category_id: 1, type_id: 4 },
+  // Data Guru sub-folders
+  { folder_id: 20, folder_name: "Buku Induk Pegawai", parent_id: 2, category_id: 2, type_id: 5 },
+  { folder_id: 21, folder_name: "Sertifikat Pendidik", parent_id: 2, category_id: 2, type_id: 6 },
+  { folder_id: 22, folder_name: "Catatan Diklat", parent_id: 2, category_id: 2, type_id: 7 },
+  // Sarana Prasarana sub-folders
+  { folder_id: 30, folder_name: "Buku Inventaris Barang dan Penghapusan Barang", parent_id: 3, category_id: 3, type_id: 8 },
+  { folder_id: 31, folder_name: "Buku Pemeliharaan & Perbaikan", parent_id: 3, category_id: 3, type_id: 9 },
+  // Surat Menyurat sub-folders
+  { folder_id: 40, folder_name: "Buku Agenda Surat Masuk", parent_id: 4, category_id: 4, type_id: 10 },
+  { folder_id: 41, folder_name: "Buku Agenda Surat Keluar", parent_id: 4, category_id: 4, type_id: 11 },
+  { folder_id: 42, folder_name: "Kumpulan Surat Keputusan (SK)", parent_id: 4, category_id: 4, type_id: 12 },
 ];
 
 // Backward-compatible derived exports
@@ -186,6 +87,139 @@ export const KATEGORI_DETAIL_FIELDS = {
 };
 
 export const TAHUN_AJARAN_OPTIONS = ["2023/2024", "2024/2025", "2025/2026"];
+
+// Mock documents with schema-aligned fields
+export const DOCUMENTS = [
+  {
+    id: 1, nomorDokumen: "IJZ/2024/001", judul: "Ijazah - Ahmad Rizki",
+    kategori: "Data Siswa", category_id: 1, type_id: 4, folder_id: 13,
+    kelas: "Alumni 2024", class_info: "Alumni 2024",
+    jenisDokumen: "Ijazah SMP", namaSiswa: "Ahmad Rizki", nisn: "0012345678", tahunAjaran: "2023/2024",
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
+    tanggalUpload: "2025-08-22T15:49:05Z", tanggalEdit: "2025-08-23T10:12:00Z", status: "Disetujui", versi: 1,
+    fileUrl: "/mock/sample.pdf",
+    auditTrail: [
+      { time: "2025-08-22T15:49:05Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
+      { time: "2025-08-23T09:59:10Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Melihat dokumen" },
+      { time: "2025-08-23T10:12:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
+    ],
+  },
+  {
+    id: 2, nomorDokumen: "BKL/2024/001", judul: "Buku Klapper Kelas 7A",
+    kategori: "Data Siswa", category_id: 1, type_id: 1, folder_id: 10,
+    kelas: "Kelas 7A", class_info: "Kelas 7A",
+    jenisDokumen: "Buku Klapper", namaSiswa: "Kelas 7A", nisn: "-", tahunAjaran: "2024/2025",
+    pengunggah: { id: 4, nama: "Ahmad Fauzi", role: "Guru", avatar: avatarTeacher },
+    tanggalUpload: "2025-09-01T08:24:00Z", tanggalEdit: "2025-09-01T09:54:00Z", status: "Menunggu", versi: 1,
+    fileUrl: "/mock/sample.pdf", catatan: "Dokumen sensitif - perlu review",
+    auditTrail: [
+      { time: "2025-09-01T08:24:00Z", user: { nama: "Ahmad Fauzi", avatar: avatarTeacher, role: "Guru" }, action: "Mengunggah dokumen" },
+    ],
+  },
+  {
+    id: 3, nomorDokumen: "BIP/2024/001", judul: "Data Pegawai - Rina Wati",
+    kategori: "Data Guru", category_id: 2, type_id: 5, folder_id: 20,
+    kelas: "-", class_info: "-",
+    jenisDokumen: "Buku Induk Pegawai", tahunAjaran: "2024/2025",
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
+    tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Disetujui", versi: 2,
+    fileUrl: "/mock/sample.pdf",
+    auditTrail: [
+      { time: "2025-09-05T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-06T14:30:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
+    ],
+  },
+  {
+    id: 4, nomorDokumen: "IJZ/2024/002", judul: "Ijazah - Siti Nurhaliza",
+    kategori: "Data Siswa", category_id: 1, type_id: 4, folder_id: 13,
+    kelas: "Alumni 2024", class_info: "Alumni 2024",
+    jenisDokumen: "Ijazah SMP", namaSiswa: "Siti Nurhaliza", nisn: "0012345679", tahunAjaran: "2023/2024",
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
+    tanggalUpload: "2025-09-10T11:00:00Z", tanggalEdit: "2025-09-10T15:00:00Z", status: "Ditolak", versi: 1,
+    fileUrl: "/mock/sample.pdf", catatan: "Format tidak sesuai standar",
+    auditTrail: [
+      { time: "2025-09-10T11:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-10T15:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menolak dokumen: Format tidak sesuai standar" },
+    ],
+  },
+  {
+    id: 5, nomorDokumen: "BIR/2024/001", judul: "Buku Induk Register Kelas 8B",
+    kategori: "Data Siswa", category_id: 1, type_id: 2, folder_id: 11,
+    kelas: "Kelas 8B", class_info: "Kelas 8B",
+    jenisDokumen: "Buku Induk Register Peserta Didik", tahunAjaran: "2023/2024",
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
+    tanggalUpload: "2025-07-15T09:00:00Z", tanggalEdit: "2025-08-01T10:00:00Z", status: "Diarsipkan", versi: 1,
+    fileUrl: "/mock/sample.pdf",
+    auditTrail: [
+      { time: "2025-07-15T09:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
+      { time: "2025-07-20T10:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
+      { time: "2025-08-01T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengarsipkan dokumen" },
+    ],
+  },
+  {
+    id: 6, nomorDokumen: "SKH/2024/001", judul: "SKHU Kelas 9C",
+    kategori: "Data Siswa", category_id: 1, type_id: 3, folder_id: 12,
+    kelas: "Kelas 9C", class_info: "Kelas 9C",
+    jenisDokumen: "Surat Keterangan Hasil Ujian (SKHU)", namaSiswa: "Kelas 9C", nisn: "-", tahunAjaran: "2024/2025",
+    pengunggah: { id: 4, nama: "Ahmad Fauzi", role: "Guru", avatar: avatarTeacher },
+    tanggalUpload: "2025-09-12T07:30:00Z", tanggalEdit: "2025-09-12T07:30:00Z", status: "Menunggu", versi: 1,
+    fileUrl: "/mock/sample.pdf",
+    auditTrail: [
+      { time: "2025-09-12T07:30:00Z", user: { nama: "Ahmad Fauzi", avatar: avatarTeacher, role: "Guru" }, action: "Mengunggah dokumen" },
+    ],
+  },
+  {
+    id: 7, nomorDokumen: "SRP/2024/001", judul: "Sertifikat Pendidik - Andi Prasetyo",
+    kategori: "Data Guru", category_id: 2, type_id: 6, folder_id: 21,
+    kelas: "-", class_info: "-",
+    jenisDokumen: "Sertifikat Pendidik", tahunAjaran: "2024/2025",
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
+    tanggalUpload: "2025-09-08T13:00:00Z", tanggalEdit: "2025-09-09T08:00:00Z", status: "Disetujui", versi: 1,
+    fileUrl: "/mock/sample.pdf",
+    auditTrail: [
+      { time: "2025-09-08T13:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
+      { time: "2025-09-09T08:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
+    ],
+  },
+  {
+    id: 8, nomorDokumen: "ASM/2024/001", judul: "Surat Masuk Dinas Pendidikan",
+    kategori: "Surat Menyurat", category_id: 4, type_id: 10, folder_id: 40,
+    kelas: "-", class_info: "-",
+    jenisDokumen: "Buku Agenda Surat Masuk", tahunAjaran: "2024/2025",
+    pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
+    tanggalUpload: "2025-09-15T10:00:00Z", tanggalEdit: "2025-09-15T10:00:00Z", status: "Menunggu", versi: 1,
+    fileUrl: "/mock/sample.pdf",
+    auditTrail: [
+      { time: "2025-09-15T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
+    ],
+  },
+];
+
+export const INITIAL_NOTIFICATIONS = [
+  { id: 1, message: "Dokumen 'SKHU Kelas 9C' menunggu persetujuan", time: "2025-09-12T07:30:00Z", read: false, type: "upload", docId: 6 },
+  { id: 2, message: "Dokumen 'Surat Masuk Dinas Pendidikan' menunggu persetujuan", time: "2025-09-15T10:00:00Z", read: false, type: "upload", docId: 8 },
+  { id: 3, message: "Dokumen 'Ijazah - Siti Nurhaliza' telah ditolak", time: "2025-09-10T15:00:00Z", read: true, type: "rejection", docId: 4 },
+];
+
+export const PERMISSIONS = [
+  { key: "dashboard.view", label: "Dashboard" },
+  { key: "documents.upload", label: "Upload Dokumen" },
+  { key: "documents.approve", label: "Setujui Dokumen" },
+  { key: "documents.reject", label: "Tolak Dokumen" },
+  { key: "documents.archive", label: "Akses Arsip" },
+  { key: "documents.edit", label: "Edit Dokumen" },
+  { key: "users.manage", label: "Kelola User" },
+  { key: "roles.manage", label: "Kelola Role" },
+  { key: "audit.view", label: "Log Sistem" },
+  { key: "audit.addNote", label: "Tambah Catatan Jejak Aktivitas" },
+  { key: "profile.edit", label: "Pengaturan Profil" },
+];
+
+export const ROLE_PERMISSIONS = {
+  "Operator/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
+  "Kepala Sekolah": ["dashboard.view", "documents.approve", "documents.reject", "documents.archive", "audit.view", "profile.edit"],
+  "Guru": ["dashboard.view", "documents.archive", "profile.edit"],
+};
 
 export const CHART_MONTHS = [
   { label: "September 2025", value: "2025-09" },
@@ -235,61 +269,104 @@ export function getChartData(period, monthStr) {
   return period === "weekly" ? generateWeeklyData(monthStr) : generateMonthlyData(monthStr);
 }
 
+// Build folder tree from FOLDERS table (schema-aligned) + academic year nodes for Data Siswa
 export function buildFolderTree(documents) {
-  const yearMap = new Map();
-  const standaloneCategories = new Set();
-
-  documents.forEach((doc) => {
-    const tahun = doc.tahunAjaran || "";
-    const yearMatch = tahun.match(/(\d{4})\/(\d{4})/);
-    const year = yearMatch ? yearMatch[2] : tahun || "Lainnya";
-    const kelas = doc.kelas || "-";
-
-    if (/^(Kelas|Alumni)/i.test(kelas)) {
-      if (!yearMap.has(year)) yearMap.set(year, new Map());
-      yearMap.get(year).set(kelas, true);
-    } else {
-      standaloneCategories.add(kelas);
-    }
-  });
-
   const tree = [];
-  const sortedYears = [...yearMap.entries()].sort((a, b) => b[0].localeCompare(a[0]));
-  sortedYears.forEach(([year, classMap]) => {
-    const children = [...classMap.keys()].sort().map((cls) => ({ name: cls, path: `${year}/${cls}`, children: [] }));
-    tree.push({ name: year, path: year, children });
-  });
 
-  [...standaloneCategories].sort().forEach((cat) => {
-    tree.push({ name: cat, path: cat, children: [] });
+  // Build from FOLDERS table hierarchy
+  const rootFolders = FOLDERS.filter((f) => f.parent_id === null);
+
+  rootFolders.forEach((root) => {
+    const children = FOLDERS.filter((f) => f.parent_id === root.folder_id);
+    const childNodes = children.map((child) => {
+      // For Data Siswa category, add tahun_ajaran sub-folders
+      if (root.category_id === 1) {
+        const yearSet = new Set();
+        documents.forEach((doc) => {
+          if (doc.type_id === child.type_id && doc.tahunAjaran) {
+            yearSet.add(doc.tahunAjaran);
+          }
+        });
+        const yearChildren = [...yearSet].sort().reverse().map((year) => ({
+          name: year,
+          path: `cat:${root.category_id}/type:${child.type_id}/year:${year}`,
+          folder_id: child.folder_id,
+          category_id: root.category_id,
+          type_id: child.type_id,
+          tahunAjaran: year,
+          children: [],
+        }));
+        return {
+          name: child.folder_name,
+          path: `cat:${root.category_id}/type:${child.type_id}`,
+          folder_id: child.folder_id,
+          category_id: root.category_id,
+          type_id: child.type_id,
+          children: yearChildren,
+        };
+      }
+      return {
+        name: child.folder_name,
+        path: `cat:${root.category_id}/type:${child.type_id}`,
+        folder_id: child.folder_id,
+        category_id: root.category_id,
+        type_id: child.type_id,
+        children: [],
+      };
+    });
+
+    tree.push({
+      name: root.folder_name,
+      path: `cat:${root.category_id}`,
+      folder_id: root.folder_id,
+      category_id: root.category_id,
+      children: childNodes,
+    });
   });
 
   return tree;
 }
 
+// Match document to folder path using schema-aligned path format
 export function docMatchesFolder(doc, folderPath) {
-  const tahun = doc.tahunAjaran || "";
-  const yearMatch = tahun.match(/(\d{4})\/(\d{4})/);
-  const year = yearMatch ? yearMatch[2] : tahun || "Lainnya";
-  const kelas = doc.kelas || "-";
+  // Parse the structured path: cat:X, cat:X/type:Y, cat:X/type:Y/year:Z
+  const parts = folderPath.split("/");
+  const catPart = parts.find((p) => p.startsWith("cat:"));
+  const typePart = parts.find((p) => p.startsWith("type:"));
+  const yearPart = parts.find((p) => p.startsWith("year:"));
 
-  if (folderPath.includes("/")) {
-    const [folderYear, folderKelas] = folderPath.split("/");
-    return year === folderYear && kelas === folderKelas;
-  }
-  if (/^\d{4}$/.test(folderPath)) {
-    return year === folderPath && /^(Kelas|Alumni)/i.test(kelas);
-  }
-  return kelas === folderPath;
+  const catId = catPart ? Number(catPart.split(":")[1]) : null;
+  const typeId = typePart ? Number(typePart.split(":")[1]) : null;
+  const year = yearPart ? yearPart.split(":")[1] : null;
+
+  if (catId && doc.category_id !== catId) return false;
+  if (typeId && doc.type_id !== typeId) return false;
+  if (year && doc.tahunAjaran !== year) return false;
+
+  // If only category specified, match all docs in that category
+  if (catId && !typeId) return doc.category_id === catId;
+  // If category+type, match docs with that type
+  if (catId && typeId && !year) return doc.category_id === catId && doc.type_id === typeId;
+  // If all three, exact match
+  return true;
 }
 
-export function flattenFolderPaths(nodes, prefix = "") {
-  const paths = [];
-  nodes.forEach((node) => {
-    paths.push(node.path);
-    if (node.children.length > 0) {
-      paths.push(...flattenFolderPaths(node.children));
-    }
-  });
-  return paths;
+// Helper: get auto-mapped folder path for upload
+export function getAutoFolderPath(categoryId, typeId, tahunAjaran) {
+  const cat = CATEGORIES.find((c) => c.category_id === categoryId);
+  const docType = DOCUMENT_TYPES.find((t) => t.type_id === typeId);
+  if (!cat || !docType) return "";
+
+  let path = `${cat.category_name} / ${docType.type_name}`;
+  // For Data Siswa, include tahun ajaran
+  if (categoryId === 1 && tahunAjaran) {
+    path += ` / ${tahunAjaran}`;
+  }
+  return path;
+}
+
+// Helper: get folder_id for a document based on category and type
+export function getFolderIdForDocument(categoryId, typeId) {
+  const folder = FOLDERS.find((f) => f.category_id === categoryId && f.type_id === typeId);
+  return folder ? folder.folder_id : null;
 }
