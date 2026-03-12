@@ -726,10 +726,6 @@ export default function ArchivePage() {
               <Label htmlFor="folder-name">Nama Folder</Label>
               <Input id="folder-name" value={newFolderName} onChange={(e) => setNewFolderName(e.target.value)} placeholder="Masukkan nama folder" autoFocus />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="folder-desc">Deskripsi (Opsional)</Label>
-              <Textarea id="folder-desc" value={newFolderDesc} onChange={(e) => setNewFolderDesc(e.target.value)} placeholder="Deskripsi singkat tentang folder ini" rows={3} />
-            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCreateFolderModal(false)}>Batal</Button>
