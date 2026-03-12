@@ -268,15 +268,49 @@ export default function UploadForm({ onSuccess, onCancel }) {
             )}
           </div>
 
-          {(file || filePreview) && (
+          {(file || filePreview || scanPageImages.length > 0) && (
             <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
               <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><Eye size={18} className="text-primary" /> Pratinjau File</h3>
-              {filePreview ? (
+              {scanPageImages.length > 0 ? (
+                /* Validation preview for scanned pages — NO PDF viewer, NO print/download */
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground font-medium">
+                      {scanPageImages.length} halaman hasil pindai
+                    </span>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
+                    {scanPageImages.map((imgSrc, i) => (
+                      <div key={i} className="relative border border-border rounded-lg overflow-hidden bg-background shadow-sm">
+                        {/* PDF-style page header */}
+                        {file?.name?.endsWith(".pdf") && (
+                          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/50 bg-muted/20">
+                            <FileText size={11} className="text-primary" />
+                            <span className="text-xs text-muted-foreground font-medium">
+                              Halaman {i + 1} dari {scanPageImages.length}
+                            </span>
+                          </div>
+                        )}
+                        <div className={file?.name?.endsWith(".pdf") ? "p-3" : ""}>
+                          <img
+                            src={imgSrc}
+                            alt={`Halaman ${i + 1}`}
+                            className="w-full h-auto object-contain rounded"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => setShowFullPreview(true)} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors">
+                    <Maximize size={14} /> Lihat Layar Penuh
+                  </button>
+                </div>
+              ) : filePreview ? (
                 <div className="relative group">
                   <img src={filePreview} alt="Preview" className="w-full rounded-lg max-h-64 object-contain bg-muted/30" />
                   <button type="button" onClick={() => setShowFullPreview(true)} className="absolute inset-0 flex items-center justify-center bg-foreground/0 group-hover:bg-foreground/40 transition-colors rounded-lg">
                     <span className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2 px-4 py-2 rounded-lg bg-card/90 text-foreground text-sm font-medium shadow-lg">
-                      <Maximize size={16} /> Lihat Full Screen
+                      <Maximize size={16} /> Lihat Layar Penuh
                     </span>
                   </button>
                 </div>
@@ -284,7 +318,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
                 <div className="flex flex-col items-center gap-3 py-8">
                   <FileText size={48} className="text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">{file?.name}</p>
-                  <button type="button" onClick={() => setShowPdfPreview(true)} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">Preview PDF</button>
+                  <button type="button" onClick={() => setShowPdfPreview(true)} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">Pratinjau PDF</button>
                 </div>
               )}
             </div>
