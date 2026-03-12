@@ -47,7 +47,7 @@ export default function AppSidebar() {
             {/* Col 2: Text */}
             <button onClick={() => navigate("/home")} className="text-left hover:opacity-80 transition-opacity min-w-0">
               <div className="text-sidebar-primary font-bold text-sm leading-tight tracking-wide">SAKURA</div>
-              <div className="text-sidebar-foreground/50 text-[9px] leading-snug mt-0.5">Secure Archive System</div>
+              
             </button>
             {/* Col 3: Collapse icon */}
             <button
