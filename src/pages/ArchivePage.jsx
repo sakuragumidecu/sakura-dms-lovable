@@ -813,7 +813,7 @@ export default function ArchivePage() {
       </AlertDialog>
 
       {detailDoc && <DocumentDetailModal document={detailDoc} onClose={() => setDetailDoc(null)} />}
-      {showPdfOverlay && previewDoc && <PdfPreviewOverlay onClose={() => setShowPdfOverlay(false)} document={previewDoc} />}
+      
       {showUploadModal && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 pb-8">
           <div className="fixed inset-0 bg-black/50" onClick={() => setShowUploadModal(false)} />
