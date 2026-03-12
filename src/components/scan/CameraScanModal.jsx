@@ -116,7 +116,9 @@ export default function CameraScanModal({ onClose, onComplete }) {
     const ext = outputFormat === "pdf" ? "pdf" : outputFormat;
     const blob = new Blob([ab], { type: outputFormat === "pdf" ? "image/jpeg" : mimeType });
     const file = new File([blob], `scan-${Date.now()}.${ext}`, { type: mimeType });
-    onComplete(file);
+    // Pass scanned page images for validation preview (avoids PDF viewer)
+    const pageImages = pages.map((p) => p.cropped || p.imageData);
+    onComplete(file, pageImages);
   };
 
   // ── Zoom ──

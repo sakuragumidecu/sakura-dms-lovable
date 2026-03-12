@@ -151,8 +151,11 @@ export default function UploadForm({ onSuccess, onCancel }) {
     }, 1000);
   };
 
-  const handleScanComplete = (scannedFile) => {
+  const handleScanComplete = (scannedFile, pageImages) => {
     handleFile(scannedFile);
+    if (pageImages && pageImages.length > 0) {
+      setScanPageImages(pageImages);
+    }
     setShowCameraScan(false);
   };
 
