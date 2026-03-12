@@ -53,10 +53,11 @@ export default function AppSidebar() {
           </button>
         )}
 
-        {/* Title only — no description */}
+        {/* Title only */}
         {!collapsed && (
-          <button onClick={() => navigate("/home")} className="mt-3 text-left hover:opacity-80 transition-opacity cursor-pointer w-full">
+          <button onClick={() => navigate("/home")} className="mt-2 text-left hover:opacity-80 transition-opacity cursor-pointer w-full">
             <div className="text-sidebar-primary font-bold text-base leading-tight tracking-wide">SAKURA</div>
+            <div className="text-sidebar-foreground/50 text-[9px] leading-snug mt-0.5">Secure Archive System</div>
           </button>
         )}
       </div>
