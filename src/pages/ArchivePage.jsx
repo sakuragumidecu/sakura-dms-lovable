@@ -618,6 +618,29 @@ export default function ArchivePage() {
               </button>
               <div className="border-t border-border my-1" />
               <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => {
+                  setEditTarget({ type: "folder", data: { id: contextMenu.data.folder_id || contextMenu.data.id, name: contextMenu.data.name } });
+                  setEditName(contextMenu.data.name);
+                  setEditDesc("");
+                  setShowEditModal(true);
+                  setContextMenu(null);
+                }}
+              >
+                <Pencil size={15} className="text-muted-foreground" /> Edit Folder
+              </button>
+              <button
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                onClick={() => {
+                  setMoveTarget({ id: contextMenu.data.folder_id || contextMenu.data.id, judul: contextMenu.data.name, isFolder: true });
+                  setMoveDestination("");
+                  setShowMoveModal(true);
+                  setContextMenu(null);
+                }}
+              >
+                <ArrowRightLeft size={15} className="text-muted-foreground" /> Pindahkan Folder
+              </button>
+              <button
                 className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
                 onClick={() => {
                   setDeleteTarget({ type: "folder", id: contextMenu.data.folder_id || contextMenu.data.id, name: contextMenu.data.name });
