@@ -256,7 +256,7 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Nomor Dokumen</label>
-              <input value={form.nomorDokumen} onChange={(e) => update("nomorDokumen", e.target.value)} placeholder="Contoh: IJZ/2024/001" className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+              <input readOnly value={form.nomorDokumen} placeholder="Otomatis setelah memilih jenis dokumen" className="w-full px-3 py-2.5 rounded-lg border border-input bg-muted/50 text-sm text-muted-foreground cursor-not-allowed" />
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Nama Dokumen *</label>
