@@ -103,7 +103,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
     const folderId = getFolderIdForDocument(selectedCategoryId, selectedTypeId);
 
     uploadDocument({
-      nomorDokumen: form.nomorDokumen || `DOC-${Date.now()}`,
+      nomorDokumen: form.nomorDokumen,
       judul: form.judul,
       kategori: form.kategori || "-",
       category_id: selectedCategoryId,
