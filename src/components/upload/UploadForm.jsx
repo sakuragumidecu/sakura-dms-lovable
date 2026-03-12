@@ -26,9 +26,10 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [fullPreviewZoom, setFullPreviewZoom] = useState(100);
   const [showDetailFields, setShowDetailFields] = useState(false);
-  const [customJenis, setCustomJenis] = useState("");
-  const [customKategori, setCustomKategori] = useState("");
   const [customTahun, setCustomTahun] = useState("");
+  const [detailData, setDetailData] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [selectedTypeId, setSelectedTypeId] = useState(null);
   const [detailData, setDetailData] = useState({});
 
   const parsedTahun = targetFolder?.split("/")[0] || "";
