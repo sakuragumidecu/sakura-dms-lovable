@@ -32,8 +32,8 @@ export default function AppSidebar() {
         {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
       </button>
 
-      {/* Branding */}
-      <div className="flex flex-col items-center pt-6 pb-4 px-3">
+      {/* Branding — clickable */}
+      <button onClick={() => navigate("/home")} className="flex flex-col items-center pt-6 pb-4 px-3 hover:opacity-80 transition-opacity cursor-pointer">
         <img src={logoSakura} alt="SAKURA" className="w-12 h-12 rounded-full bg-sidebar-accent shrink-0" />
         {!collapsed && (
           <div className="text-center mt-3">
@@ -43,7 +43,7 @@ export default function AppSidebar() {
             </p>
           </div>
         )}
-      </div>
+      </button>
 
       {/* Divider below branding */}
       <div className="mx-4 h-px bg-sidebar-border" />

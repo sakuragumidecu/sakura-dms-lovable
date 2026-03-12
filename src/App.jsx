@@ -40,6 +40,7 @@ function AppRoutes() {
       <Route path="/signup" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <SignUpPage />} />
       <Route path="/verify/:id" element={<VerifyPage />} />
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route path="/home" element={<HomeDashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/archive" element={<ArchivePage />} />
