@@ -11,7 +11,7 @@ import { CATEGORIES, DOCUMENT_TYPES, KATEGORI_DETAIL_FIELDS, TAHUN_AJARAN_OPTION
 import { Calendar } from "@/components/ui/calendar";
 
 export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
-  const { uploadDocument, currentUser, documents } = useApp();
+  const { uploadDocument, currentUser, documents, generateDocumentNumber, getFolderForCategory } = useApp();
   const { settings } = useSettings();
   const { toast } = useToast();
   const navigate = useNavigate();
