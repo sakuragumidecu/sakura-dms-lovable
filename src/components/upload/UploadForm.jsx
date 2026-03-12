@@ -300,7 +300,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
                       </div>
                     ))}
                   </div>
-                  <button type="button" onClick={() => setShowFullPreview(true)} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors">
+                  <button type="button" onClick={() => { setFullPreviewPage(0); setShowFullPreview(true); }} className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-input text-sm font-medium hover:bg-muted transition-colors">
                     <Maximize size={14} /> Lihat Layar Penuh
                   </button>
                 </div>
