@@ -15,7 +15,32 @@ export const AppProvider = ({ children }) => {
   const [documents, setDocuments] = useState(DOCUMENTS);
   const [rolePermissions, setRolePermissions] = useState(ROLE_PERMISSIONS);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [documentCounters, setDocumentCounters] = useState(INITIAL_DOCUMENT_COUNTERS);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const generateDocumentNumber = (typeId) => {
+    const docType = DOCUMENT_TYPES.find((t) => t.type_id === typeId);
+    if (!docType) return `DOC-${Date.now()}`;
+    const prefix = docType.code_prefix;
+    const year = new Date().getFullYear();
+    let nextSeq = 1;
+    setDocumentCounters((prev) => {
+      const existing = prev.find((c) => c.prefix === prefix && c.year === year);
+      if (existing) {
+        nextSeq = existing.last_seq + 1;
+        return prev.map((c) => (c.prefix === prefix && c.year === year ? { ...c, last_seq: nextSeq } : c));
+      }
+      return [...prev, { prefix, year, last_seq: 1 }];
+    });
+    return `${prefix}/${year}/${String(nextSeq).padStart(3, "0")}`;
+  };
+
+  const getFolderForCategory = (categoryId) => {
+    const cat = CATEGORIES.find((c) => c.category_id === categoryId);
+    if (!cat) return null;
+    const folder = FOLDERS.find((f) => f.folder_name === cat.category_name);
+    return folder || null;
+  };
 
   const login = (email) => {
     const user = users.find((u) => u.email === email);
