@@ -48,7 +48,7 @@ function AppRoutes() {
         <Route path="/logs" element={<LogPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/change-password" element={<ChangePasswordPage />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
