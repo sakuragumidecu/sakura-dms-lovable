@@ -265,25 +265,41 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Kategori Dokumen *</label>
-              <select required value={form.kategori} onChange={(e) => { update("kategori", e.target.value); update("jenisDokumen", ""); setCustomKategori(""); }} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <select required value={selectedCategoryId || ""} onChange={(e) => {
+                const catId = Number(e.target.value);
+                const cat = CATEGORIES.find((c) => c.category_id === catId);
+                setSelectedCategoryId(catId || null);
+                setSelectedTypeId(null);
+                update("kategori", cat?.category_name || "");
+                update("jenisDokumen", "");
+                update("nomorDokumen", "");
+                // Auto-set folder
+                if (cat) {
+                  const folder = getFolderForCategory(catId);
+                  if (folder) update("folderTujuan", folder.folder_name);
+                }
+              }} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
                 <option value="">Pilih kategori</option>
-                {KATEGORI_OPTIONS.map((k) => <option key={k}>{k}</option>)}
+                {CATEGORIES.map((c) => <option key={c.category_id} value={c.category_id}>{c.category_name}</option>)}
               </select>
-              {form.kategori === "Lainnya" && (
-                <input value={customKategori} onChange={(e) => setCustomKategori(e.target.value)} placeholder="Ketik nama kategori..." className="w-full mt-2 px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">Jenis Dokumen *</label>
-              <select required value={form.jenisDokumen} onChange={(e) => update("jenisDokumen", e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" disabled={!form.kategori}>
-                <option value="">{form.kategori ? "Pilih jenis dokumen" : "Pilih kategori dulu"}</option>
-                {jenisOptions.map((j) => <option key={j}>{j}</option>)}
-                <option value="Lainnya">Lainnya</option>
+              <select required value={selectedTypeId || ""} onChange={(e) => {
+                const typeId = Number(e.target.value);
+                const docType = DOCUMENT_TYPES.find((t) => t.type_id === typeId);
+                setSelectedTypeId(typeId || null);
+                update("jenisDokumen", docType?.type_name || "");
+                // Auto-generate document number
+                if (typeId) {
+                  const docNum = generateDocumentNumber(typeId);
+                  update("nomorDokumen", docNum);
+                }
+              }} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" disabled={!selectedCategoryId}>
+                <option value="">{selectedCategoryId ? "Pilih jenis dokumen" : "Pilih kategori dulu"}</option>
+                {jenisOptions.map((t) => <option key={t.type_id} value={t.type_id}>{t.type_name}</option>)}
               </select>
-              {form.jenisDokumen === "Lainnya" && (
-                <input value={customJenis} onChange={(e) => setCustomJenis(e.target.value)} placeholder="Ketik jenis dokumen..." className="w-full mt-2 px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
-              )}
             </div>
 
             <div>
