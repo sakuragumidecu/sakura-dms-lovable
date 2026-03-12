@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 export default function CropOverlay({ imageUrl, cropArea, onChange }) {
   const containerRef = useRef(null);
@@ -26,6 +26,8 @@ export default function CropOverlay({ imageUrl, cropArea, onChange }) {
     setDragging(type);
   }, [cropArea, getRelativePos]);
 
+  const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+
   const handlePointerMove = useCallback((e) => {
     if (!dragging) return;
     e.preventDefault();
@@ -36,115 +38,151 @@ export default function CropOverlay({ imageUrl, cropArea, onChange }) {
     let next = { ...c };
 
     if (dragging === "move") {
-      next.x = Math.max(0, Math.min(100 - c.w, c.x + dx));
-      next.y = Math.max(0, Math.min(100 - c.h, c.y + dy));
+      next.x = clamp(c.x + dx, 0, 100 - c.w);
+      next.y = clamp(c.y + dy, 0, 100 - c.h);
     } else if (dragging === "se") {
-      next.w = Math.max(10, Math.min(100 - c.x, c.w + dx));
-      next.h = Math.max(10, Math.min(100 - c.y, c.h + dy));
+      next.w = clamp(c.w + dx, 10, 100 - c.x);
+      next.h = clamp(c.h + dy, 10, 100 - c.y);
     } else if (dragging === "sw") {
-      const newX = Math.max(0, c.x + dx);
-      next.x = newX;
-      next.w = Math.max(10, c.w - (newX - c.x));
-      next.h = Math.max(10, Math.min(100 - c.y, c.h + dy));
+      const newW = clamp(c.w - dx, 10, c.x + c.w);
+      next.x = c.x + c.w - newW;
+      next.w = newW;
+      next.h = clamp(c.h + dy, 10, 100 - c.y);
     } else if (dragging === "ne") {
-      next.w = Math.max(10, Math.min(100 - c.x, c.w + dx));
-      const newY = Math.max(0, c.y + dy);
-      next.y = newY;
-      next.h = Math.max(10, c.h - (newY - c.y));
+      next.w = clamp(c.w + dx, 10, 100 - c.x);
+      const newH = clamp(c.h - dy, 10, c.y + c.h);
+      next.y = c.y + c.h - newH;
+      next.h = newH;
     } else if (dragging === "nw") {
-      const newX = Math.max(0, c.x + dx);
-      const newY = Math.max(0, c.y + dy);
-      next.x = newX;
-      next.y = newY;
-      next.w = Math.max(10, c.w - (newX - c.x));
-      next.h = Math.max(10, c.h - (newY - c.y));
+      const newW = clamp(c.w - dx, 10, c.x + c.w);
+      const newH = clamp(c.h - dy, 10, c.y + c.h);
+      next.x = c.x + c.w - newW;
+      next.y = c.y + c.h - newH;
+      next.w = newW;
+      next.h = newH;
+    } else if (dragging === "n") {
+      const newH = clamp(c.h - dy, 10, c.y + c.h);
+      next.y = c.y + c.h - newH;
+      next.h = newH;
+    } else if (dragging === "s") {
+      next.h = clamp(c.h + dy, 10, 100 - c.y);
+    } else if (dragging === "e") {
+      next.w = clamp(c.w + dx, 10, 100 - c.x);
+    } else if (dragging === "w") {
+      const newW = clamp(c.w - dx, 10, c.x + c.w);
+      next.x = c.x + c.w - newW;
+      next.w = newW;
     }
 
     onChange(next);
   }, [dragging, getRelativePos, onChange]);
 
-  const handlePointerUp = useCallback(() => {
-    setDragging(null);
-  }, []);
+  const handlePointerUp = useCallback(() => setDragging(null), []);
 
-  const handleStyle = "w-4 h-4 sm:w-5 sm:h-5 bg-primary border-2 border-primary-foreground rounded-full absolute z-20 shadow-lg cursor-pointer";
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e) => handlePointerMove(e);
+    const onUp = () => handlePointerUp();
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [dragging, handlePointerMove, handlePointerUp]);
+
+  const cornerCls = "absolute z-30 bg-primary border-2 border-primary-foreground rounded-full shadow-lg";
+  const cornerSize = 14;
+  const offset = -cornerSize / 2;
 
   return (
     <div
       ref={containerRef}
-      className="relative select-none touch-none rounded-lg overflow-hidden bg-muted/20"
-      style={{ maxHeight: "50vh" }}
-      onMouseMove={handlePointerMove}
-      onMouseUp={handlePointerUp}
-      onMouseLeave={handlePointerUp}
-      onTouchMove={handlePointerMove}
-      onTouchEnd={handlePointerUp}
+      className="relative select-none touch-none bg-muted/30 flex items-center justify-center"
+      style={{ maxHeight: "55vh", overflow: "hidden" }}
     >
-      {/* Full image - always visible */}
       <img
         src={imageUrl}
-        alt="Pratinjau untuk dipotong"
-        className="w-full h-auto block rounded-lg"
-        style={{ maxHeight: "50vh", objectFit: "contain", width: "100%" }}
+        alt="Pratinjau potong"
+        className="block max-w-full max-h-[55vh] object-contain"
         draggable={false}
         onLoad={() => setImgLoaded(true)}
       />
 
       {imgLoaded && (
-        <>
-          {/* Dark overlay outside crop area */}
+        <div className="absolute inset-0">
+          {/* Dark overlay - 4 rects around crop */}
           <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 5 }}>
-            {/* Top */}
-            <div className="absolute bg-foreground/45" style={{ top: 0, left: 0, right: 0, height: `${cropArea.y}%` }} />
-            {/* Bottom */}
-            <div className="absolute bg-foreground/45" style={{ bottom: 0, left: 0, right: 0, height: `${Math.max(0, 100 - cropArea.y - cropArea.h)}%` }} />
-            {/* Left */}
-            <div className="absolute bg-foreground/45" style={{ top: `${cropArea.y}%`, left: 0, width: `${cropArea.x}%`, height: `${cropArea.h}%` }} />
-            {/* Right */}
-            <div className="absolute bg-foreground/45" style={{ top: `${cropArea.y}%`, right: 0, width: `${Math.max(0, 100 - cropArea.x - cropArea.w)}%`, height: `${cropArea.h}%` }} />
+            <div className="absolute bg-foreground/50" style={{ top: 0, left: 0, right: 0, height: `${cropArea.y}%` }} />
+            <div className="absolute bg-foreground/50" style={{ bottom: 0, left: 0, right: 0, height: `${Math.max(0, 100 - cropArea.y - cropArea.h)}%` }} />
+            <div className="absolute bg-foreground/50" style={{ top: `${cropArea.y}%`, left: 0, width: `${cropArea.x}%`, height: `${cropArea.h}%` }} />
+            <div className="absolute bg-foreground/50" style={{ top: `${cropArea.y}%`, right: 0, width: `${Math.max(0, 100 - cropArea.x - cropArea.w)}%`, height: `${cropArea.h}%` }} />
           </div>
 
-          {/* Crop selection box */}
+          {/* Crop box */}
           <div
             className="absolute border-2 border-primary cursor-move"
             style={{
-              left: `${cropArea.x}%`,
-              top: `${cropArea.y}%`,
-              width: `${cropArea.w}%`,
-              height: `${cropArea.h}%`,
+              left: `${cropArea.x}%`, top: `${cropArea.y}%`,
+              width: `${cropArea.w}%`, height: `${cropArea.h}%`,
               zIndex: 10,
-              boxShadow: "0 0 0 1px hsl(var(--primary) / 0.3)",
             }}
             onMouseDown={(e) => handlePointerDown(e, "move")}
             onTouchStart={(e) => handlePointerDown(e, "move")}
           >
-            {/* Rule-of-thirds grid */}
+            {/* Grid lines */}
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute left-1/3 top-0 bottom-0 w-px bg-primary-foreground/40" />
-              <div className="absolute left-2/3 top-0 bottom-0 w-px bg-primary-foreground/40" />
-              <div className="absolute top-1/3 left-0 right-0 h-px bg-primary-foreground/40" />
-              <div className="absolute top-2/3 left-0 right-0 h-px bg-primary-foreground/40" />
+              <div className="absolute left-1/3 top-0 bottom-0 w-px bg-primary-foreground/30" />
+              <div className="absolute left-2/3 top-0 bottom-0 w-px bg-primary-foreground/30" />
+              <div className="absolute top-1/3 left-0 right-0 h-px bg-primary-foreground/30" />
+              <div className="absolute top-2/3 left-0 right-0 h-px bg-primary-foreground/30" />
             </div>
           </div>
 
-          {/* Corner handles - larger touch targets */}
-          <div className={handleStyle} style={{ left: `calc(${cropArea.x}% - 8px)`, top: `calc(${cropArea.y}% - 8px)`, cursor: "nw-resize", zIndex: 20 }}
-            onMouseDown={(e) => handlePointerDown(e, "nw")} onTouchStart={(e) => handlePointerDown(e, "nw")} />
-          <div className={handleStyle} style={{ left: `calc(${cropArea.x + cropArea.w}% - 8px)`, top: `calc(${cropArea.y}% - 8px)`, cursor: "ne-resize", zIndex: 20 }}
-            onMouseDown={(e) => handlePointerDown(e, "ne")} onTouchStart={(e) => handlePointerDown(e, "ne")} />
-          <div className={handleStyle} style={{ left: `calc(${cropArea.x}% - 8px)`, top: `calc(${cropArea.y + cropArea.h}% - 8px)`, cursor: "sw-resize", zIndex: 20 }}
-            onMouseDown={(e) => handlePointerDown(e, "sw")} onTouchStart={(e) => handlePointerDown(e, "sw")} />
-          <div className={handleStyle} style={{ left: `calc(${cropArea.x + cropArea.w}% - 8px)`, top: `calc(${cropArea.y + cropArea.h}% - 8px)`, cursor: "se-resize", zIndex: 20 }}
-            onMouseDown={(e) => handlePointerDown(e, "se")} onTouchStart={(e) => handlePointerDown(e, "se")} />
+          {/* Corner handles */}
+          {[
+            { type: "nw", left: cropArea.x, top: cropArea.y, cursor: "nw-resize" },
+            { type: "ne", left: cropArea.x + cropArea.w, top: cropArea.y, cursor: "ne-resize" },
+            { type: "sw", left: cropArea.x, top: cropArea.y + cropArea.h, cursor: "sw-resize" },
+            { type: "se", left: cropArea.x + cropArea.w, top: cropArea.y + cropArea.h, cursor: "se-resize" },
+          ].map(({ type, left, top, cursor }) => (
+            <div
+              key={type}
+              className={cornerCls}
+              style={{
+                left: `calc(${left}% + ${offset}px)`,
+                top: `calc(${top}% + ${offset}px)`,
+                width: cornerSize, height: cornerSize, cursor, zIndex: 20,
+              }}
+              onMouseDown={(e) => handlePointerDown(e, type)}
+              onTouchStart={(e) => handlePointerDown(e, type)}
+            />
+          ))}
 
-          {/* Edge midpoint handles */}
-          <div className="w-6 h-2 bg-primary rounded-full absolute shadow-md cursor-n-resize"
-            style={{ left: `calc(${cropArea.x + cropArea.w / 2}% - 12px)`, top: `calc(${cropArea.y}% - 4px)`, zIndex: 20 }}
-            onMouseDown={(e) => handlePointerDown(e, "nw")} onTouchStart={(e) => handlePointerDown(e, "nw")} />
-          <div className="w-6 h-2 bg-primary rounded-full absolute shadow-md cursor-s-resize"
-            style={{ left: `calc(${cropArea.x + cropArea.w / 2}% - 12px)`, top: `calc(${cropArea.y + cropArea.h}% - 4px)`, zIndex: 20 }}
-            onMouseDown={(e) => handlePointerDown(e, "se")} onTouchStart={(e) => handlePointerDown(e, "se")} />
-        </>
+          {/* Edge handles */}
+          {[
+            { type: "n", left: `${cropArea.x + cropArea.w / 2}%`, top: `${cropArea.y}%`, cursor: "n-resize", w: 24, h: 6 },
+            { type: "s", left: `${cropArea.x + cropArea.w / 2}%`, top: `${cropArea.y + cropArea.h}%`, cursor: "s-resize", w: 24, h: 6 },
+            { type: "w", left: `${cropArea.x}%`, top: `${cropArea.y + cropArea.h / 2}%`, cursor: "w-resize", w: 6, h: 24 },
+            { type: "e", left: `${cropArea.x + cropArea.w}%`, top: `${cropArea.y + cropArea.h / 2}%`, cursor: "e-resize", w: 6, h: 24 },
+          ].map(({ type, left, top, cursor, w, h }) => (
+            <div
+              key={type}
+              className="absolute bg-primary rounded-full shadow-md"
+              style={{
+                left: `calc(${left} - ${w / 2}px)`,
+                top: `calc(${top} - ${h / 2}px)`,
+                width: w, height: h, cursor, zIndex: 20,
+              }}
+              onMouseDown={(e) => handlePointerDown(e, type)}
+              onTouchStart={(e) => handlePointerDown(e, type)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
