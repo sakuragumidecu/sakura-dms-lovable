@@ -57,8 +57,27 @@ export default function ArchivePage() {
   const [moveDestination, setMoveDestination] = useState("");
 
   const [contextMenu, setContextMenu] = useState(null); // { x, y, type, data }
+  const [folderGridSize, setFolderGridSize] = useState("medium"); // small, medium, large
 
   const isAdmin = currentUser.role === "Operator/TU";
+
+  // Filter documents based on access restriction
+  const accessibleDocuments = useMemo(() => {
+    return documents.filter((doc) => {
+      // Admin can see everything
+      if (currentUser.role === "Operator/TU") return true;
+      // Sensitive categories: Data Guru (2) and SK (type_id 12)
+      const isSensitive = doc.category_id === 2 || doc.type_id === 12;
+      if (!isSensitive) return true;
+      // Teachers can only see their own docs (matched by NIP)
+      if (currentUser.role === "Guru" && currentUser.nip) {
+        return doc.nip === currentUser.nip || doc.pengunggah?.id === currentUser.id;
+      }
+      // Kepala Sekolah can see all
+      if (currentUser.role === "Kepala Sekolah") return true;
+      return false;
+    });
+  }, [documents, currentUser]);
 
   const folderTree = useMemo(() => buildFolderTree(documents), [documents]);
 
