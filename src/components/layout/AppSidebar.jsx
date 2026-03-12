@@ -22,30 +22,43 @@ export default function AppSidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => hasPermission(item.permission));
 
   return (
-    <aside className={`${collapsed ? "w-[72px]" : "w-[190px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300`}>
-      {/* Header — grid: collapse icon | logo */}
-      <div className="px-3 pt-3 pb-3 space-y-2">
-        {/* Collapse button - top row */}
-        <div className={`flex ${collapsed ? "justify-center" : "justify-end"}`}>
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            title={collapsed ? "Perluas sidebar" : "Sembunyikan sidebar"}
-            className="p-1.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors shrink-0"
-          >
-            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-          </button>
-        </div>
-
-        {/* Logo + SAKURA */}
-        <button
-          onClick={() => navigate("/home")}
-          className={`flex items-center hover:opacity-80 transition-opacity cursor-pointer ${collapsed ? "justify-center" : "gap-2"}`}
-        >
-          <img src={logoSakura} alt="SAKURA" className="w-8 h-8 rounded-full bg-sidebar-accent shrink-0" />
-          {!collapsed && (
-            <div className="text-sidebar-primary font-bold text-sm leading-tight tracking-wide">SAKURA</div>
-          )}
-        </button>
+    <aside className={`${collapsed ? "w-[72px]" : "w-[220px]"} min-h-screen bg-sidebar flex flex-col shrink-0 transition-all duration-300`}>
+      {/* Header — 3-column grid: Logo | Text | Collapse */}
+      <div className="px-3 pt-4 pb-3">
+        {collapsed ? (
+          <div className="flex flex-col items-center gap-2">
+            <button
+              onClick={() => setCollapsed(false)}
+              title="Perluas sidebar"
+              className="p-1.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <PanelLeft size={18} />
+            </button>
+            <button onClick={() => navigate("/home")} className="hover:opacity-80 transition-opacity">
+              <img src={logoSakura} alt="SAKURA" className="w-8 h-8 rounded-full bg-sidebar-accent" />
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-[32px_1fr_auto] items-center gap-3">
+            {/* Col 1: Logo */}
+            <button onClick={() => navigate("/home")} className="hover:opacity-80 transition-opacity">
+              <img src={logoSakura} alt="SAKURA" className="w-8 h-8 rounded-full bg-sidebar-accent" />
+            </button>
+            {/* Col 2: Text */}
+            <button onClick={() => navigate("/home")} className="text-left hover:opacity-80 transition-opacity min-w-0">
+              <div className="text-sidebar-primary font-bold text-sm leading-tight tracking-wide">SAKURA</div>
+              <div className="text-sidebar-foreground/50 text-[9px] leading-snug mt-0.5">Secure Archive System</div>
+            </button>
+            {/* Col 3: Collapse icon */}
+            <button
+              onClick={() => setCollapsed(true)}
+              title="Sembunyikan sidebar"
+              className="p-1.5 rounded-lg text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+            >
+              <PanelLeftClose size={18} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Divider */}
