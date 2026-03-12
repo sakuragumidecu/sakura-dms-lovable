@@ -143,6 +143,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
     setTimeout(() => {
       setFile(null);
       setFilePreview(null);
+      setScanPageImages([]);
       setMetaData({});
       setForm({ nomorDokumen: "", judul: "", jenisDokumen: "", kategori: "", catatan: "", tanggalUpload: new Date() });
       setSelectedCategoryId(null);
