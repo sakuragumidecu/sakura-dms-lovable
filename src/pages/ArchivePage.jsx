@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, Plus, Pencil, Trash2, Monitor, MoreVertical, FolderPlus, FilePlus, ArrowRightLeft } from "lucide-react";
+import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Eye, Download, Clock, X, Upload, Plus, Pencil, Trash2, Monitor, MoreVertical, FolderPlus, FilePlus, ArrowRightLeft, Grid2X2, Grid3X3, LayoutGrid } from "lucide-react";
 import AppHeader from "@/components/layout/AppHeader";
 import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
