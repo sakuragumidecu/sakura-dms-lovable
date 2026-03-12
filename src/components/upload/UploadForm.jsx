@@ -284,16 +284,13 @@ export default function UploadForm({ onSuccess, onCancel }) {
                   <div className="max-h-96 overflow-y-auto space-y-3 pr-1">
                     {scanPageImages.map((imgSrc, i) => (
                       <div key={i} className="relative border border-border rounded-lg overflow-hidden bg-background shadow-sm">
-                        {/* PDF-style page header */}
-                        {file?.name?.endsWith(".pdf") && (
-                          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/50 bg-muted/20">
-                            <FileText size={11} className="text-primary" />
-                            <span className="text-xs text-muted-foreground font-medium">
-                              Halaman {i + 1} dari {scanPageImages.length}
-                            </span>
-                          </div>
-                        )}
-                        <div className={file?.name?.endsWith(".pdf") ? "p-3" : ""}>
+                        <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border/50 bg-muted/20">
+                          <FileText size={11} className="text-primary" />
+                          <span className="text-xs text-muted-foreground font-medium">
+                            Halaman {i + 1} dari {scanPageImages.length}
+                          </span>
+                        </div>
+                        <div className="p-3">
                           <img
                             src={imgSrc}
                             alt={`Halaman ${i + 1}`}
