@@ -50,9 +50,9 @@ export default function UploadForm({ targetFolder, onSuccess, onCancel }) {
   });
 
   const jenisOptions = useMemo(() => {
-    if (!form.kategori) return [];
-    return KATEGORI_JENIS_MAP[form.kategori] || [];
-  }, [form.kategori]);
+    if (!selectedCategoryId) return [];
+    return DOCUMENT_TYPES.filter((t) => t.category_id === selectedCategoryId);
+  }, [selectedCategoryId]);
 
   const detailFields = useMemo(() => {
     return KATEGORI_DETAIL_FIELDS[form.kategori] || [];
