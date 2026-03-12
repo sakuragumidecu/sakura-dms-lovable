@@ -4,20 +4,20 @@ import logoSakura from "@/assets/logo_sakura.png";
 import heroSchool from "@/assets/hero_school.jpg";
 
 const STATS = [
-  { label: "Total Ijazah", value: "4,789" },
-  { label: "Dokumen Terarsip", value: "1,245" },
-  { label: "Pengguna Aktif", value: "36" },
-];
+{ label: "Total Ijazah", value: "4,789" },
+{ label: "Dokumen Terarsip", value: "1,245" },
+{ label: "Pengguna Aktif", value: "36" }];
+
 
 // Fitur-fitur aplikasi
 const FEATURES = [
-  { icon: FileText, title: "Arsip Digital", desc: "Simpan dan kelola ijazah, rapor, dan dokumen akademik dalam format digital yang aman dan terstruktur." },
-  { icon: CheckCircle, title: "Alur Persetujuan", desc: "Proses persetujuan dokumen yang transparan dengan audit trail lengkap dan notifikasi real-time." },
-  { icon: Smartphone, title: "Scan Mobile", desc: "Scan dokumen langsung dari perangkat mobile menggunakan kamera untuk kemudahan digitalisasi." },
-  { icon: Shield, title: "Keamanan Data", desc: "Sistem keamanan berbasis Role-Based Access Control (RBAC) untuk melindungi data sensitif sekolah." },
-  { icon: Archive, title: "Pengarsipan Terstruktur", desc: "Struktur folder berdasarkan tahun, kelas, dan jenis dokumen untuk pencarian yang mudah." },
-  { icon: Users, title: "Multi-Role", desc: "Dukungan akses untuk Operator/TU, Kepala Sekolah, dan Guru." },
-];
+{ icon: FileText, title: "Arsip Digital", desc: "Simpan dan kelola ijazah, rapor, dan dokumen akademik dalam format digital yang aman dan terstruktur." },
+{ icon: CheckCircle, title: "Alur Persetujuan", desc: "Proses persetujuan dokumen yang transparan dengan audit trail lengkap dan notifikasi real-time." },
+{ icon: Smartphone, title: "Scan Mobile", desc: "Scan dokumen langsung dari perangkat mobile menggunakan kamera untuk kemudahan digitalisasi." },
+{ icon: Shield, title: "Keamanan Data", desc: "Sistem keamanan berbasis Role-Based Access Control (RBAC) untuk melindungi data sensitif sekolah." },
+{ icon: Archive, title: "Pengarsipan Terstruktur", desc: "Struktur folder berdasarkan tahun, kelas, dan jenis dokumen untuk pencarian yang mudah." },
+{ icon: Users, title: "Multi-Role", desc: "Dukungan akses untuk Operator/TU, Kepala Sekolah, dan Guru." }];
+
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ export default function HomePage() {
             <img src={logoSakura} alt="SAKURA" className="w-10 h-10 rounded-full" />
             <div>
               <div className="font-bold text-primary text-lg leading-tight">SAKURA</div>
-              <div className="text-muted-foreground text-xs">Secure Archive System</div>
+              
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -69,13 +69,13 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-foreground text-center mb-3">Fitur Unggulan SAKURA</h2>
           <p className="text-center text-muted-foreground mb-12">Solusi lengkap untuk pengelolaan arsip sekolah</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
+            {FEATURES.map(({ icon: Icon, title, desc }) =>
+            <div key={title} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg hover:-translate-y-1 transition-all">
                 <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center mb-4"><Icon size={24} className="text-primary" /></div>
                 <h3 className="font-bold text-foreground text-lg mb-2">{title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -91,6 +91,6 @@ export default function HomePage() {
       <footer className="py-8 bg-card border-t border-border">
         <div className="max-w-7xl mx-auto px-6 text-center text-sm text-muted-foreground">© 2026 SAKURA · SMP Negeri 4 Cikarang Barat · President University Capstone Project</div>
       </footer>
-    </div>
-  );
+    </div>);
+
 }
