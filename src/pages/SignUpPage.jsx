@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock, Eye, EyeOff, User, Building } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, Building, Hash } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
 
 export default function SignUpPage() {
