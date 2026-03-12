@@ -41,7 +41,7 @@ export default function AppSidebar() {
             {!collapsed && (
               <div className="text-left min-w-0">
                 <div className="text-sidebar-primary font-bold text-sm leading-tight tracking-wide">SAKURA</div>
-                <div className="text-sidebar-foreground/50 text-[9px] leading-snug">Secure Archive System</div>
+                
               </div>
             )}
           </button>
