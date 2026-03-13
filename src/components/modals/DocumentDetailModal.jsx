@@ -19,13 +19,14 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [showApproveForm, setShowApproveForm] = useState(false);
   const [approveComment, setApproveComment] = useState("");
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
   const isAdmin = currentUser.role === "Operator/TU";
 
   const handleAddNote = () => { if (!noteText.trim()) return; addAuditNote(doc.id, noteText.trim()); setNoteText(""); };
   const handleReject = () => { if (!rejectReason.trim()) return; rejectDocument(doc.id, rejectReason.trim()); setShowRejectForm(false); setRejectReason(""); onClose(); };
   const handleApprove = () => { approveDocument(doc.id, approveComment.trim() || undefined); setShowApproveForm(false); setApproveComment(""); onClose(); };
-  const handleArchive = () => { archiveDocument(doc.id); onClose(); };
+  const handleArchive = () => { archiveDocument(doc.id); setShowArchiveConfirm(false); onClose(); };
 
   const canApprove = hasPermission("documents.approve") && doc.status === "Menunggu";
   const canArchive = hasPermission("documents.archive") && doc.status === "Disetujui";
@@ -49,9 +50,10 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
             <div className="flex flex-wrap gap-3">
               <button onClick={() => setShowPdf(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"><Eye size={16} /> Preview</button>
               {canApprove && (<><button onClick={() => setShowApproveForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-sakura-success/20 text-sakura-success text-sm font-semibold hover:bg-sakura-success/30 transition-colors"><CheckCircle size={16} /> Setujui</button><button onClick={() => setShowRejectForm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-destructive/10 text-destructive text-sm font-semibold hover:bg-destructive/20 transition-colors"><XCircle size={16} /> Tolak</button></>)}
-              {canArchive && <button onClick={handleArchive} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-muted text-muted-foreground text-sm font-semibold hover:bg-muted/80 transition-colors"><Archive size={16} /> Arsipkan</button>}
+              {canArchive && <button onClick={() => setShowArchiveConfirm(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90 transition-opacity"><Archive size={16} /> Masukkan ke Arsip Dokumen</button>}
             </div>
             {showApproveForm && (<div className="p-4 rounded-lg border border-sakura-success/30 bg-sakura-success/5 space-y-3"><h4 className="font-semibold text-sm text-sakura-success">Konfirmasi Persetujuan</h4><p className="text-sm text-foreground">Apakah Anda yakin ingin menyetujui dokumen ini?</p><textarea value={approveComment} onChange={(e) => setApproveComment(e.target.value)} placeholder="Komentar (opsional)..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" /><div className="flex gap-2"><button onClick={handleApprove} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90">Setujui</button><button onClick={() => { setShowApproveForm(false); setApproveComment(""); }} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button></div></div>)}
+            {showArchiveConfirm && (<div className="p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-3"><h4 className="font-semibold text-sm text-primary">Konfirmasi Pengarsipan Dokumen</h4><p className="text-sm text-foreground">Apakah Anda yakin ingin memasukkan dokumen ini ke Arsip Dokumen? QR Code verifikasi akan otomatis dibuat.</p><div className="flex gap-2"><button onClick={handleArchive} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90">Arsipkan Dokumen</button><button onClick={() => setShowArchiveConfirm(false)} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button></div></div>)}
             {showRejectForm && (<div className="p-4 rounded-lg border border-destructive/30 bg-destructive/5 space-y-3"><h4 className="font-semibold text-sm text-destructive">Alasan Penolakan</h4><textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Masukkan alasan penolakan..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" /><div className="flex gap-2"><button onClick={handleReject} className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:opacity-90">Tolak</button><button onClick={() => setShowRejectForm(false)} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button></div></div>)}
             <div>
               <div className="flex items-center gap-2 mb-4"><Clock size={18} className="text-primary" /><h3 className="font-bold text-foreground">Jejak Aktivitas</h3><span className="text-xs text-muted-foreground">(Read-only)</span></div>

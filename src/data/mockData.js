@@ -144,13 +144,12 @@ export const DOCUMENTS = [
     kelas: "Alumni 2024", class_info: "Alumni 2024",
     jenisDokumen: "Ijazah SMP", namaSiswa: "Ahmad Rizki", nisn: "0012345678", tahunAjaran: "2023/2024",
     pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-08-22T15:49:05Z", tanggalEdit: "2025-08-23T10:12:00Z", status: "Diarsipkan", versi: 1,
+    tanggalUpload: "2025-08-22T15:49:05Z", tanggalEdit: "2025-08-23T10:12:00Z", status: "Disetujui", versi: 1,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
       { time: "2025-08-22T15:49:05Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-08-23T09:59:10Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Melihat dokumen" },
       { time: "2025-08-23T10:12:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-      { time: "2025-08-23T10:12:00Z", user: { nama: "Sistem", avatar: avatarAdmin, role: "Sistem" }, action: "Dokumen otomatis diarsipkan setelah persetujuan" },
     ],
   },
   {
@@ -171,12 +170,11 @@ export const DOCUMENTS = [
     kelas: "-", class_info: "-",
     jenisDokumen: "Buku Induk Pegawai", tahunAjaran: "2024/2025",
     pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Diarsipkan", versi: 2,
+    tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Disetujui", versi: 2,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
       { time: "2025-09-05T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-09-06T14:30:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-      { time: "2025-09-06T14:30:00Z", user: { nama: "Sistem", avatar: avatarAdmin, role: "Sistem" }, action: "Dokumen otomatis diarsipkan setelah persetujuan" },
     ],
   },
   {
@@ -224,12 +222,11 @@ export const DOCUMENTS = [
     kelas: "-", class_info: "-",
     jenisDokumen: "Sertifikat Pendidik", tahunAjaran: "2024/2025",
     pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-08T13:00:00Z", tanggalEdit: "2025-09-09T08:00:00Z", status: "Diarsipkan", versi: 1,
+    tanggalUpload: "2025-09-08T13:00:00Z", tanggalEdit: "2025-09-09T08:00:00Z", status: "Disetujui", versi: 1,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
       { time: "2025-09-08T13:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-09-09T08:00:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
-      { time: "2025-09-09T08:00:00Z", user: { nama: "Sistem", avatar: avatarAdmin, role: "Sistem" }, action: "Dokumen otomatis diarsipkan setelah persetujuan" },
     ],
   },
   {
