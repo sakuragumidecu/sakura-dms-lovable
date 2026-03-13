@@ -19,13 +19,14 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [showApproveForm, setShowApproveForm] = useState(false);
   const [approveComment, setApproveComment] = useState("");
+  const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
   const isAdmin = currentUser.role === "Operator/TU";
 
   const handleAddNote = () => { if (!noteText.trim()) return; addAuditNote(doc.id, noteText.trim()); setNoteText(""); };
   const handleReject = () => { if (!rejectReason.trim()) return; rejectDocument(doc.id, rejectReason.trim()); setShowRejectForm(false); setRejectReason(""); onClose(); };
   const handleApprove = () => { approveDocument(doc.id, approveComment.trim() || undefined); setShowApproveForm(false); setApproveComment(""); onClose(); };
-  const handleArchive = () => { archiveDocument(doc.id); onClose(); };
+  const handleArchive = () => { archiveDocument(doc.id); setShowArchiveConfirm(false); onClose(); };
 
   const canApprove = hasPermission("documents.approve") && doc.status === "Menunggu";
   const canArchive = hasPermission("documents.archive") && doc.status === "Disetujui";
