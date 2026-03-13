@@ -42,8 +42,8 @@ function buildDocumentHtml(doc, mode) {
       </table>`
     : "";
 
-  const isApproved = doc.status === "Disetujui" || doc.status === "Diarsipkan";
-  const verifyUrl = `${window.location.origin}/verify/${doc.id}`;
+  const isApproved = doc.status === "Diarsipkan";
+  const verifyUrl = isApproved ? (() => { const SYSTEM_KEY = "SAKURA-SMPN4-VERIFY-2026"; const payload = `${doc.id}-${SYSTEM_KEY}`; let hash = 0; for (let i = 0; i < payload.length; i++) { hash = ((hash << 5) - hash) + payload.charCodeAt(i); hash = hash & hash; } return `${window.location.origin}/verify-document/${doc.id}?token=${Math.abs(hash).toString(16).padStart(8, '0')}sk`; })() : "";
 
   const qrSection = (mode === "distributed" && isApproved)
     ? `
