@@ -171,11 +171,12 @@ export const DOCUMENTS = [
     kelas: "-", class_info: "-",
     jenisDokumen: "Buku Induk Pegawai", tahunAjaran: "2024/2025",
     pengunggah: { id: 1, nama: "Budi Santoso", role: "Operator/TU", avatar: avatarAdmin },
-    tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Disetujui", versi: 2,
+    tanggalUpload: "2025-09-05T10:00:00Z", tanggalEdit: "2025-09-06T14:30:00Z", status: "Diarsipkan", versi: 2,
     fileUrl: "/mock/sample.pdf",
     auditTrail: [
       { time: "2025-09-05T10:00:00Z", user: { nama: "Budi Santoso", avatar: avatarAdmin, role: "Operator/TU" }, action: "Mengunggah dokumen" },
       { time: "2025-09-06T14:30:00Z", user: { nama: "Dr. Siti Rahayu", avatar: avatarPrincipal, role: "Kepala Sekolah" }, action: "Menyetujui dokumen" },
+      { time: "2025-09-06T14:30:00Z", user: { nama: "Sistem", avatar: avatarAdmin, role: "Sistem" }, action: "Dokumen otomatis diarsipkan setelah persetujuan" },
     ],
   },
   {
