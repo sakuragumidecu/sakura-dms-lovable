@@ -194,10 +194,14 @@ export const AppProvider = ({ children }) => {
         if (d.id !== docId || d.status !== "Disetujui") return d;
         return {
           ...d, status: "Diarsipkan", tanggalEdit: new Date().toISOString(),
-          auditTrail: [...d.auditTrail, { time: new Date().toISOString(), user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role }, action: "Mengarsipkan dokumen" }],
+          auditTrail: [...d.auditTrail, { time: new Date().toISOString(), user: { nama: currentUser.nama, avatar: currentUser.avatar, role: currentUser.role }, action: "Mengarsipkan dokumen dan membuat QR Code verifikasi" }],
         };
       })
     );
+    const doc = documents.find((d) => d.id === docId);
+    if (doc) {
+      setNotifications((prev) => [{ id: Date.now(), message: `Dokumen '${doc.judul}' berhasil diarsipkan dan QR Code verifikasi telah dibuat`, time: new Date().toISOString(), read: false, type: "archive", docId }, ...prev]);
+    }
   };
 
   const toggleFavorite = (docId) => {
