@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 
 const VARIANT_STYLES = {
-  default: "border-border hover:border-primary/30",
-  warning: "border-border hover:border-sakura-warning/40",
-  success: "border-border hover:border-sakura-success/40",
-  muted: "border-border hover:border-muted-foreground/30",
+  default: "border-l-primary",
+  warning: "border-l-sakura-warning",
+  success: "border-l-sakura-success",
+  muted: "border-l-muted-foreground/40",
 };
 
 const ICON_STYLES = {
@@ -22,13 +22,13 @@ export default function DashboardCard({ title, value, icon: Icon, onClick, varia
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={`bg-card rounded-2xl border p-5 text-left transition-shadow duration-300 hover:shadow-card-hover ${VARIANT_STYLES[variant]}`}
+      className={`bg-card rounded-2xl border border-border border-l-[3px] p-5 text-left transition-shadow duration-300 hover:shadow-md ${VARIANT_STYLES[variant]}`}
     >
       <div className="flex items-center justify-between">
         <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${ICON_STYLES[variant]}`}>
           <Icon size={22} />
         </div>
-        <span className="text-3xl font-extrabold text-foreground tabular-nums tracking-tight">{value}</span>
+        <span className="text-3xl font-extrabold text-foreground tabular-nums tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>{value}</span>
       </div>
       <div className="mt-3 text-[13px] font-medium text-muted-foreground">{title}</div>
     </motion.button>
