@@ -9,36 +9,33 @@ import { useState } from "react";
 export const FLOWER_NODES = [
   // Interactive flowers — larger sizes, with glow
   { cx: 245, cy: 275, size: 75, rot: -10, section: "about", label: "Apa itu SAKURA?" },
-  { cx: 400, cy: 200, size: 72, rot: 15, section: "why", label: "Arsip Digital" },
-  { cx: 560, cy: 120, size: 78, rot: -5, section: "workflow", label: "Alur Persetujuan" },
-  { cx: 850, cy: 80, size: 74, rot: 20, section: "security", label: "Keamanan & QR" },
+  { cx: 365, cy: 240, size: 72, rot: 15, section: "why", label: "Arsip Digital" },
+  { cx: 480, cy: 140, size: 78, rot: -5, section: "workflow", label: "Alur Persetujuan" },
+  { cx: 660, cy: 150, size: 74, rot: 20, section: "security", label: "Keamanan & QR" },
   { cx: 520, cy: 458, size: 72, rot: -15, section: "school", label: "SMP Negeri 4" },
   // Decorative flowers — smaller, no interaction
-  { cx: 640, cy: 95, size: 48, rot: 30, section: null, label: null },
-  { cx: 920, cy: 70, size: 46, rot: -25, section: null, label: null },
+  { cx: 545, cy: 110, size: 48, rot: 30, section: null, label: null },
+  { cx: 710, cy: 130, size: 45, rot: -25, section: null, label: null },
   { cx: 575, cy: 475, size: 46, rot: 10, section: null, label: null },
-  { cx: 750, cy: 110, size: 50, rot: -20, section: null, label: null },
-  { cx: 1000, cy: 65, size: 44, rot: 5, section: null, label: null },
-  { cx: 700, cy: 140, size: 48, rot: -30, section: null, label: null },
+  { cx: 650, cy: 230, size: 50, rot: -20, section: null, label: null },
+  { cx: 720, cy: 226, size: 42, rot: 5, section: null, label: null },
+  { cx: 650, cy: 175, size: 50, rot: -30, section: null, label: null },
   { cx: 180, cy: 316, size: 44, rot: 12, section: null, label: null },
   { cx: 450, cy: 400, size: 48, rot: -8, section: null, label: null },
-  { cx: 300, cy: 250, size: 42, rot: 25, section: null, label: null },
-  { cx: 480, cy: 155, size: 44, rot: -18, section: null, label: null },
-  { cx: 800, cy: 100, size: 42, rot: 8, section: null, label: null },
+  { cx: 300, cy: 290, size: 40, rot: 25, section: null, label: null },
+  { cx: 420, cy: 170, size: 42, rot: -18, section: null, label: null },
+  { cx: 590, cy: 145, size: 40, rot: 8, section: null, label: null },
   { cx: 500, cy: 430, size: 38, rot: -12, section: null, label: null },
-  { cx: 960, cy: 55, size: 40, rot: 15, section: null, label: null },
-  { cx: 1050, cy: 75, size: 38, rot: -10, section: null, label: null },
 ];
 
 const BUD_POSITIONS = [
   { cx: 220, cy: 300, size: 9, rot: -20 },
-  { cx: 430, cy: 180, size: 10, rot: 15 },
-  { cx: 600, cy: 130, size: 8, rot: -10 },
-  { cx: 780, cy: 95, size: 9, rot: 25 },
-  { cx: 900, cy: 60, size: 8, rot: -15 },
+  { cx: 400, cy: 205, size: 10, rot: 15 },
+  { cx: 500, cy: 155, size: 8, rot: -10 },
+  { cx: 580, cy: 195, size: 9, rot: 25 },
+  { cx: 690, cy: 140, size: 8, rot: -15 },
   { cx: 470, cy: 430, size: 9, rot: 10 },
-  { cx: 680, cy: 120, size: 8, rot: -5 },
-  { cx: 1020, cy: 60, size: 7, rot: 20 },
+  { cx: 620, cy: 170, size: 8, rot: -5 },
 ];
 
 function scrollToSection(id) {
