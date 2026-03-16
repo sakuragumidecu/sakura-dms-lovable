@@ -230,6 +230,7 @@
 .blossom-3d {
   perspective: 600px;
   transform-style: preserve-3d;
+  animation: blossom-float 4s ease-in-out infinite;
 }
 
 .blossom-3d:hover .blossom-circle {
