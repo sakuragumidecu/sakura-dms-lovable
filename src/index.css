@@ -396,14 +396,30 @@
   }
 }
 
-/* Pulse ring for interactive flowers */
-@keyframes pulseRing {
-  0%, 100% { opacity: 0.4; stroke-width: 2; }
-  50% { opacity: 0; stroke-width: 6; }
+/* Interactive flower glow */
+@keyframes flowerGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(232,96,122,0.5))
+            drop-shadow(0 0 12px rgba(232,96,122,0.25))
+            drop-shadow(2px 4px 8px rgba(200,80,100,0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(232,96,122,0.8))
+            drop-shadow(0 0 24px rgba(232,96,122,0.4))
+            drop-shadow(0 0 36px rgba(255,182,193,0.5));
+  }
 }
 
-.animate-pulse-ring {
-  animation: pulseRing 2s ease-in-out infinite;
+.sakura-flower-interactive {
+  animation: flowerGlow 2.5s ease-in-out infinite;
+}
+
+/* Force labels horizontal */
+.sakura-flower-label {
+  transform: none !important;
+  rotate: 0deg !important;
+  writing-mode: horizontal-tb !important;
+  text-orientation: mixed !important;
 }
 
 /* Floating atmospheric particles */
