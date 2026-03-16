@@ -1,244 +1,184 @@
 
-# Rencana Revisi & Perbaikan Sistem SAKURA DMS
 
-## Ringkasan
+# Plan: Modernisasi UI/UX SAKURA DMS — Full Redesign
 
-10 area perubahan besar mencakup sidebar, dashboard, upload dokumen, arsip, detail dokumen, manajemen user, login, pengaturan, dan alur persetujuan.
+## Overview
 
----
-
-## 1. Sidebar - Collapse Button di Atas
-
-**File**: `src/components/layout/AppSidebar.tsx`
-
-- Pindahkan tombol collapse/expand dari bagian bawah sidebar ke bagian **atas** (di samping logo SAKURA)
-- Arah panah tetap jelas: `PanelLeftClose` untuk collapse, `PanelLeft` untuk expand
+Redesign menyeluruh UI/UX SAKURA DMS dengan font Poppins, palet warna baru (deep purple/maroon), animasi kelopak sakura di Home, dark mode toggle, dan perbaikan UX di semua halaman. Semua business logic, RBAC, dan data flow tetap tidak berubah.
 
 ---
 
-## 2. Dashboard - Filter Aktivitas & Grafik Interaktif
+## Phase 1: Design Foundation
 
-### a. Filter Mingguan/Bulanan
+### 1a. Font & Color Tokens
 
-**File**: `src/components/dashboard/ActivityChart.tsx`
+**Files**: `index.css`, `tailwind.config.js`
 
-- Tambah toggle button "Mingguan" / "Bulanan" di header chart
-- Untuk bulanan, generate data 30 hari dari mock data
-- Chart title berubah sesuai filter yang aktif
+- Ganti font Inter → **Poppins** (weight 300/400/500/600/700)
+- Update CSS variables:
+  - Primary: `#602080` (deep purple) → HSL `~270 60% 31%`
+  - Sidebar bg: `#5e2730` (deep maroon) → HSL `~350 42% 26%`
+  - Accent shades: `#B030B0`, `#8F1383`, `#E47676`
+  - Main bg: `#F9FAFB`, Card: `#FFFFFF`
+- Add dark mode variables (sudah ada partial, perlu update ke palet baru)
+- Add `--sakura-purple`, `--sakura-maroon` custom tokens
 
-### b. Grafik Status (Disetujui/Ditolak/Menunggu)
+### 1b. Dark Mode Toggle
 
-- Tambah 3 line baru pada grafik: Disetujui, Ditolak, Menunggu (selain Upload dan Persetujuan yang sudah ada)
-- Atau ganti line yang ada menjadi 3 status tersebut
+**File**: `src/pages/SettingsPage.jsx`, `src/contexts/SettingsContext.jsx`
 
-### c. Klik Titik Grafik
-
-- Sudah ada `onDateClick` handler, perbaiki agar benar-benar menampilkan daftar dokumen sesuai tanggal yang diklik
-
-### d. Klik Status
-
-- Klik pada status di legend grafik menampilkan daftar dokumen dengan filter status tersebut
-
-**File**: `src/data/mockData.ts` - Tambah data chart bulanan
+- Dark mode toggle sudah ada di Settings (tema section). Pastikan applies `dark` class ke `<html>` element
+- Verify all dark mode CSS variables match new palette
 
 ---
 
-## 3. Upload Dokumen - Redesign Form dengan Kategori Dinamis
+## Phase 2: Home Page — Sakura Petal Animation
 
-**File**: `src/components/upload/UploadForm.tsx`
+**File**: `src/pages/HomePage.jsx`
 
-### a. Filter Dropdown Jenis Dokumen Baru
+- Full redesign layout:
+  - **Left side**: Logo SAKURA + full acronym text ("Secure Archiving and Keeping of Unified Records for Administration") — displayed only on Home
+  - Deskripsi sekolah + gambar sekolah placeholder
+  - CTA buttons: Login / Signup (pojok kanan atas nav)
+- **Center-right**: Sakura branch illustration (copy uploaded image `image-21.png` to `src/assets/sakura_branch.png`)
+- **Petal animation**: CSS keyframe particle system — 15-20 floating petal elements with randomized fall paths, opacity, rotation, size. Reduced-motion media query disables animation
+- **No footer** on Home page (per requirement)
+- Inspiration from sutera.ch: clean typography, generous whitespace, artistic visual centerpiece
 
-Ganti opsi jenis dokumen menjadi:
-- Surat Masuk dan Keluar Siswa
-- Surat Pindah Siswa
-- Sertifikat Guru
-- Sertifikat Prestasi Siswa
-- Ijazah SMP
-- Surat Keterangan Hasil Ujian (SKHU)
-- Rekapitulasi Absensi Siswa dan Guru
-- Surat Keputusan (Arsip Surat)
-- Inventaris Sarana Prasarana
-- Lainnya (input text manual jika dipilih)
-
-### b. Kategori di Atas Jenis Dokumen
-
-- Pindahkan **Kategori** di atas **Jenis Dokumen**
-- Opsi kategori: Data Siswa, Data Guru, Sarana Prasarana Sekolah, Surat Menyurat, Keuangan, Lainnya
-- Setiap kategori memiliki jenis dokumen yang relevan (filter cascade)
-
-### c. Data Detail Opsional (Next Page)
-
-- Setelah metadata utama, tambah tombol "Tambah Data Detail (Opsional)" yang expand/collapse
-- Berisi field tambahan sesuai kategori (mis. untuk Data Siswa: NIS, Tempat Lahir, dll.)
-- Tidak wajib diisi
-
-### d. Filter Folder Tujuan
-
-- Tambah dropdown "Masukkan ke Folder" yang menampilkan folder dari arsip dokumen
-- Auto-mapping berdasarkan jenis dokumen tetap berjalan
-
-### e. Tanggal dengan Date Picker
-
-- Tanggal Upload: tambah icon kalender yang bisa diklik untuk memilih tanggal
-- Tahun Ajaran: ubah jadi dropdown dengan opsi 2023/2024, 2024/2025, 2025/2026, dan "Lainnya" (input manual)
-
-### f. Konfirmasi Upload
-
-- Saat klik Upload: tampilkan dialog konfirmasi "Apakah Anda yakin data sudah benar?"
-- Setelah submit berhasil: toast notifikasi dengan tombol "Lihat di Arsip Dokumen" yang navigasi ke `/archive`
-
-### g. Preview Sesuai File
-
-- Preview menampilkan file yang benar-benar di-upload (untuk image: sudah ada, untuk PDF: tampilkan nama file, bukan dummy)
-
----
-
-## 4. Arsip Dokumen
-
-**File**: `src/pages/ArchivePage.tsx`
-
-- Hapus field "Tambah catatan admin..." dari panel preview samping (tidak perlu catatan di setiap dokumen di semua role)
-
----
-
-## 5. Detail Dokumen - Perbaikan UI
-
-**File**: `src/components/modals/DocumentDetailModal.tsx`
-
-- Role pengunggah: ganti tanda hubung (--) menjadi **badge/border** dengan warna khusus (misal: bg-primary/10 text-primary rounded-full px-2)
-- Status aksi (Mengunggah, Menyetujui, dll.): tampilkan dalam **badge bordered** dengan warna khusus sesuai aksi
-- Hapus penggunaan tanda "—" sebagai pemisah, ganti dengan border/badge styling
-
----
-
-## 6. Manajemen User - CRUD Lengkap
-
-**File**: `src/pages/UserManagementPage.tsx`
-
-- **Create**: Tambah tombol "Tambah User" yang membuka modal form (Nama, Email, Role, Departemen)
-- **Read**: Sudah ada (tabel user)
-- **Update**: Tambah tombol "Edit" yang membuka modal edit semua field user
-- **Delete**: Tambah tombol "Hapus" dengan konfirmasi dialog
-- Semua aksi CRUD hanya bisa dilakukan oleh Admin/TU
-- Tambah kolom Aksi yang lebih lengkap
-
-**File**: `src/contexts/AppContext.tsx` - Tambah fungsi `addUser`, `updateUser`, `deleteUser`
-
----
-
-## 7. Login - Tambah Google Login
-
-**File**: `src/pages/LoginPage.tsx`
-
-- Tambah tombol "Masuk dengan Google" di bawah form login (dengan ikon Google)
-- Tombol ini simulasi saja (alert bahwa fitur memerlukan backend)
-- Styling: border button dengan logo Google, teks "Masuk dengan Google"
-- Tambah divider "atau" antara form login dan tombol Google
-
----
-
-## 8. Pengaturan Sistem - Simplifikasi
-
-**File**: `src/pages/SettingsPage.tsx`
-
-- Hapus section "Export JSON" dari Reset & Export
-- Hapus pengaturan frekuensi notifikasi
-- Section "Reset & Export" diganti menjadi "Reset Sistem" saja
-- Tombol: "Reset ke Default" saja
-
----
-
-## 9. Alur Persetujuan - Simplifikasi
-
-**File**: `src/pages/ApprovalPage.tsx`
-
-- Hapus step "Review & Annotate" dan "Verifikasi & Tanda Tangan" dari workflow visual
-- Workflow menjadi: Staff/Guru Upload -> Antrian Persetujuan -> Disetujui/Ditolak
-- Tombol "Approve" diganti teks menjadi **"Setujui"**
-- Modal konfirmasi: ganti dari biometrik menjadi konfirmasi sederhana "Apakah Anda yakin ingin menyetujui dokumen ini?"
-- Hapus ikon Fingerprint dan referensi tanda tangan digital
-- Hapus tombol "Review & Annotate" dari card actions
-- Approval by system: setelah disetujui, dokumen otomatis masuk arsip (status langsung "Diarsipkan")
-
-**File**: `src/pages/DashboardPage.tsx` (tab Persetujuan)
-- Sama: ganti "Approve" menjadi "Setujui", simplifikasi modal konfirmasi
-
----
-
-## 10. Pratinjau Dokumen
-
-**File**: `src/components/modals/PdfPreviewOverlay.tsx`
-
-- Pastikan preview bisa fullscreen (overlay/ngambang)
-- Tetap ada tombol close
-- Preview harus sesuai file yang di-upload (bukan dummy)
-
----
-
-## Detail Teknis
-
-### File yang Diubah
-
+### Technical: Petal Animation
 ```text
-src/components/layout/AppSidebar.tsx          - Collapse button ke atas
-src/components/dashboard/ActivityChart.tsx     - Filter + status lines
-src/components/upload/UploadForm.tsx           - Redesign form upload
-src/components/modals/DocumentDetailModal.tsx  - Badge styling
-src/pages/ArchivePage.tsx                      - Hapus catatan
-src/pages/UserManagementPage.tsx               - CRUD user
-src/pages/LoginPage.tsx                        - Google login button
-src/pages/SettingsPage.tsx                     - Simplifikasi
-src/pages/ApprovalPage.tsx                     - Simplifikasi workflow
-src/pages/DashboardPage.tsx                    - Tab persetujuan update
-src/contexts/AppContext.tsx                    - addUser, updateUser, deleteUser
-src/data/mockData.ts                           - Chart data + kategori baru
+Component: SakuraPetals.jsx
+- Renders 15-20 absolute-positioned petal <div>s
+- Each petal: random size (8-16px), random starting X position, 
+  random animation-duration (6-12s), random animation-delay
+- CSS keyframes: fall from top with slight horizontal sway + rotation
+- @media (prefers-reduced-motion: reduce) → display: none
+- Optional toggle in Settings (reduced-motion preference)
 ```
 
-### Kategori & Jenis Dokumen Mapping
+---
+
+## Phase 3: Login / Signup Redesign
+
+**Files**: `src/pages/LoginPage.jsx`, `src/pages/SignUpPage.jsx`
+
+- Keep split-panel layout, update colors to new purple/maroon palette
+- Left panel: gradient maroon/purple with SAKURA branding
+- Right panel: clean form with new styling
+- Google OAuth button (simulasi, sudah ada)
+- Footer: `© 2026 SAKURA · Developed by Group 5` (tampil di login/signup)
+
+---
+
+## Phase 4: Sidebar & Header
+
+**File**: `src/components/layout/AppSidebar.jsx`
+
+- Update colors to new maroon sidebar (`#5e2730`)
+- Keep icon-above-label layout (sudah ada)
+- Sidebar sticky (`position: sticky; top: 0; height: 100vh`)
+- Collapse/expand button aligned with logo (sudah ada)
+- Settings item with separator (sudah ada)
+
+**File**: `src/components/layout/AppHeader.jsx`
+
+- Update styling to match new palette
+- Profile dropdown (sudah ada) — no changes needed except color update
+
+---
+
+## Phase 5: Dashboard
+
+**File**: `src/pages/DashboardPage.jsx`, `src/components/dashboard/ActivityChart.jsx`
+
+- Update hero greeting to new palette
+- Summary cards: add "Ditolak" card (sudah ada with 5 cards)
+- **Chart changes**:
+  - Only 3 lines: Disetujui, Menunggu, Ditolak (remove Upload/Persetujuan lines)
+  - Remove "Pilih Tanggal" global → replace with range selector (Weekly: pick start date → auto 7 days; Monthly: pick month)
+  - Click on chart point → modal with document list for that date + status
+  - Click legend → toggle line visibility (sudah ada)
+- Bottom sections: Dokumen Terbaru + Aktivitas Terbaru (sudah ada, update styling)
+
+---
+
+## Phase 6: Upload Form
+
+**File**: `src/components/upload/UploadForm.jsx`
+
+- **Field visibility**: Hide detail fields until Kategori + Jenis selected (sudah partially implemented)
+- Ensure "Masukkan ke Folder" auto-fills from category/type mapping (sudah ada)
+- Update styling to new palette
+- Toast notifications on success (sudah ada)
+
+---
+
+## Phase 7: Archive Page
+
+**File**: `src/pages/ArchivePage.jsx`
+
+- Update styling to new palette
+- Resizable folder tree (sudah ada with react-resizable-panels)
+- Folder tree tooltip with name + description on hover (sudah ada)
+- Admin CRUD: Create/Edit/Delete folder modals (sudah ada)
+- Search filters: add date range filter, class filter
+- Document grid: show status badge, uploader avatar, action buttons respecting RBAC
+
+---
+
+## Phase 8: Document Detail & Audit Trail
+
+**File**: `src/components/modals/DocumentDetailModal.jsx`
+
+- Audit trail entries with avatar, nama, jabatan, timestamp, action in Bahasa Indonesia
+- QR Code: only when status = "Diarsipkan" — positioned bottom-right, medium size
+- "Masukkan ke Arsip" button: visible when status = "Disetujui" for Operator/TU role
+- Add "Syarat & Ketentuan Verifikasi QR" link below QR → modal explanation
+
+---
+
+## Phase 9: Footer
+
+**File**: `src/components/layout/CopyrightFooter.jsx`
+
+- Text: `© 2026 SAKURA · Developed by Group 5`
+- Show on all pages **except** Home
+- Keep pinned layout (sudah fixed)
+
+---
+
+## Files Changed Summary
 
 ```text
-Data Siswa:
-  - Surat Masuk dan Keluar Siswa
-  - Surat Pindah Siswa
-  - Ijazah SMP
-  - SKHU
-  - Rekapitulasi Absensi Siswa dan Guru
-
-Data Guru:
-  - Sertifikat Guru
-  - Surat Keputusan (Arsip Surat)
-
-Sarana Prasarana Sekolah:
-  - Inventaris Sarana Prasarana
-
-Surat Menyurat:
-  - Surat Masuk dan Keluar Siswa
-  - Surat Pindah Siswa
-
-Keuangan:
-  - (field manual)
-
-Lainnya:
-  - Sertifikat Prestasi Siswa
-  - Lainnya (input manual)
+src/index.css                              — Poppins font, new HSL palette
+tailwind.config.js                         — Updated design tokens
+src/assets/sakura_branch.png               — New asset (from upload)
+src/pages/HomePage.jsx                     — Full redesign with petal animation
+src/components/SakuraPetals.jsx            — NEW: Petal particle component
+src/pages/LoginPage.jsx                    — Color palette update
+src/pages/SignUpPage.jsx                   — Color palette update
+src/components/layout/AppSidebar.jsx       — Sticky sidebar, color update
+src/components/layout/AppHeader.jsx        — Color update
+src/components/layout/AppLayout.jsx        — Conditional footer
+src/components/layout/CopyrightFooter.jsx  — Updated text
+src/pages/DashboardPage.jsx               — Palette + chart changes
+src/components/dashboard/ActivityChart.jsx — 3 lines only, range selector
+src/components/dashboard/DashboardCard.jsx — Palette update
+src/components/upload/UploadForm.jsx       — Palette + field visibility
+src/pages/ArchivePage.jsx                  — Palette + search filters
+src/components/modals/DocumentDetailModal.jsx — QR logic, archive button, audit trail
+src/pages/SettingsPage.jsx                 — Dark mode integration check
+src/contexts/SettingsContext.jsx           — Dark mode class toggle
 ```
 
-### Workflow Persetujuan Baru (3 Step)
+### Implementation Order (8 implementation messages estimated)
 
-```text
-1. Staff/Guru Upload
-2. Antrian Persetujuan
-3. Disetujui / Ditolak
-```
+1. Design tokens (index.css + tailwind.config.js + Poppins)
+2. Home page + SakuraPetals component + sakura_branch asset
+3. Login/Signup palette + Footer conditional logic
+4. Sidebar + Header palette
+5. Dashboard + Chart redesign (3 lines, range selector)
+6. Upload form + Archive page palette
+7. Document Detail (QR, archive button, audit trail)
+8. Dark mode verification + responsive polish
 
-### User CRUD Functions
-
-```text
-addUser(user: Omit<User, "id">)      - Generate ID, tambah ke state
-updateUser(id, partial)                - Update field user
-deleteUser(id)                         - Hapus dari state (tidak bisa hapus diri sendiri)
-```
-
-## 11. Website Responsive
-- Website bisa responsif dengan baik dan tidak hancur baik itu dekstop maupun di mobile. Karena nantinya akan dipakai juga di MOBILE, terlebih untuk scan mobile.
