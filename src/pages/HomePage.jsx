@@ -178,7 +178,7 @@ export default function HomePage() {
           background: "linear-gradient(180deg, #FFE4EC 0%, #FFF0F5 30%, #FFF5F8 60%, #FFFFFF 100%)",
         }}
       >
-        <div className="max-w-5xl mx-auto px-6 py-24 space-y-24">
+        <div className="relative z-[2] max-w-5xl mx-auto px-6 py-24 space-y-24">
           <AboutSection />
           <ArchiveSection />
           <WorkflowSection />

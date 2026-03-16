@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Server, Database, Cloud, ShieldCheck, Wrench } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
 
 const TECH_CARDS = [
   {
     title: "Frontend",
-    iconColor: "#61DAFB",
     icon: (
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="none">
+      <svg viewBox="0 0 24 24" width={20} height={20} fill="none">
         <circle cx="12" cy="12" r="2.5" fill="#61DAFB" />
         <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" fill="none" />
         <ellipse cx="12" cy="12" rx="10" ry="4" stroke="#61DAFB" strokeWidth="1.2" fill="none" transform="rotate(60 12 12)" />
@@ -18,130 +18,123 @@ const TECH_CARDS = [
   },
   {
     title: "Backend",
-    iconColor: "#8CC84B",
-    icon: (
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="#8CC84B">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#8CC84B" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-    tags: ["Node.js", "Express.js", "REST API", "JWT Auth", "Multer"],
+    icon: <Server size={20} className="text-[#8CC84B]" />,
+    tags: ["Node.js", "Express.js", "REST API", "Multer"],
   },
   {
     title: "Database",
-    iconColor: "#A855F7",
-    icon: (
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="#A855F7" strokeWidth="1.5" strokeLinecap="round">
-        <ellipse cx="12" cy="5" rx="9" ry="3" />
-        <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" />
-        <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" />
-      </svg>
-    ),
-    tags: ["MySQL", "phpMyAdmin", "XAMPP", "Azure Blob Storage"],
+    icon: <Database size={20} className="text-purple-500" />,
+    tags: ["MySQL", "phpMyAdmin", "XAMPP"],
+  },
+  {
+    title: "Cloud Storage",
+    icon: <Cloud size={20} className="text-blue-500" />,
+    tags: ["Azure Blob Storage", "Azure Cloud"],
   },
   {
     title: "Keamanan",
-    iconColor: "#C23A57",
-    icon: (
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="#C23A57" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <path d="M9 12l2 2 4-4" />
-      </svg>
-    ),
-    tags: ["JWT Token", "bcrypt", "QR Verification", "Signed Token", "HTTPS"],
+    icon: <ShieldCheck size={20} className="text-primary" />,
+    tags: ["JWT Token", "bcrypt", "QR Code", "Signed Token"],
   },
   {
-    title: "Development Tools",
-    iconColor: "#F59E0B",
-    icon: (
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-      </svg>
-    ),
-    tags: ["VS Code", "Git & GitHub", "Postman", "Chrome", "Microsoft Edge"],
-  },
-  {
-    title: "Cloud & Hosting",
-    iconColor: "#3B82F6",
-    icon: (
-      <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z" />
-      </svg>
-    ),
-    tags: ["Azure Cloud", "Azure Blob Storage", "Lovable.dev"],
+    title: "Dev Tools",
+    icon: <Wrench size={20} className="text-amber-500" />,
+    tags: ["VS Code", "Git & GitHub", "Postman", "Chrome", "MS Edge"],
   },
 ];
 
-const ORBIT_PETALS = [
-  { duration: 8, startAngle: 0, radius: 140, size: 14 },
-  { duration: 12, startAngle: 90, radius: 130, size: 11 },
-  { duration: 15, startAngle: 200, radius: 150, size: 13 },
-  { duration: 10, startAngle: 300, radius: 135, size: 10 },
+const FEATURE_PILLS = [
+  "🔒 Aman & Terenkripsi",
+  "☁️ Cloud Storage",
+  "✅ Alur Persetujuan Digital",
 ];
 
-function OrbitPetal({ duration, startAngle, radius, size }) {
+function Slide1() {
   return (
-    <div
-      className="absolute left-1/2 top-1/2"
-      style={{
-        width: 0,
-        height: 0,
-        animation: `orbit ${duration}s linear infinite`,
-        animationDelay: `${-(startAngle / 360) * duration}s`,
-        "--orbit-radius": `${radius}px`,
-      }}
-    >
-      <svg width={size} height={size * 1.3} viewBox="0 0 18 24" fill="none" style={{ marginLeft: -size / 2, marginTop: -size / 2 }}>
-        <path
-          d="M 9 0 C 15 0 18 6 18 12 C 18 18 14 24 9 24 C 4 24 0 18 0 12 C 0 6 3 0 9 0 Z"
-          fill="#FFB7C5"
-          opacity="0.6"
-        />
-      </svg>
+    <div className="flex flex-col md:flex-row items-center gap-10 w-full">
+      {/* LEFT — Logo */}
+      <div className="flex flex-col items-center gap-4 md:w-[45%] flex-shrink-0">
+        <div
+          className="flex items-center justify-center rounded-full bg-white"
+          style={{
+            width: 220,
+            height: 220,
+            boxShadow:
+              "0 8px 40px rgba(194,58,87,0.15), 0 0 0 8px rgba(255,182,193,0.2), 0 0 0 16px rgba(255,182,193,0.1)",
+            padding: 20,
+          }}
+        >
+          <img
+            src={logoSakura}
+            alt="SAKURA Logo"
+            className="rounded-xl"
+            style={{ width: 160, height: 160, objectFit: "contain" }}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground text-center">
+          SMP Negeri 4 Cikarang Barat
+        </p>
+        <p className="text-xs text-muted-foreground/60 text-center">
+          Kab. Bekasi · Jawa Barat
+        </p>
+      </div>
+
+      {/* RIGHT — Text */}
+      <div className="flex-1 min-w-0">
+        <h2
+          className="text-3xl md:text-[32px] font-bold mb-2"
+          style={{ fontFamily: "'Playfair Display', serif", color: "#1A0A0F" }}
+        >
+          Apa itu SAKURA?
+        </h2>
+        <p className="text-sm italic mb-5" style={{ color: "#C23A57" }}>
+          Secure Archiving and Keeping of Unified Records for Administration
+        </p>
+        <p className="text-[15px] leading-[1.8] mb-6" style={{ color: "#5B5468" }}>
+          SAKURA adalah sistem manajemen dokumen digital yang dirancang khusus untuk SMP Negeri 4
+          Cikarang Barat. Sistem ini membantu sekolah dalam mengelola, menyimpan, dan mengarsipkan
+          dokumen administrasi secara aman, terstruktur, dan efisien menggunakan teknologi cloud
+          modern.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {FEATURE_PILLS.map((pill) => (
+            <span
+              key={pill}
+              className="inline-block rounded-full text-xs font-medium"
+              style={{
+                background: "#FDE8EC",
+                color: "#C23A57",
+                padding: "8px 16px",
+              }}
+            >
+              {pill}
+            </span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function TechCard({ card, index, isHovered, isSelected, onClick }) {
-  const stackOffset = isHovered ? 0 : index * 8;
-  const stackRight = isHovered ? 0 : index * 4;
-  const fanY = isHovered ? -index * 74 : 0;
-
+function TechCard({ card }) {
   return (
     <div
-      onClick={() => onClick(index)}
+      className="flex flex-col gap-3 bg-white rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1.5"
       style={{
-        position: isHovered ? "relative" : "absolute",
-        top: isHovered ? 0 : stackOffset,
-        left: isHovered ? 0 : stackRight,
-        right: isHovered ? 0 : undefined,
-        width: "100%",
-        zIndex: TECH_CARDS.length - index,
-        transform: isHovered
-          ? `translateY(${fanY}px) scale(1.01)`
-          : `translateY(0)`,
-        transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        background: "rgba(255,255,255,0.88)",
-        backdropFilter: "blur(16px)",
-        WebkitBackdropFilter: "blur(16px)",
-        border: isSelected
-          ? "1.5px solid #C23A57"
-          : "1px solid rgba(255,182,193,0.35)",
-        borderRadius: "16px",
-        padding: "16px 20px",
-        boxShadow: isSelected
-          ? "0 8px 32px rgba(194,58,87,0.25)"
-          : "0 4px 20px rgba(194,58,87,0.08)",
-        cursor: "pointer",
-        opacity: !isHovered && index > 0 ? 0.95 : 1,
+        border: "1px solid rgba(255,182,193,0.3)",
+        boxShadow: "0 4px 16px rgba(194,58,87,0.06)",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = "0 12px 40px rgba(194,58,87,0.15)";
+        e.currentTarget.style.borderColor = "rgba(232,96,122,0.4)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = "0 4px 16px rgba(194,58,87,0.06)";
+        e.currentTarget.style.borderColor = "rgba(255,182,193,0.3)";
       }}
     >
-      <div className="flex items-center gap-3 mb-2.5">
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: `${card.iconColor}15` }}
-        >
-          {card.icon}
-        </div>
+      <div className="flex items-center gap-2.5">
+        {card.icon}
         <span className="font-semibold text-sm" style={{ color: "#1A0A0F" }}>
           {card.title}
         </span>
@@ -150,11 +143,12 @@ function TechCard({ card, index, isHovered, isSelected, onClick }) {
         {card.tags.map((tag) => (
           <span
             key={tag}
-            className="px-2.5 py-0.5 rounded-full font-medium"
+            className="inline-block rounded-full font-medium"
             style={{
               background: "#FDE8EC",
               color: "#C23A57",
-              fontSize: "11px",
+              fontSize: 10,
+              padding: "3px 10px",
             }}
           >
             {tag}
@@ -165,9 +159,58 @@ function TechCard({ card, index, isHovered, isSelected, onClick }) {
   );
 }
 
+function Slide2() {
+  return (
+    <div className="w-full">
+      <h2
+        className="text-2xl md:text-[28px] font-bold text-center mb-8"
+        style={{ fontFamily: "'Playfair Display', serif", color: "#1A0A0F" }}
+      >
+        Stack Teknologi SAKURA
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {TECH_CARDS.map((card) => (
+          <TechCard key={card.title} card={card} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AboutSection() {
-  const [isHovered, setIsHovered] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const TOTAL = 2;
+
+  const goTo = useCallback(
+    (idx) => {
+      setDirection(idx > activeSlide ? 1 : -1);
+      setActiveSlide(idx);
+    },
+    [activeSlide]
+  );
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setActiveSlide((p) => (p + 1) % TOTAL);
+  }, []);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setActiveSlide((p) => (p - 1 + TOTAL) % TOTAL);
+  }, []);
+
+  // Auto-advance
+  useEffect(() => {
+    const timer = setInterval(next, 6000);
+    return () => clearInterval(timer);
+  }, [next]);
+
+  const variants = {
+    enter: (dir) => ({ opacity: 0, x: dir > 0 ? 40 : -40 }),
+    center: { opacity: 1, x: 0 },
+    exit: (dir) => ({ opacity: 0, x: dir > 0 ? -40 : 40 }),
+  };
 
   return (
     <motion.div
@@ -176,81 +219,62 @@ export default function AboutSection() {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
-      className="flex flex-col md:flex-row items-center gap-10 md:gap-16 py-12"
-      style={{ position: "relative", zIndex: 2 }}
+      className="relative w-full rounded-[28px] overflow-hidden"
+      style={{
+        background: "linear-gradient(160deg, #FFF8FA 0%, #FFF0F5 50%, #FFE8F2 100%)",
+        padding: "48px 6%",
+        minHeight: 480,
+      }}
     >
-      {/* LEFT — Logo emblem */}
-      <div className="flex-shrink-0 flex flex-col items-center" style={{ width: "40%" }}>
-        <div className="relative flex items-center justify-center" style={{ width: 320, height: 320 }}>
-          {/* Glow */}
-          <div
-            className="absolute inset-0 rounded-full"
-            style={{
-              background: "radial-gradient(circle, rgba(255,182,193,0.3) 0%, rgba(255,182,193,0) 70%)",
-            }}
-          />
-          {/* Orbiting petals */}
-          {ORBIT_PETALS.map((p, i) => (
-            <OrbitPetal key={i} {...p} />
-          ))}
-          {/* Logo */}
-          <img
-            src={logoSakura}
-            alt="SAKURA Logo"
-            className="relative rounded-2xl"
-            style={{ width: 200, height: 200, objectFit: "contain" }}
-          />
-        </div>
-        <h2
-          className="text-center mt-2 font-bold"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: 48,
-            color: "#1A0A0F",
-            lineHeight: 1.1,
-          }}
+      {/* Arrow buttons */}
+      <button
+        onClick={prev}
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white transition-colors duration-200 hover:bg-secondary"
+        style={{ border: "1px solid #FFB7C5" }}
+        aria-label="Previous slide"
+      >
+        <ChevronLeft size={18} className="text-primary" />
+      </button>
+      <button
+        onClick={next}
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 rounded-full bg-white transition-colors duration-200 hover:bg-secondary"
+        style={{ border: "1px solid #FFB7C5" }}
+        aria-label="Next slide"
+      >
+        <ChevronRight size={18} className="text-primary" />
+      </button>
+
+      {/* Slide content */}
+      <div className="relative overflow-hidden" style={{ minHeight: 360 }}>
+        <motion.div
+          key={activeSlide}
+          custom={direction}
+          variants={variants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="w-full px-6 md:px-12"
         >
-          SAKURA
-        </h2>
-        <p
-          className="text-center mt-2 italic"
-          style={{ fontSize: 13, color: "#C23A57", maxWidth: 280 }}
-        >
-          Secure Archiving and Keeping of Unified Records for Administration
-        </p>
-        <p className="text-center mt-1" style={{ fontSize: 12, color: "#5B5468" }}>
-          SMP Negeri 4 Cikarang Barat
-        </p>
+          {activeSlide === 0 ? <Slide1 /> : <Slide2 />}
+        </motion.div>
       </div>
 
-      {/* RIGHT — Tech stack cards */}
-      <div className="flex-1 min-w-0">
-        <div
-          className="relative"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          style={{
-            minHeight: isHovered ? TECH_CARDS.length * 74 + 20 : TECH_CARDS.length * 8 + 90,
-            transition: "min-height 0.4s cubic-bezier(0.34,1.56,0.64,1)",
-          }}
-        >
-          {TECH_CARDS.map((card, i) => (
-            <TechCard
-              key={card.title}
-              card={card}
-              index={i}
-              isHovered={isHovered}
-              isSelected={selectedCard === i}
-              onClick={setSelectedCard}
-            />
-          ))}
-        </div>
-        <p
-          className="text-center mt-3"
-          style={{ fontSize: 11, color: "#9B7A8A" }}
-        >
-          Hover untuk melihat teknologi yang digunakan
-        </p>
+      {/* Dots */}
+      <div className="flex items-center justify-center gap-2 mt-6">
+        {Array.from({ length: TOTAL }).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => goTo(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className="rounded-full transition-all duration-300"
+            style={{
+              width: activeSlide === i ? 24 : 8,
+              height: 8,
+              background: activeSlide === i ? "#C23A57" : "#FFB7C5",
+            }}
+          />
+        ))}
       </div>
     </motion.div>
   );

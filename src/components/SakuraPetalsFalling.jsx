@@ -94,6 +94,7 @@ export default function SakuraPetalsFalling() {
     <div
       className="fixed inset-0 pointer-events-none"
       style={{ zIndex: 1, width: "100vw", height: "100vh", perspective: "600px", overflow: "hidden" }}
+
       aria-hidden="true"
     >
       {petals.map((p) => (
