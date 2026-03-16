@@ -1,181 +1,287 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, FileText, CheckCircle, Smartphone, Archive, Users, ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ArrowRight } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
-import sakuraBranch from "@/assets/sakura_branch.png";
-import heroSchool from "@/assets/hero_school.jpg";
 import SakuraPetals from "@/components/SakuraPetals";
 
-const FEATURES = [
-  { icon: FileText, title: "Arsip Digital", desc: "Simpan dan kelola dokumen akademik dalam format digital yang aman dan terstruktur." },
-  { icon: CheckCircle, title: "Alur Persetujuan", desc: "Proses persetujuan dokumen yang transparan dengan audit trail dan notifikasi real-time." },
-  { icon: Smartphone, title: "Scan Mobile", desc: "Scan dokumen langsung dari perangkat mobile menggunakan kamera." },
-  { icon: Shield, title: "Keamanan RBAC", desc: "Sistem keamanan berbasis Role-Based Access Control untuk melindungi data sensitif." },
-  { icon: Archive, title: "Pengarsipan Terstruktur", desc: "Struktur folder berdasarkan tahun, kelas, dan jenis dokumen." },
-  { icon: Users, title: "Multi-Role", desc: "Dukungan akses untuk Operator/TU, Kepala Sekolah, dan Guru." },
+/* ── node data ── */
+const NODES = [
+  {
+    id: "about",
+    label: "Apa itu SAKURA?",
+    x: 50, y: 28,
+    title: "Tentang SAKURA",
+    body: "SAKURA (Secure Archiving and Keeping of Unified Records for Administration) adalah sistem arsip digital yang dirancang untuk membantu sekolah mengelola dokumen akademik dan administrasi secara aman, terstruktur, dan efisien.",
+  },
+  {
+    id: "why",
+    label: "Mengapa Arsip Digital?",
+    x: 24, y: 44,
+    title: "Pentingnya Arsip Digital",
+    body: "Digitalisasi arsip mengurangi risiko kehilangan dokumen fisik, mempercepat pencarian data, dan memungkinkan akses terpusat dari mana saja. Arsip digital juga mendukung transparansi dan akuntabilitas administrasi sekolah.",
+  },
+  {
+    id: "workflow",
+    label: "Alur Persetujuan",
+    x: 74, y: 40,
+    title: "Alur Persetujuan Dokumen",
+    body: "Dokumen diunggah oleh Operator/TU → menunggu persetujuan Kepala Sekolah → disetujui atau ditolak → jika disetujui, Operator/TU dapat memindahkan ke arsip → QR verifikasi otomatis dibuat setelah diarsipkan.",
+  },
+  {
+    id: "security",
+    label: "Keamanan & QR",
+    x: 36, y: 68,
+    title: "Keamanan & Verifikasi QR",
+    body: "SAKURA menggunakan Role-Based Access Control (RBAC) untuk membatasi akses. Setiap dokumen yang diarsipkan dilengkapi QR Code berisi link verifikasi yang ditandatangani secara kriptografis (HMAC-SHA256) untuk mencegah pemalsuan.",
+  },
+  {
+    id: "school",
+    label: "SMP Negeri 4",
+    x: 62, y: 72,
+    title: "SMP Negeri 4 Cikarang Barat",
+    body: "Berlokasi di Kp. Kali Jeruk, Desa Kalijaya, Kec. Cikarang Barat, Kab. Bekasi, Jawa Barat. NPSN: 20218452. Sekolah negeri jenjang SMP yang berkomitmen pada digitalisasi administrasi demi transparansi dan efisiensi.",
+  },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
-};
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
-};
+/* ── SVG branch paths ── */
+function BranchSVG() {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className="absolute inset-0 w-full h-full"
+      preserveAspectRatio="xMidYMid meet"
+      style={{ zIndex: 1 }}
+    >
+      {/* main trunk */}
+      <motion.path
+        d="M50 95 C50 75, 48 60, 50 50 C52 40, 45 30, 50 18"
+        fill="none"
+        stroke="hsl(20 30% 55%)"
+        strokeWidth="0.8"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 2, ease: "easeInOut" }}
+      />
+      {/* branch left-mid */}
+      <motion.path
+        d="M49 52 C40 48, 30 46, 24 44"
+        fill="none"
+        stroke="hsl(20 30% 60%)"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.5, delay: 0.8 }}
+      />
+      {/* branch right-mid */}
+      <motion.path
+        d="M51 48 C58 44, 66 42, 74 40"
+        fill="none"
+        stroke="hsl(20 30% 60%)"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.5, delay: 1 }}
+      />
+      {/* branch down-left */}
+      <motion.path
+        d="M48 58 C44 62, 40 66, 36 68"
+        fill="none"
+        stroke="hsl(20 30% 62%)"
+        strokeWidth="0.4"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.2, delay: 1.3 }}
+      />
+      {/* branch down-right */}
+      <motion.path
+        d="M52 58 C56 62, 58 66, 62 72"
+        fill="none"
+        stroke="hsl(20 30% 62%)"
+        strokeWidth="0.4"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.2, delay: 1.5 }}
+      />
+      {/* top branch */}
+      <motion.path
+        d="M50 28 C50 24, 50 22, 50 18"
+        fill="none"
+        stroke="hsl(20 30% 58%)"
+        strokeWidth="0.5"
+        strokeLinecap="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1, delay: 1.2 }}
+      />
+    </svg>
+  );
+}
 
+/* ── single blossom node ── */
+function BlossomNode({ node, isActive, onClick }) {
+  return (
+    <motion.button
+      onClick={() => onClick(node.id)}
+      className="absolute z-10 group flex flex-col items-center gap-1"
+      style={{ left: `${node.x}%`, top: `${node.y}%`, transform: "translate(-50%, -50%)" }}
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20, delay: 1.5 + NODES.indexOf(node) * 0.15 }}
+      whileHover={{ scale: 1.18 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {/* glow ring */}
+      <span className={`
+        absolute -inset-3 rounded-full transition-all duration-500
+        ${isActive ? "bg-[hsl(340_80%_70%/0.25)] scale-110" : "bg-transparent group-hover:bg-[hsl(340_80%_70%/0.12)]"}
+      `} />
+      {/* blossom circle */}
+      <span className={`
+        relative w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-lg
+        shadow-md transition-all duration-300 border
+        ${isActive
+          ? "bg-[hsl(340_70%_65%)] border-[hsl(340_80%_75%)] shadow-[0_0_20px_hsl(340_80%_70%/0.4)]"
+          : "bg-[hsl(340_60%_88%)] border-[hsl(340_50%_82%)] group-hover:bg-[hsl(340_65%_78%)] group-hover:shadow-[0_0_14px_hsl(340_80%_70%/0.25)]"
+        }
+      `}>
+        🌸
+      </span>
+      {/* label */}
+      <span className={`
+        text-[10px] md:text-xs font-medium whitespace-nowrap px-2 py-0.5 rounded-full transition-colors duration-300
+        ${isActive ? "text-[hsl(340_70%_35%)] bg-[hsl(340_60%_92%)]" : "text-[hsl(350_20%_40%)] group-hover:text-[hsl(340_70%_35%)]"}
+      `}>
+        {node.label}
+      </span>
+    </motion.button>
+  );
+}
+
+/* ── info card ── */
+function InfoCard({ node, onClose }) {
+  if (!node) return null;
+  return (
+    <motion.div
+      key={node.id}
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 12, scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 300, damping: 26 }}
+      className="
+        absolute bottom-6 left-1/2 -translate-x-1/2 z-30
+        w-[90%] max-w-md
+        bg-white/90 backdrop-blur-xl border border-[hsl(340_40%_88%)]
+        rounded-2xl shadow-xl p-6
+      "
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-[hsl(350_20%_50%)] hover:bg-[hsl(340_40%_92%)] transition-colors"
+      >
+        <X size={14} />
+      </button>
+      <h3 className="text-lg font-semibold text-[hsl(350_30%_25%)] mb-2">{node.title}</h3>
+      <p className="text-sm leading-relaxed text-[hsl(220_10%_35%)]">{node.body}</p>
+    </motion.div>
+  );
+}
+
+/* ── main page ── */
 export default function HomePage() {
   const navigate = useNavigate();
+  const [activeNode, setActiveNode] = useState(null);
+
+  const handleNodeClick = (id) => {
+    setActiveNode((prev) => (prev === id ? null : id));
+  };
+
+  const activeData = NODES.find((n) => n.id === activeNode) || null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Nav */}
-      <nav className="sticky top-0 z-40 bg-card/80 glass border-b border-border/60">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-3">
-            <img src={logoSakura} alt="SAKURA" className="w-9 h-9 rounded-xl" />
-            <span className="font-bold text-primary text-lg tracking-wider">SAKURA</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => navigate("/login")} className="px-5 py-2 rounded-xl border border-input text-sm font-medium hover:bg-muted transition-all text-foreground">
-              Masuk
-            </button>
-            <button onClick={() => navigate("/signup")} className="px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-all shadow-soft">
-              Daftar
-            </button>
-          </div>
+    <div className="relative min-h-screen overflow-hidden" style={{ background: "linear-gradient(160deg, #FFF7FA 0%, #FFEFF5 40%, #FFF0F5 100%)" }}>
+      {/* petals */}
+      <SakuraPetals count={22} />
+
+      {/* nav */}
+      <nav className="relative z-40 flex items-center justify-between px-6 md:px-10 py-4">
+        <div className="flex items-center gap-2.5">
+          <img src={logoSakura} alt="SAKURA" className="w-8 h-8 rounded-lg" />
+          <span className="font-semibold text-[hsl(350_30%_25%)] tracking-wider text-sm">SAKURA</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate("/login")}
+            className="px-4 py-2 rounded-xl text-sm font-medium text-[hsl(350_30%_30%)] hover:bg-[hsl(340_40%_92%)] transition-colors"
+          >
+            Masuk
+          </button>
+          <button
+            onClick={() => navigate("/signup")}
+            className="px-4 py-2 rounded-xl bg-[hsl(340_70%_45%)] text-white text-sm font-semibold hover:bg-[hsl(340_70%_40%)] transition-colors shadow-sm"
+          >
+            Daftar
+          </button>
         </div>
       </nav>
 
-      {/* Hero with Sakura Petals */}
-      <section className="relative overflow-hidden min-h-[85vh] flex items-center">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary via-sakura-maroon to-primary/80" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
-        
-        {/* Sakura petals animation */}
-        <SakuraPetals count={20} />
+      {/* hero area — the interactive branch */}
+      <div className="relative w-full" style={{ height: "calc(100vh - 64px)" }}>
+        {/* decorative blurs */}
+        <div className="absolute top-[15%] left-[10%] w-64 h-64 bg-[hsl(340_60%_85%/0.3)] rounded-full blur-3xl" />
+        <div className="absolute bottom-[20%] right-[8%] w-48 h-48 bg-[hsl(330_50%_90%/0.4)] rounded-full blur-3xl" />
 
-        {/* Decorative circles */}
-        <div className="absolute top-10 right-10 w-72 h-72 bg-primary-foreground/5 rounded-full blur-xl" />
-        <div className="absolute bottom-10 left-10 w-56 h-56 bg-accent/10 rounded-full blur-2xl" />
+        {/* branch + nodes container */}
+        <div className="absolute inset-0 mx-auto" style={{ maxWidth: "800px" }}>
+          <BranchSVG />
+          {NODES.map((node) => (
+            <BlossomNode
+              key={node.id}
+              node={node}
+              isActive={activeNode === node.id}
+              onClick={handleNodeClick}
+            />
+          ))}
 
-        <div className="relative max-w-7xl mx-auto px-6 py-16 lg:py-24 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Left content */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <img src={logoSakura} alt="SAKURA" className="w-14 h-14 rounded-2xl ring-2 ring-primary-foreground/20" />
-                <div>
-                  <h2 className="text-primary-foreground font-bold text-2xl tracking-wider">SAKURA</h2>
-                  <p className="text-primary-foreground/50 text-xs font-medium tracking-wide">Document Management System</p>
-                </div>
-              </div>
-
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-primary-foreground leading-[1.1] mb-4">
-                Secure Archiving and Keeping of Unified Records for Administration
-              </h1>
-
-              <p className="text-lg text-primary-foreground/60 mb-4 leading-relaxed max-w-xl">
-                Sistem manajemen arsip digital terintegrasi untuk pengelolaan dokumen akademik secara aman, terstruktur, dan efisien.
-              </p>
-
-              {/* School info */}
-              <div className="flex items-center gap-3 mb-8 p-3 rounded-xl bg-primary-foreground/8 border border-primary-foreground/10 w-fit">
-                <img src={heroSchool} alt="SMP Negeri 4 Cikarang Barat" className="w-12 h-12 rounded-lg object-cover" />
-                <div>
-                  <p className="text-primary-foreground font-semibold text-sm">SMP Negeri 4 Cikarang Barat</p>
-                  <p className="text-primary-foreground/50 text-xs">Kabupaten Bekasi, Jawa Barat</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3 flex-wrap">
-                <button onClick={() => navigate("/login")} className="group px-7 py-3 rounded-xl bg-primary-foreground text-primary font-bold hover:shadow-elevated transition-all flex items-center gap-2">
-                  Masuk ke Sistem
-                  <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
-                </button>
-                <button onClick={() => navigate("/signup")} className="px-7 py-3 rounded-xl border-2 border-primary-foreground/25 text-primary-foreground font-semibold hover:bg-primary-foreground/10 transition-all">
-                  Daftar Akun
-                </button>
-              </div>
-            </motion.div>
-
-            {/* Right visual — Sakura branch */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-              className="hidden lg:flex items-center justify-center relative"
-            >
-              <div className="relative">
-                <div className="absolute inset-0 bg-accent/10 rounded-full blur-3xl scale-110" />
-                <img
-                  src={sakuraBranch}
-                  alt="Sakura"
-                  className="relative w-full max-w-md object-contain drop-shadow-2xl"
-                />
-              </div>
-            </motion.div>
-          </div>
+          <AnimatePresence mode="wait">
+            {activeData && <InfoCard node={activeData} onClose={() => setActiveNode(null)} />}
+          </AnimatePresence>
         </div>
-      </section>
 
-      {/* About */}
-      <section className="py-20 bg-card">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-            <h2 className="text-3xl font-bold text-foreground mb-4">Tentang SMP Negeri 4 Cikarang Barat</h2>
-            <p className="max-w-3xl mx-auto text-muted-foreground leading-relaxed">
-              SMP Negeri 4 Cikarang Barat berkomitmen pada digitalisasi administrasi sekolah. SAKURA hadir sebagai solusi modern untuk manajemen dokumen akademik yang selama ini dilakukan secara manual — mendukung transparansi, efisiensi, dan keamanan pengelolaan arsip.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-20 bg-background">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} variants={fadeUp} className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-foreground mb-3">Fitur Unggulan</h2>
-            <p className="text-muted-foreground">Solusi lengkap untuk pengelolaan arsip sekolah</p>
-          </motion.div>
-          <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: "-50px" }} variants={stagger} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <motion.div
-                key={title}
-                variants={fadeUp}
-                className="bg-card border border-border rounded-2xl p-6 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Icon size={24} className="text-primary" />
-                </div>
-                <h3 className="font-bold text-foreground text-lg mb-2">{title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-20 bg-primary relative overflow-hidden">
-        <SakuraPetals count={10} />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-foreground/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-        <div className="relative max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold text-primary-foreground mb-4">Siap Memulai?</h2>
-          <p className="text-primary-foreground/60 mb-8">Masuk ke sistem SAKURA untuk mengelola arsip dokumen sekolah Anda.</p>
-          <button onClick={() => navigate("/login")} className="group px-8 py-3 rounded-xl bg-primary-foreground text-primary font-bold hover:shadow-elevated transition-all inline-flex items-center gap-2">
-            Masuk Sekarang
-            <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+        {/* bottom CTA */}
+        <motion.div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.5, duration: 0.6 }}
+        >
+          <p className="text-xs text-[hsl(350_20%_50%)] tracking-wide font-light">
+            SMP Negeri 4 Cikarang Barat · Kab. Bekasi
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-[hsl(340_70%_45%)] text-white text-sm font-semibold hover:bg-[hsl(340_70%_40%)] shadow-lg hover:shadow-xl transition-all"
+          >
+            Masuk ke Sistem
+            <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform" />
           </button>
-        </div>
-      </section>
+        </motion.div>
 
-      {/* No footer on Home per requirement */}
+        {/* instruction hint */}
+        <motion.p
+          className="absolute top-6 left-1/2 -translate-x-1/2 z-20 text-[11px] text-[hsl(350_15%_55%)] tracking-wide font-light"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 3, duration: 1 }}
+        >
+          Klik bunga 🌸 untuk menjelajahi SAKURA
+        </motion.p>
+      </div>
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 
 const PETAL_COLORS = [
-  "hsl(330 60% 80%)",
-  "hsl(340 55% 75%)",
-  "hsl(320 50% 82%)",
-  "hsl(345 60% 85%)",
-  "hsl(335 45% 78%)",
+  "hsl(340 65% 82%)",
+  "hsl(345 55% 78%)",
+  "hsl(335 50% 85%)",
+  "hsl(350 60% 80%)",
+  "hsl(330 45% 83%)",
+  "hsl(338 58% 76%)",
 ];
 
 function randomBetween(min, max) {
@@ -17,13 +18,13 @@ export default function SakuraPetals({ count = 18 }) {
     return Array.from({ length: count }, (_, i) => ({
       id: i,
       left: `${randomBetween(0, 100)}%`,
-      size: randomBetween(8, 18),
-      duration: `${randomBetween(7, 14)}s`,
-      delay: `${randomBetween(0, 10)}s`,
-      sway: `${randomBetween(-100, 100)}px`,
+      size: randomBetween(6, 16),
+      duration: `${randomBetween(8, 16)}s`,
+      delay: `${randomBetween(0, 12)}s`,
+      sway: `${randomBetween(-80, 80)}px`,
       rotation: `${randomBetween(180, 720)}deg`,
       color: PETAL_COLORS[i % PETAL_COLORS.length],
-      opacity: randomBetween(0.3, 0.7),
+      opacity: randomBetween(0.25, 0.6),
       alt: i % 3 === 0,
     }));
   }, [count]);
