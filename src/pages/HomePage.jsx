@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, FileText, School, Workflow, Sparkles } from "lucide-react";
@@ -77,11 +78,29 @@ function SectionCard({ section, index }) {
 /* ── main page ── */
 export default function HomePage() {
   const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+  const heroRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
-      {/* nav */}
-      <nav className="relative z-40 flex items-center justify-between px-6 md:px-10 py-4">
+    <div className="relative min-h-screen overflow-x-hidden">
+      {/* nav — transparent, blur on scroll */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-4 transition-all duration-300"
+        style={{
+          background: scrolled ? "rgba(255,255,255,0.85)" : "transparent",
+          backdropFilter: scrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: scrolled ? "blur(12px)" : "none",
+          borderBottom: scrolled ? "1px solid rgba(194,58,87,0.08)" : "1px solid transparent",
+        }}
+      >
         <div className="flex items-center gap-2.5">
           <img src={logoSakura} alt="SAKURA" className="w-8 h-8 rounded-lg" />
           <span className="font-semibold text-foreground tracking-wider text-sm">SAKURA</span>
@@ -104,19 +123,22 @@ export default function HomePage() {
 
       {/* ─── HERO ─── */}
       <section
-        className="relative w-full overflow-hidden"
+        ref={heroRef}
+        className="relative w-full"
         style={{
-          height: "calc(100vh - 64px)",
+          minHeight: "100vh",
+          overflowX: "hidden",
+          overflowY: "visible",
           background: "radial-gradient(ellipse at 50% 40%, #FFF0F3 0%, #FFE4EC 60%, #FFEFF5 100%)",
         }}
       >
-        {/* Atmospheric particles (behind branch) */}
+        {/* Atmospheric particles */}
         <FloatingParticles count={25} />
 
         {/* Cherry blossom branch SVG */}
         <SakuraBranch />
 
-        {/* Falling petals (in front of everything) */}
+        {/* Falling petals */}
         <SakuraPetalsFalling />
 
         {/* Hero text — right side */}

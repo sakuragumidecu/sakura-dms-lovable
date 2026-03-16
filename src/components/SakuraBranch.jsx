@@ -1,36 +1,41 @@
 import { useState } from "react";
 
 /**
- * Cinematic SVG cherry blossom branch with LARGE realistic flowers.
- * Branch enters from the left, flowers are interactive (clickable → scroll).
+ * Cinematic SVG cherry blossom branch with realistic 3D-style flowers.
+ * Flowers are clickable and scroll to sections.
  */
 
+/* ── Flower positions ── */
 const FLOWER_NODES = [
-  { cx: 245, cy: 275, size: 28, grad: "blossomA", section: "about", label: "Apa itu SAKURA?" },
-  { cx: 365, cy: 240, size: 24, grad: "blossomB", section: "why", label: "Arsip Digital" },
-  { cx: 480, cy: 140, size: 30, grad: "blossomA", section: "workflow", label: "Alur Persetujuan" },
-  { cx: 660, cy: 150, size: 26, grad: "blossomB", section: "security", label: "Keamanan & QR" },
-  { cx: 520, cy: 458, size: 25, grad: "blossomA", section: "school", label: "SMP Negeri 4" },
-  // Extra decorative flowers (no click)
-  { cx: 545, cy: 110, size: 20, grad: "blossomB", section: null, label: null },
-  { cx: 710, cy: 130, size: 18, grad: "blossomA", section: null, label: null },
-  { cx: 575, cy: 475, size: 19, grad: "blossomB", section: null, label: null },
-  { cx: 650, cy: 230, size: 22, grad: "blossomA", section: null, label: null },
-  { cx: 720, cy: 226, size: 17, grad: "blossomB", section: null, label: null },
-  { cx: 650, cy: 175, size: 21, grad: "blossomA", section: null, label: null },
-  { cx: 180, cy: 316, size: 19, grad: "blossomB", section: null, label: null },
-  { cx: 450, cy: 400, size: 20, grad: "blossomA", section: null, label: null },
-  { cx: 300, cy: 290, size: 16, grad: "blossomB", section: null, label: null },
+  // Interactive flowers (linked to sections)
+  { cx: 245, cy: 275, size: 32, rot: -10, section: "about", label: "Apa itu SAKURA?" },
+  { cx: 365, cy: 240, size: 28, rot: 15, section: "why", label: "Arsip Digital" },
+  { cx: 480, cy: 140, size: 34, rot: -5, section: "workflow", label: "Alur Persetujuan" },
+  { cx: 660, cy: 150, size: 30, rot: 20, section: "security", label: "Keamanan & QR" },
+  { cx: 520, cy: 458, size: 29, rot: -15, section: "school", label: "SMP Negeri 4" },
+  // Decorative flowers
+  { cx: 545, cy: 110, size: 24, rot: 30, section: null, label: null },
+  { cx: 710, cy: 130, size: 22, rot: -25, section: null, label: null },
+  { cx: 575, cy: 475, size: 23, rot: 10, section: null, label: null },
+  { cx: 650, cy: 230, size: 26, rot: -20, section: null, label: null },
+  { cx: 720, cy: 226, size: 20, rot: 5, section: null, label: null },
+  { cx: 650, cy: 175, size: 25, rot: -30, section: null, label: null },
+  { cx: 180, cy: 316, size: 22, rot: 12, section: null, label: null },
+  { cx: 450, cy: 400, size: 24, rot: -8, section: null, label: null },
+  { cx: 300, cy: 290, size: 19, rot: 25, section: null, label: null },
+  { cx: 420, cy: 170, size: 21, rot: -18, section: null, label: null },
+  { cx: 590, cy: 145, size: 20, rot: 8, section: null, label: null },
+  { cx: 500, cy: 430, size: 18, rot: -12, section: null, label: null },
 ];
 
 const BUD_POSITIONS = [
-  { cx: 220, cy: 300, size: 9 },
-  { cx: 400, cy: 205, size: 10 },
-  { cx: 500, cy: 155, size: 8 },
-  { cx: 580, cy: 195, size: 9 },
-  { cx: 690, cy: 140, size: 8 },
-  { cx: 470, cy: 430, size: 9 },
-  { cx: 620, cy: 170, size: 8 },
+  { cx: 220, cy: 300, size: 9, rot: -20 },
+  { cx: 400, cy: 205, size: 10, rot: 15 },
+  { cx: 500, cy: 155, size: 8, rot: -10 },
+  { cx: 580, cy: 195, size: 9, rot: 25 },
+  { cx: 690, cy: 140, size: 8, rot: -15 },
+  { cx: 470, cy: 430, size: 9, rot: 10 },
+  { cx: 620, cy: 170, size: 8, rot: -5 },
 ];
 
 function scrollToSection(id) {
@@ -38,107 +43,137 @@ function scrollToSection(id) {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/** Render a large, realistic 5-petal cherry blossom */
-function renderLargeFlower(node, hoveredId, setHoveredId) {
-  const { cx, cy, size, grad, section, label } = node;
+/**
+ * Generate a single wide, rounded heart-shaped petal path
+ * centered at (0,0), pointing upward, then rotate by angle.
+ */
+function petalPath(angle, size) {
+  const s = size / 50; // scale factor relative to viewBox 100
+  const rad = (angle * Math.PI) / 180;
+  // Wide rounded heart petal shape
+  const pts = [
+    [0, -size * 0.95],   // tip
+    [-size * 0.55, -size * 0.7],  // left control
+    [-size * 0.65, -size * 0.2],  // left wide
+    [-size * 0.35, size * 0.1],   // left base
+    [0, 0],                        // center
+    [size * 0.35, size * 0.1],    // right base
+    [size * 0.65, -size * 0.2],   // right wide
+    [size * 0.55, -size * 0.7],   // right control
+  ];
+  
+  // Rotate all points
+  const rotate = ([x, y]) => {
+    const cos = Math.cos(rad);
+    const sin = Math.sin(rad);
+    return [x * cos - y * sin, x * sin + y * cos];
+  };
+
+  const r = pts.map(rotate);
+  
+  return `M ${r[0][0]} ${r[0][1]} 
+    C ${r[1][0]} ${r[1][1]}, ${r[2][0]} ${r[2][1]}, ${r[3][0]} ${r[3][1]} 
+    Q ${r[4][0]} ${r[4][1]}, ${r[5][0]} ${r[5][1]} 
+    C ${r[6][0]} ${r[6][1]}, ${r[7][0]} ${r[7][1]}, ${r[0][0]} ${r[0][1]} Z`;
+}
+
+/** Render a 3D-style 5-petal cherry blossom */
+function renderFlower(node, hoveredId, setHoveredId) {
+  const { cx, cy, size, rot, section, label } = node;
   const isInteractive = !!section;
   const isHovered = hoveredId === section;
-  const scale = isHovered ? 1.15 : 1;
+  const scale = isHovered ? 1.2 : 1;
   const petalAngles = [0, 72, 144, 216, 288];
-  const petalLength = size * 1.1;
-
-  const petalPath = (angle) => {
-    const rad = (angle * Math.PI) / 180;
-    const tipX = cx + Math.cos(rad) * petalLength;
-    const tipY = cy + Math.sin(rad) * petalLength;
-    const cp1Angle = rad - 0.45;
-    const cp2Angle = rad + 0.45;
-    const cpDist = size * 0.7;
-    const cp1x = cx + Math.cos(cp1Angle) * cpDist;
-    const cp1y = cy + Math.sin(cp1Angle) * cpDist;
-    const cp2x = cx + Math.cos(cp2Angle) * cpDist;
-    const cp2y = cy + Math.sin(cp2Angle) * cpDist;
-    return `M ${cx} ${cy} Q ${cp1x} ${cp1y} ${tipX} ${tipY} Q ${cp2x} ${cp2y} ${cx} ${cy}`;
-  };
-
-  // Petal vein line
-  const veinPath = (angle) => {
-    const rad = (angle * Math.PI) / 180;
-    const endX = cx + Math.cos(rad) * petalLength * 0.85;
-    const endY = cy + Math.sin(rad) * petalLength * 0.85;
-    return `M ${cx} ${cy} L ${endX} ${endY}`;
-  };
-
-  // Stamen positions
-  const stamenAngles = [36, 108, 180, 252, 324];
+  const stamenCount = 10;
+  const stamenLength = size * 0.45;
+  const uniqueId = `flower-${cx}-${cy}`;
 
   return (
     <g
-      key={`flower-${cx}-${cy}`}
+      key={uniqueId}
       style={{
         cursor: isInteractive ? "pointer" : "default",
-        transform: `scale(${scale})`,
-        transformOrigin: `${cx}px ${cy}px`,
-        transition: "transform 0.3s ease",
+        transform: `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${scale})`,
+        transformOrigin: "0 0",
+        transition: "transform 0.3s ease, filter 0.3s ease",
         filter: isHovered
-          ? "drop-shadow(0 2px 12px rgba(255,150,180,0.6))"
-          : "drop-shadow(0 2px 8px rgba(255,150,180,0.3))",
+          ? "drop-shadow(0 3px 12px rgba(200,80,100,0.5))"
+          : "drop-shadow(1px 2px 4px rgba(200,80,100,0.3))",
       }}
       onClick={isInteractive ? () => scrollToSection(section) : undefined}
       onMouseEnter={isInteractive ? () => setHoveredId(section) : undefined}
       onMouseLeave={isInteractive ? () => setHoveredId(null) : undefined}
     >
-      {/* Petals */}
+      {/* Petal gradient defs scoped to this flower */}
+      <defs>
+        <radialGradient id={`pg-${uniqueId}`} cx="40%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
+          <stop offset="45%" stopColor="#FFB7C5" />
+          <stop offset="100%" stopColor="#FF85A1" />
+        </radialGradient>
+      </defs>
+
+      {/* 5 petals */}
       {petalAngles.map((angle) => (
-        <path
-          key={`petal-${angle}`}
-          d={petalPath(angle)}
-          fill={`url(#${grad})`}
-          stroke="#FFB0C0"
-          strokeWidth="0.5"
-          opacity="0.92"
-        />
+        <g key={`p-${angle}`}>
+          <path
+            d={petalPath(angle, size)}
+            fill={`url(#pg-${uniqueId})`}
+            stroke="#FFa0b5"
+            strokeWidth="0.5"
+            opacity="0.94"
+          />
+          {/* Vein — subtle white stripe */}
+          <line
+            x1={0}
+            y1={0}
+            x2={Math.sin((angle * Math.PI) / 180) * size * -0.7}
+            y2={-Math.cos((angle * Math.PI) / 180) * size * 0.7}
+            stroke="white"
+            strokeWidth="0.8"
+            opacity="0.2"
+            strokeLinecap="round"
+          />
+        </g>
       ))}
-      {/* Petal veins */}
-      {petalAngles.map((angle) => (
-        <path
-          key={`vein-${angle}`}
-          d={veinPath(angle)}
-          stroke="#FF8FAB"
-          strokeWidth="0.4"
-          opacity="0.35"
-          fill="none"
-        />
-      ))}
-      {/* Center */}
-      <circle cx={cx} cy={cy} r={size * 0.22} fill="url(#flowerCenter)" />
-      {/* Stamens — yellow/cream dots */}
-      {stamenAngles.map((angle) => {
-        const rad = (angle * Math.PI) / 180;
-        const sx = cx + Math.cos(rad) * size * 0.35;
-        const sy = cy + Math.sin(rad) * size * 0.35;
+
+      {/* Center gradient */}
+      <defs>
+        <radialGradient id={`cg-${uniqueId}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#FFD700" />
+          <stop offset="100%" stopColor="#FFA500" />
+        </radialGradient>
+      </defs>
+      <circle r={size * 0.16} fill={`url(#cg-${uniqueId})`} />
+
+      {/* Stamens */}
+      {Array.from({ length: stamenCount }, (_, i) => {
+        const a = (i * 360) / stamenCount;
+        const rad = (a * Math.PI) / 180;
+        const endX = Math.cos(rad) * stamenLength;
+        const endY = Math.sin(rad) * stamenLength;
+        const startX = Math.cos(rad) * size * 0.12;
+        const startY = Math.sin(rad) * size * 0.12;
         return (
-          <g key={`stamen-${angle}`}>
+          <g key={`s-${i}`}>
             <line
-              x1={cx + Math.cos(rad) * size * 0.15}
-              y1={cy + Math.sin(rad) * size * 0.15}
-              x2={sx}
-              y2={sy}
-              stroke="#E8C547"
-              strokeWidth="0.6"
+              x1={startX} y1={startY}
+              x2={endX} y2={endY}
+              stroke="#C23A57"
+              strokeWidth="1.2"
               opacity="0.7"
+              strokeLinecap="round"
             />
-            <circle cx={sx} cy={sy} r="1.6" fill="#F5D76E" opacity="0.85" />
+            <circle cx={endX} cy={endY} r="2.2" fill="#FFD700" opacity="0.9" />
           </g>
         );
       })}
-      {/* Tooltip */}
+
+      {/* Tooltip on hover */}
       {isHovered && label && (
         <foreignObject
-          x={cx - 60}
-          y={cy - size - 30}
-          width="120"
-          height="28"
+          x={-60} y={-size - 32}
+          width="120" height="28"
           style={{ overflow: "visible", pointerEvents: "none" }}
         >
           <div
@@ -162,14 +197,13 @@ function renderLargeFlower(node, hoveredId, setHoveredId) {
   );
 }
 
-/** Render a half-open bud */
+/** Render a bud */
 function renderBud(bud) {
-  const { cx, cy, size } = bud;
+  const { cx, cy, size, rot } = bud;
   return (
-    <g key={`bud-${cx}-${cy}`}>
-      <ellipse cx={cx} cy={cy} rx={size * 0.6} ry={size} fill="#FFB7C5" opacity="0.75" transform={`rotate(-20 ${cx} ${cy})`} />
-      <ellipse cx={cx + 1} cy={cy} rx={size * 0.4} ry={size * 0.8} fill="#FFC0CB" opacity="0.6" transform={`rotate(10 ${cx} ${cy})`} />
-      <ellipse cx={cx - 1} cy={cy + 1} rx={size * 0.3} ry={size * 0.6} fill="#FFD6E0" opacity="0.5" transform={`rotate(-5 ${cx} ${cy})`} />
+    <g key={`bud-${cx}-${cy}`} transform={`rotate(${rot} ${cx} ${cy})`}>
+      <ellipse cx={cx} cy={cy} rx={size * 0.5} ry={size} fill="#FF85A1" opacity="0.75" />
+      <ellipse cx={cx + 1} cy={cy - 1} rx={size * 0.35} ry={size * 0.75} fill="#FFB7C5" opacity="0.6" />
     </g>
   );
 }
@@ -182,11 +216,10 @@ export default function SakuraBranch() {
       className="absolute inset-0 w-full h-full"
       viewBox="0 0 1200 800"
       preserveAspectRatio="xMinYMid slice"
-      style={{ zIndex: 2 }}
+      style={{ zIndex: 2, overflow: "visible" }}
       aria-hidden="true"
     >
       <defs>
-        {/* Branch gradients */}
         <linearGradient id="branchMain" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#3D1C02" />
           <stop offset="30%" stopColor="#7B4A2D" />
@@ -205,25 +238,6 @@ export default function SakuraBranch() {
           <stop offset="50%" stopColor="#9B7653" />
           <stop offset="100%" stopColor="#5C3A1E" />
         </linearGradient>
-
-        {/* Large flower petal gradients — 3D radial */}
-        <radialGradient id="blossomA" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#FFF0F5" />
-          <stop offset="40%" stopColor="#FFB7C5" />
-          <stop offset="100%" stopColor="#FF8FAB" />
-        </radialGradient>
-        <radialGradient id="blossomB" cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="#FFF5F8" />
-          <stop offset="40%" stopColor="#FFC0CB" />
-          <stop offset="100%" stopColor="#FFAABB" />
-        </radialGradient>
-
-        {/* Flower center gradient */}
-        <radialGradient id="flowerCenter" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFFDE8" />
-          <stop offset="60%" stopColor="#F5D76E" />
-          <stop offset="100%" stopColor="#E8C547" />
-        </radialGradient>
       </defs>
 
       {/* ── MAIN TRUNK ── */}
@@ -252,11 +266,11 @@ export default function SakuraBranch() {
       <path d="M 150 370 C 155 350, 165 335, 180 320" fill="none" stroke="url(#branchTwig)" strokeWidth="4" strokeLinecap="round" />
       <path d="M 600 210 C 615 195, 630 185, 650 178" fill="none" stroke="url(#branchTwig)" strokeWidth="3" strokeLinecap="round" />
 
-      {/* ── BUDS (half-open) ── */}
+      {/* ── BUDS ── */}
       {BUD_POSITIONS.map((bud) => renderBud(bud))}
 
-      {/* ── LARGE FLOWERS ── */}
-      {FLOWER_NODES.map((node) => renderLargeFlower(node, hoveredId, setHoveredId))}
+      {/* ── FLOWERS ── */}
+      {FLOWER_NODES.map((node) => renderFlower(node, hoveredId, setHoveredId))}
     </svg>
   );
 }

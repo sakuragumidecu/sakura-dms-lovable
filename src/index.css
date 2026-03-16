@@ -244,24 +244,36 @@
     transform: translate3d(0, 0, 0) rotate(0deg) rotateX(0deg) rotateY(0deg) scale(1);
     opacity: 0;
   }
-  5% {
-    opacity: 0.9;
+  4% {
+    opacity: var(--petal-opacity, 0.85);
+  }
+  25% {
+    transform: translate3d(calc(var(--petal-drift, 40px) * -0.5), 25vh, 0)
+      rotate(calc(var(--petal-rotation, 360deg) * 0.25))
+      rotateX(var(--petal-tiltX, 20deg))
+      rotateY(calc(var(--petal-tiltY, 15deg) * 0.5))
+      scale(0.95);
   }
   50% {
-    transform: translate3d(calc(var(--petal-drift, 40px) * -0.6), 45vh, 0)
+    transform: translate3d(calc(var(--petal-drift, 40px) * 0.3), 50vh, 0)
       rotate(calc(var(--petal-rotation, 360deg) * 0.5))
-      rotateX(var(--petal-tiltX, 15deg))
+      rotateX(calc(var(--petal-tiltX, 20deg) * -0.5))
       rotateY(var(--petal-tiltY, 15deg))
       scale(0.9);
-    opacity: 0.8;
+    opacity: var(--petal-opacity, 0.8);
   }
-  85% {
-    opacity: 0.4;
+  75% {
+    transform: translate3d(calc(var(--petal-drift, 40px) * -0.4), 80vh, 0)
+      rotate(calc(var(--petal-rotation, 360deg) * 0.75))
+      rotateX(var(--petal-tiltX, 20deg))
+      rotateY(calc(var(--petal-tiltY, 15deg) * -0.5))
+      scale(0.8);
+    opacity: calc(var(--petal-opacity, 0.7) * 0.6);
   }
   100% {
     transform: translate3d(var(--petal-drift, 40px), 110vh, 0)
       rotate(var(--petal-rotation, 360deg))
-      rotateX(calc(var(--petal-tiltX, 15deg) * -1))
+      rotateX(calc(var(--petal-tiltX, 20deg) * -1))
       rotateY(calc(var(--petal-tiltY, 15deg) * -1))
       scale(0.6);
     opacity: 0;
@@ -273,21 +285,28 @@
     transform: translate3d(0, 0, 0) rotate(0deg) rotateX(0deg) scale(1);
     opacity: 0;
   }
-  8% {
-    opacity: 0.85;
+  6% {
+    opacity: var(--petal-opacity, 0.8);
   }
-  30% {
-    transform: translate3d(calc(var(--petal-drift, -50px) * 0.4), 25vh, 0)
-      rotate(calc(var(--petal-rotation, 400deg) * 0.3))
+  25% {
+    transform: translate3d(calc(var(--petal-drift, -50px) * 0.4), 22vh, 0)
+      rotate(calc(var(--petal-rotation, 400deg) * 0.2))
       rotateX(var(--petal-tiltX, 20deg))
       scale(0.95);
   }
-  60% {
-    transform: translate3d(calc(var(--petal-drift, -50px) * -0.3), 55vh, 0)
-      rotate(calc(var(--petal-rotation, 400deg) * 0.65))
-      rotateX(calc(var(--petal-tiltX, 20deg) * -0.5))
-      scale(0.85);
-    opacity: 0.6;
+  50% {
+    transform: translate3d(calc(var(--petal-drift, -50px) * -0.3), 48vh, 0)
+      rotate(calc(var(--petal-rotation, 400deg) * 0.5))
+      rotateX(calc(var(--petal-tiltX, 20deg) * -0.3))
+      scale(0.88);
+    opacity: var(--petal-opacity, 0.75);
+  }
+  75% {
+    transform: translate3d(calc(var(--petal-drift, -50px) * 0.5), 78vh, 0)
+      rotate(calc(var(--petal-rotation, 400deg) * 0.8))
+      rotateX(var(--petal-tiltX, 20deg))
+      scale(0.75);
+    opacity: calc(var(--petal-opacity, 0.6) * 0.5);
   }
   100% {
     transform: translate3d(var(--petal-drift, -50px), 110vh, 0)
