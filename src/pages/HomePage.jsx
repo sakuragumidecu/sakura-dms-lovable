@@ -121,6 +121,9 @@ export default function HomePage() {
         </div>
       </nav>
 
+      {/* Falling petals — fixed overlay across all sections */}
+      <SakuraPetalsFalling />
+
       {/* ─── HERO ─── */}
       <section
         ref={heroRef}
@@ -137,9 +140,6 @@ export default function HomePage() {
 
         {/* Cherry blossom branch SVG */}
         <SakuraBranch />
-
-        {/* Falling petals */}
-        <SakuraPetalsFalling />
 
         {/* Hero text — right side */}
         <motion.div

@@ -1,14 +1,13 @@
 import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FLOWER_NODES } from "@/components/SakuraBranch";
 
 /**
- * 80 SVG sakura petals falling with pure CSS keyframe animation.
- * Each petal falls from -20px to 110vh with unique timing.
+ * Petals spawn FROM flower positions on the branch, then fall 200vh
+ * through all sections. Rendered in a fixed container.
  */
 
-const PETAL_COLORS = [
-  "#FFB7C5", "#FFC8D5", "#FF9EB5", "#FFD6E0", "#FFAFC5",
-];
+const PETAL_COLORS = ["#FFB7C5", "#FFC8D5", "#FF9EB5", "#FFD6E0", "#FFAFC5"];
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
@@ -21,7 +20,6 @@ function PetalSVG({ color, width, height, blur }) {
       height={height}
       viewBox="0 0 18 24"
       fill="none"
-      xmlns="http://www.w3.org/2000/svg"
       style={blur ? { filter: "blur(0.8px)" } : undefined}
     >
       <path
@@ -44,19 +42,32 @@ export default function SakuraPetalsFalling() {
   const isMobile = useIsMobile();
   const count = isMobile ? 35 : 80;
 
+  // Convert flower SVG positions to viewport percentages
+  // SVG viewBox is 0 0 1200 800, hero is 100vw x 100vh
+  const flowerPercents = useMemo(() =>
+    FLOWER_NODES.map((f) => ({
+      xPct: (f.cx / 1200) * 100,
+      yPct: (f.cy / 800) * 100,
+    })), []
+  );
+
   const petals = useMemo(() => {
     return Array.from({ length: count }, (_, i) => {
+      // Pick a random flower as spawn point
+      const flower = flowerPercents[i % flowerPercents.length];
       const color = PETAL_COLORS[i % PETAL_COLORS.length];
-      const w = rand(10, 22);
+      const w = rand(10, 20);
       const h = w * rand(1.2, 1.5);
-      const duration = rand(6, 14);
-      const delay = rand(0, 12);
-      const driftX = rand(-50, 50);
+      const duration = rand(8, 15);
+      const delay = rand(0, 10);
+      const driftX = rand(-60, 60);
       const rotation = rand(360, 540);
       const tiltY = rand(0, 180);
-      const startX = rand(5, 95);
+      // Spawn near the flower position (slight randomness)
+      const startX = flower.xPct + rand(-3, 3);
+      const startY = flower.yPct; // vh percentage of hero
       const blur = i % 6 === 0;
-      const opacity = rand(0.65, 0.9);
+      const opacity = rand(0.6, 0.85);
 
       return {
         id: i,
@@ -67,12 +78,12 @@ export default function SakuraPetalsFalling() {
         style: {
           position: "absolute",
           left: `${startX}%`,
-          top: "-20px",
+          top: `${startY}vh`,
           width: `${w}px`,
           height: `${h}px`,
           willChange: "transform",
           opacity: 0,
-          animationName: i % 2 === 0 ? "petalFall" : "petalFall2",
+          animationName: i % 2 === 0 ? "petalFallFromFlower" : "petalFallFromFlower2",
           animationDuration: `${duration}s`,
           animationDelay: `${delay}s`,
           animationTimingFunction: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
@@ -83,17 +94,16 @@ export default function SakuraPetalsFalling() {
           "--petal-tiltX": `${rand(20, 40)}deg`,
           "--petal-tiltY": `${tiltY}deg`,
           "--petal-opacity": opacity,
-          zIndex: 30,
           pointerEvents: "none",
         },
       };
     });
-  }, [count]);
+  }, [count, flowerPercents]);
 
   return (
     <div
-      className="absolute inset-0 pointer-events-none"
-      style={{ zIndex: 30, perspective: "600px", overflow: "visible" }}
+      className="fixed inset-0 pointer-events-none"
+      style={{ zIndex: 10, width: "100%", height: "200vh", perspective: "600px", overflow: "visible" }}
       aria-hidden="true"
     >
       {petals.map((p) => (

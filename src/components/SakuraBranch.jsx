@@ -1,31 +1,31 @@
 import { useState } from "react";
 
 /**
- * Cinematic SVG cherry blossom branch with realistic 3D-style flowers.
- * Flowers are clickable and scroll to sections.
+ * Cinematic SVG cherry blossom branch with 3D-style flowers.
+ * Uses the exact petal path from the reference template.
  */
 
-/* ── Flower positions ── */
-const FLOWER_NODES = [
-  // Interactive flowers (linked to sections)
-  { cx: 245, cy: 275, size: 32, rot: -10, section: "about", label: "Apa itu SAKURA?" },
-  { cx: 365, cy: 240, size: 28, rot: 15, section: "why", label: "Arsip Digital" },
-  { cx: 480, cy: 140, size: 34, rot: -5, section: "workflow", label: "Alur Persetujuan" },
-  { cx: 660, cy: 150, size: 30, rot: 20, section: "security", label: "Keamanan & QR" },
-  { cx: 520, cy: 458, size: 29, rot: -15, section: "school", label: "SMP Negeri 4" },
-  // Decorative flowers
-  { cx: 545, cy: 110, size: 24, rot: 30, section: null, label: null },
-  { cx: 710, cy: 130, size: 22, rot: -25, section: null, label: null },
-  { cx: 575, cy: 475, size: 23, rot: 10, section: null, label: null },
-  { cx: 650, cy: 230, size: 26, rot: -20, section: null, label: null },
-  { cx: 720, cy: 226, size: 20, rot: 5, section: null, label: null },
-  { cx: 650, cy: 175, size: 25, rot: -30, section: null, label: null },
-  { cx: 180, cy: 316, size: 22, rot: 12, section: null, label: null },
-  { cx: 450, cy: 400, size: 24, rot: -8, section: null, label: null },
-  { cx: 300, cy: 290, size: 19, rot: 25, section: null, label: null },
-  { cx: 420, cy: 170, size: 21, rot: -18, section: null, label: null },
-  { cx: 590, cy: 145, size: 20, rot: 8, section: null, label: null },
-  { cx: 500, cy: 430, size: 18, rot: -12, section: null, label: null },
+/* ── Flower positions (in SVG viewBox 0 0 1200 800) ── */
+export const FLOWER_NODES = [
+  // Interactive flowers (linked to sections) — larger sizes
+  { cx: 245, cy: 275, size: 65, rot: -10, section: "about", label: "Apa itu SAKURA?" },
+  { cx: 365, cy: 240, size: 60, rot: 15, section: "why", label: "Arsip Digital" },
+  { cx: 480, cy: 140, size: 70, rot: -5, section: "workflow", label: "Alur Persetujuan" },
+  { cx: 660, cy: 150, size: 62, rot: 20, section: "security", label: "Keamanan & QR" },
+  { cx: 520, cy: 458, size: 60, rot: -15, section: "school", label: "SMP Negeri 4" },
+  // Decorative flowers — smaller, no interaction
+  { cx: 545, cy: 110, size: 48, rot: 30, section: null, label: null },
+  { cx: 710, cy: 130, size: 45, rot: -25, section: null, label: null },
+  { cx: 575, cy: 475, size: 46, rot: 10, section: null, label: null },
+  { cx: 650, cy: 230, size: 50, rot: -20, section: null, label: null },
+  { cx: 720, cy: 226, size: 42, rot: 5, section: null, label: null },
+  { cx: 650, cy: 175, size: 50, rot: -30, section: null, label: null },
+  { cx: 180, cy: 316, size: 44, rot: 12, section: null, label: null },
+  { cx: 450, cy: 400, size: 48, rot: -8, section: null, label: null },
+  { cx: 300, cy: 290, size: 40, rot: 25, section: null, label: null },
+  { cx: 420, cy: 170, size: 42, rot: -18, section: null, label: null },
+  { cx: 590, cy: 145, size: 40, rot: 8, section: null, label: null },
+  { cx: 500, cy: 430, size: 38, rot: -12, section: null, label: null },
 ];
 
 const BUD_POSITIONS = [
@@ -43,150 +43,121 @@ function scrollToSection(id) {
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-/**
- * Generate a single wide, rounded heart-shaped petal path
- * centered at (0,0), pointing upward, then rotate by angle.
- */
-function petalPath(angle, size) {
-  const s = size / 50; // scale factor relative to viewBox 100
-  const rad = (angle * Math.PI) / 180;
-  // Wide rounded heart petal shape
-  const pts = [
-    [0, -size * 0.95],   // tip
-    [-size * 0.55, -size * 0.7],  // left control
-    [-size * 0.65, -size * 0.2],  // left wide
-    [-size * 0.35, size * 0.1],   // left base
-    [0, 0],                        // center
-    [size * 0.35, size * 0.1],    // right base
-    [size * 0.65, -size * 0.2],   // right wide
-    [size * 0.55, -size * 0.7],   // right control
-  ];
-  
-  // Rotate all points
-  const rotate = ([x, y]) => {
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
-    return [x * cos - y * sin, x * sin + y * cos];
-  };
+/* ── Stamen endpoints (9 stamens radiating from center 50,50 in viewBox 100) ── */
+const STAMEN_TIPS = [
+  [50, 33], [60, 35], [65, 45], [63, 57], [55, 65],
+  [45, 65], [37, 57], [35, 45], [40, 35],
+];
 
-  const r = pts.map(rotate);
-  
-  return `M ${r[0][0]} ${r[0][1]} 
-    C ${r[1][0]} ${r[1][1]}, ${r[2][0]} ${r[2][1]}, ${r[3][0]} ${r[3][1]} 
-    Q ${r[4][0]} ${r[4][1]}, ${r[5][0]} ${r[5][1]} 
-    C ${r[6][0]} ${r[6][1]}, ${r[7][0]} ${r[7][1]}, ${r[0][0]} ${r[0][1]} Z`;
-}
-
-/** Render a 3D-style 5-petal cherry blossom */
+/** Render a single 3D cherry blossom using the exact template */
 function renderFlower(node, hoveredId, setHoveredId) {
   const { cx, cy, size, rot, section, label } = node;
   const isInteractive = !!section;
   const isHovered = hoveredId === section;
   const scale = isHovered ? 1.2 : 1;
-  const petalAngles = [0, 72, 144, 216, 288];
-  const stamenCount = 10;
-  const stamenLength = size * 0.45;
-  const uniqueId = `flower-${cx}-${cy}`;
+  const uid = `fl-${cx}-${cy}`;
+  const svgSize = size; // size in SVG viewBox units
 
   return (
     <g
-      key={uniqueId}
+      key={uid}
       style={{
         cursor: isInteractive ? "pointer" : "default",
-        transform: `translate(${cx}px, ${cy}px) rotate(${rot}deg) scale(${scale})`,
-        transformOrigin: "0 0",
+        transform: `translate(${cx - svgSize / 2}px, ${cy - svgSize / 2}px) scale(${scale})`,
+        transformOrigin: `${svgSize / 2}px ${svgSize / 2}px`,
         transition: "transform 0.3s ease, filter 0.3s ease",
         filter: isHovered
-          ? "drop-shadow(0 3px 12px rgba(200,80,100,0.5))"
-          : "drop-shadow(1px 2px 4px rgba(200,80,100,0.3))",
+          ? "drop-shadow(0 4px 14px rgba(200,80,100,0.5))"
+          : "drop-shadow(2px 4px 8px rgba(200,80,100,0.3))",
+        opacity: isInteractive ? 1 : 0.85,
       }}
       onClick={isInteractive ? () => scrollToSection(section) : undefined}
       onMouseEnter={isInteractive ? () => setHoveredId(section) : undefined}
       onMouseLeave={isInteractive ? () => setHoveredId(null) : undefined}
     >
-      {/* Petal gradient defs scoped to this flower */}
-      <defs>
-        <radialGradient id={`pg-${uniqueId}`} cx="40%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
-          <stop offset="45%" stopColor="#FFB7C5" />
-          <stop offset="100%" stopColor="#FF85A1" />
-        </radialGradient>
-      </defs>
+      <svg
+        viewBox="0 0 100 100"
+        width={svgSize}
+        height={svgSize}
+        overflow="visible"
+        style={{ transform: `rotate(${rot}deg)` }}
+      >
+        <defs>
+          <radialGradient id={`pg-${uid}`} cx="50%" cy="60%" r="50%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="40%" stopColor="#FFB7C5" />
+            <stop offset="100%" stopColor="#E8607A" />
+          </radialGradient>
+          <radialGradient id={`cg-${uid}`} cx="50%" cy="40%" r="50%">
+            <stop offset="0%" stopColor="#FFE066" />
+            <stop offset="100%" stopColor="#FFA500" />
+          </radialGradient>
+        </defs>
 
-      {/* 5 petals */}
-      {petalAngles.map((angle) => (
-        <g key={`p-${angle}`}>
-          <path
-            d={petalPath(angle, size)}
-            fill={`url(#pg-${uniqueId})`}
-            stroke="#FFa0b5"
-            strokeWidth="0.5"
-            opacity="0.94"
-          />
-          {/* Vein — subtle white stripe */}
-          <line
-            x1={0}
-            y1={0}
-            x2={Math.sin((angle * Math.PI) / 180) * size * -0.7}
-            y2={-Math.cos((angle * Math.PI) / 180) * size * 0.7}
-            stroke="white"
-            strokeWidth="0.8"
-            opacity="0.2"
-            strokeLinecap="round"
-          />
-        </g>
-      ))}
-
-      {/* Center gradient */}
-      <defs>
-        <radialGradient id={`cg-${uniqueId}`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#FFD700" />
-          <stop offset="100%" stopColor="#FFA500" />
-        </radialGradient>
-      </defs>
-      <circle r={size * 0.16} fill={`url(#cg-${uniqueId})`} />
-
-      {/* Stamens */}
-      {Array.from({ length: stamenCount }, (_, i) => {
-        const a = (i * 360) / stamenCount;
-        const rad = (a * Math.PI) / 180;
-        const endX = Math.cos(rad) * stamenLength;
-        const endY = Math.sin(rad) * stamenLength;
-        const startX = Math.cos(rad) * size * 0.12;
-        const startY = Math.sin(rad) * size * 0.12;
-        return (
-          <g key={`s-${i}`}>
-            <line
-              x1={startX} y1={startY}
-              x2={endX} y2={endY}
-              stroke="#C23A57"
-              strokeWidth="1.2"
-              opacity="0.7"
-              strokeLinecap="round"
+        {/* 5 petals */}
+        {[0, 72, 144, 216, 288].map((angle) => (
+          <g key={angle} transform={`rotate(${angle}, 50, 50)`}>
+            <path
+              d="M50,50 C38,38 30,20 50,10 C70,20 62,38 50,50Z"
+              fill={`url(#pg-${uid})`}
+              opacity="0.95"
             />
-            <circle cx={endX} cy={endY} r="2.2" fill="#FFD700" opacity="0.9" />
+            <path
+              d="M50,50 C50,35 50,22 50,10"
+              stroke="white"
+              strokeWidth="0.8"
+              opacity="0.4"
+              fill="none"
+            />
           </g>
-        );
-      })}
+        ))}
 
-      {/* Tooltip on hover */}
+        {/* Gold center */}
+        <circle cx="50" cy="50" r="9" fill={`url(#cg-${uid})`} />
+
+        {/* Red stamens */}
+        <g stroke="#C23A57" strokeWidth="1.2" opacity="0.7">
+          {STAMEN_TIPS.map(([tx, ty], i) => (
+            <line key={i} x1="50" y1="50" x2={tx} y2={ty} />
+          ))}
+        </g>
+
+        {/* Gold stamen tips */}
+        {STAMEN_TIPS.map(([tx, ty], i) => (
+          <circle key={`t${i}`} cx={tx} cy={ty} r="2" fill="#FFD700" opacity="0.9" />
+        ))}
+
+        {/* Subtle breathing animation via CSS class */}
+        {isInteractive && !isHovered && (
+          <circle
+            cx="50" cy="50" r="48"
+            fill="none"
+            stroke="rgba(232,96,122,0.3)"
+            strokeWidth="2"
+            className="animate-pulse-ring"
+          />
+        )}
+      </svg>
+
+      {/* Tooltip — always horizontal, positioned above flower */}
       {isHovered && label && (
         <foreignObject
-          x={-60} y={-size - 32}
-          width="120" height="28"
+          x={-20} y={-30}
+          width={svgSize + 40} height="28"
           style={{ overflow: "visible", pointerEvents: "none" }}
         >
           <div
             style={{
               background: "#fff",
-              color: "#C2185B",
-              fontSize: "10px",
-              fontWeight: 600,
-              padding: "4px 10px",
+              color: "#C23A57",
+              fontSize: "12px",
+              fontWeight: 500,
+              padding: "4px 12px",
               borderRadius: "20px",
               textAlign: "center",
-              boxShadow: "0 2px 10px rgba(194,24,91,0.15)",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
               whiteSpace: "nowrap",
+              transform: `rotate(${-rot}deg)`, // counter-rotate to stay horizontal
             }}
           >
             {label}
