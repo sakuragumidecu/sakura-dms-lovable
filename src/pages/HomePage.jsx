@@ -172,8 +172,9 @@ export default function HomePage() {
 
       {/* ── Feature sections ── */}
       <div
-        className="relative z-10"
+        className="relative"
         style={{
+          zIndex: 2,
           background: "linear-gradient(180deg, #FFE4EC 0%, #FFF0F5 30%, #FFF5F8 60%, #FFFFFF 100%)",
         }}
       >

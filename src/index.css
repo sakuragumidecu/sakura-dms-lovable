@@ -436,6 +436,12 @@
   50% { transform: rotate(1deg); }
 }
 
+/* Orbit for petals around logo */
+@keyframes orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit-radius, 140px)) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(var(--orbit-radius, 140px)) rotate(-360deg); }
+}
+
 /* Bloom-in animation for section cards */
 @keyframes bloomIn {
   0% {
