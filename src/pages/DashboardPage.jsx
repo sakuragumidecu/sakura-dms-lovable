@@ -49,21 +49,29 @@ export default function DashboardPage() {
     <>
       <AppHeader title="Dashboard" subtitle="Ringkasan aktivitas dokumen" />
 
-      <div className="p-6 lg:p-8 space-y-6">
+      <div className="p-6 lg:p-8 space-y-6" style={{ background: "hsl(340 20% 97%)" }}>
         {/* Hero greeting */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative overflow-hidden rounded-2xl bg-primary p-6 lg:p-8"
+          className="relative overflow-hidden rounded-2xl p-6 lg:p-8"
+          style={{ background: "linear-gradient(135deg, #FFF0F3 0%, #FFD6E0 100%)" }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-accent/30 opacity-90" />
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-foreground/5 rounded-full -translate-y-1/3 translate-x-1/3" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-primary-foreground/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+          {/* Subtle petal SVG overlay */}
+          <svg className="absolute right-4 top-1/2 -translate-y-1/2 opacity-[0.08]" width="120" height="120" viewBox="0 0 120 120" aria-hidden="true">
+            {[0, 72, 144, 216, 288].map((angle) => {
+              const rad = (angle * Math.PI) / 180;
+              const tx = 60 + Math.cos(rad) * 30;
+              const ty = 60 + Math.sin(rad) * 30;
+              return <ellipse key={angle} cx={tx} cy={ty} rx="18" ry="28" fill="#C23A57" transform={`rotate(${angle} ${tx} ${ty})`} />;
+            })}
+            <circle cx="60" cy="60" r="8" fill="#E8607A" />
+          </svg>
           <div className="relative">
-            <p className="text-primary-foreground/70 text-sm font-medium">{getGreeting()},</p>
-            <h2 className="text-2xl lg:text-3xl font-bold text-primary-foreground mt-1">{currentUser.nama}</h2>
-            <p className="text-primary-foreground/60 text-sm mt-2 max-w-lg">
+            <p className="text-primary/70 text-sm font-medium">{getGreeting()},</p>
+            <h2 className="text-2xl lg:text-3xl font-bold text-foreground mt-1">{currentUser.nama}</h2>
+            <p className="text-muted-foreground text-sm mt-2 max-w-lg">
               Kelola dokumen, pantau status persetujuan, dan arsipkan dokumen administrasi sekolah.
             </p>
           </div>
