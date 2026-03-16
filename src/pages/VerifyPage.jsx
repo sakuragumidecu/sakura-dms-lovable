@@ -48,14 +48,14 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ background: "hsl(340 20% 97%)" }}>
       {/* Header */}
-      <div className="bg-primary text-primary-foreground px-6 py-4">
-        <div className="max-w-3xl mx-auto flex items-center gap-3">
-          <img src={logoSakura} alt="SAKURA" className="w-10 h-10 rounded-full" />
+      <div className="border-b" style={{ background: "#fff", borderColor: "rgba(194,58,87,0.1)" }}>
+        <div className="max-w-3xl mx-auto flex items-center gap-3 px-6 py-4">
+          <img src={logoSakura} alt="SAKURA" className="w-10 h-10 rounded-xl" />
           <div>
-            <div className="font-bold text-lg">SAKURA</div>
-            <div className="text-primary-foreground/70 text-xs">Verifikasi Keaslian Dokumen</div>
+            <div className="font-bold text-lg text-foreground">SAKURA</div>
+            <div className="text-muted-foreground text-xs">Verifikasi Keaslian Dokumen</div>
           </div>
         </div>
       </div>
