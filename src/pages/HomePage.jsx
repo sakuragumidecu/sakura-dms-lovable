@@ -1,77 +1,156 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Shield, FileText, School, Workflow, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
 import SakuraBranch from "@/components/SakuraBranch";
 import SakuraPetalsFalling from "@/components/SakuraPetalsFalling";
 import FloatingParticles from "@/components/FloatingParticles";
 
+/* ── Mini sakura flower SVG for section icons & decorations ── */
+function MiniSakuraFlower({ size = 40, opacity = 1 }) {
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} style={{ opacity }}>
+      <defs>
+        <radialGradient id="miniPG" cx="50%" cy="60%" r="50%">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="40%" stopColor="#FFB7C5" />
+          <stop offset="100%" stopColor="#E8607A" />
+        </radialGradient>
+      </defs>
+      {[0, 72, 144, 216, 288].map((a) => (
+        <g key={a} transform={`rotate(${a}, 50, 50)`}>
+          <path d="M50,50 C38,38 30,20 50,10 C70,20 62,38 50,50Z" fill="url(#miniPG)" opacity="0.9" />
+        </g>
+      ))}
+      <circle cx="50" cy="50" r="7" fill="#FFD700" opacity="0.9" />
+    </svg>
+  );
+}
+
+/* ── Decorative flower cluster for section illustration ── */
+function FlowerCluster() {
+  const flowers = [
+    { x: 0, y: 0, size: 55, opacity: 0.35, rot: 0 },
+    { x: 40, y: -25, size: 40, opacity: 0.25, rot: 30 },
+    { x: -30, y: 30, size: 35, opacity: 0.2, rot: -20 },
+    { x: 50, y: 25, size: 30, opacity: 0.15, rot: 45 },
+    { x: -10, y: -35, size: 28, opacity: 0.18, rot: -10 },
+  ];
+  return (
+    <div className="relative w-48 h-48 md:w-56 md:h-56">
+      {flowers.map((f, i) => (
+        <div
+          key={i}
+          className="absolute"
+          style={{
+            left: `calc(50% + ${f.x}px)`,
+            top: `calc(50% + ${f.y}px)`,
+            transform: `translate(-50%, -50%) rotate(${f.rot}deg)`,
+          }}
+        >
+          <MiniSakuraFlower size={f.size} opacity={f.opacity} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ── section data ── */
 const SECTIONS = [
   {
     id: "about",
-    icon: Sparkles,
     title: "Tentang SAKURA",
     body: "SAKURA (Secure Archiving and Keeping of Unified Records for Administration) adalah sistem arsip digital yang dirancang untuk membantu sekolah mengelola dokumen akademik dan administrasi secara aman, terstruktur, dan efisien.",
-    color: "from-primary/10 to-accent/5",
   },
   {
     id: "why",
-    icon: FileText,
     title: "Pentingnya Arsip Digital",
     body: "Digitalisasi arsip mengurangi risiko kehilangan dokumen fisik, mempercepat pencarian data, dan memungkinkan akses terpusat dari mana saja. Arsip digital juga mendukung transparansi dan akuntabilitas administrasi sekolah.",
-    color: "from-sakura-success/10 to-sakura-success/5",
   },
   {
     id: "workflow",
-    icon: Workflow,
     title: "Alur Persetujuan Dokumen",
     body: "Dokumen diunggah oleh Operator/TU → menunggu persetujuan Kepala Sekolah → disetujui atau ditolak → jika disetujui, Operator/TU dapat memindahkan ke arsip → QR verifikasi otomatis dibuat setelah diarsipkan.",
-    color: "from-sakura-warning/10 to-sakura-warning/5",
   },
   {
     id: "security",
-    icon: Shield,
     title: "Keamanan & Verifikasi QR",
     body: "SAKURA menggunakan Role-Based Access Control (RBAC) untuk membatasi akses. Setiap dokumen yang diarsipkan dilengkapi QR Code berisi link verifikasi yang ditandatangani secara kriptografis (HMAC-SHA256) untuk mencegah pemalsuan.",
-    color: "from-primary/10 to-sakura-violet/5",
   },
   {
     id: "school",
-    icon: School,
     title: "SMP Negeri 4 Cikarang Barat",
     body: "Berlokasi di Kp. Kali Jeruk, Desa Kalijaya, Kec. Cikarang Barat, Kab. Bekasi, Jawa Barat. NPSN: 20218452. Sekolah negeri jenjang SMP yang berkomitmen pada digitalisasi administrasi demi transparansi dan efisiensi.",
-    color: "from-sakura-pink/10 to-sakura-maroon/5",
   },
 ];
 
-/* ── section card ── */
+/* ── section card with bloom animation ── */
 function SectionCard({ section, index }) {
-  const Icon = section.icon;
+  const ref = useRef(null);
+  const [bloomed, setBloomed] = useState(false);
   const isEven = index % 2 === 0;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setBloomed(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <motion.div
+    <div
+      ref={ref}
       id={`section-${section.id}`}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, delay: 0.1 }}
-      className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-8 md:gap-12`}
+      className={`flex flex-col ${isEven ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-8 md:gap-12 sakura-bloom-card`}
+      style={{
+        opacity: bloomed ? undefined : 0,
+        transform: bloomed ? undefined : "scale(0.85)",
+        filter: bloomed ? undefined : "blur(4px)",
+        animation: bloomed ? "bloomIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards" : "none",
+      }}
     >
-      <div className={`flex-1 p-8 rounded-3xl bg-gradient-to-br ${section.color} border border-border/50`}>
-        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-          <Icon size={24} className="text-primary" />
+      <div
+        className="flex-1 p-8 rounded-3xl transition-all duration-300 hover:-translate-y-1"
+        style={{
+          background: "rgba(255, 255, 255, 0.6)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          border: "1px solid rgba(255, 182, 193, 0.3)",
+          borderRadius: "24px",
+          boxShadow: "0 8px 32px rgba(194, 58, 87, 0.08)",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = "0 16px 48px rgba(194, 58, 87, 0.15)";
+          e.currentTarget.style.borderColor = "rgba(232, 96, 122, 0.4)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = "0 8px 32px rgba(194, 58, 87, 0.08)";
+          e.currentTarget.style.borderColor = "rgba(255, 182, 193, 0.3)";
+        }}
+      >
+        <div
+          className="w-14 h-14 flex items-center justify-center mb-4"
+          style={{ background: "rgba(232, 96, 122, 0.1)", borderRadius: "12px", padding: "10px" }}
+        >
+          <MiniSakuraFlower size={40} />
         </div>
         <h3 className="text-xl md:text-2xl font-bold text-foreground mb-3">{section.title}</h3>
         <p className="text-muted-foreground leading-relaxed">{section.body}</p>
       </div>
       <div className="flex-1 flex justify-center">
-        <div className="w-48 h-48 md:w-56 md:h-56 rounded-full bg-gradient-to-br from-primary/5 to-accent/10 flex items-center justify-center">
-          <Icon size={64} className="text-primary/30" />
-        </div>
+        <FlowerCluster />
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -236,11 +315,18 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* ── Scroll sections ── */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 py-24 space-y-20">
-        {SECTIONS.map((section, i) => (
-          <SectionCard key={section.id} section={section} index={i} />
-        ))}
+      {/* ── Scroll sections with sakura atmosphere ── */}
+      <div
+        className="relative z-10"
+        style={{
+          background: "linear-gradient(180deg, #FFE4EC 0%, #FFF0F5 30%, #FFF5F8 60%, #FFFFFF 100%)",
+        }}
+      >
+        <div className="max-w-4xl mx-auto px-6 py-24 space-y-20">
+          {SECTIONS.map((section, i) => (
+            <SectionCard key={section.id} section={section} index={i} />
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -1,19 +1,17 @@
 import { useState } from "react";
 
 /**
- * Cinematic SVG cherry blossom branch spanning full width with 3D flowers.
- * Branch extends from left edge to upper-right near navbar.
+ * Cinematic SVG cherry blossom branch with 3D flowers.
+ * Labels only appear on hover as elegant tooltips.
  */
 
 /* ── Flower positions (in SVG viewBox 0 0 1200 800) ── */
 export const FLOWER_NODES = [
-  // Interactive flowers — larger sizes, with glow
   { cx: 245, cy: 275, size: 75, rot: -10, section: "about", label: "Apa itu SAKURA?" },
   { cx: 365, cy: 240, size: 72, rot: 15, section: "why", label: "Arsip Digital" },
   { cx: 480, cy: 140, size: 78, rot: -5, section: "workflow", label: "Alur Persetujuan" },
   { cx: 660, cy: 150, size: 74, rot: 20, section: "security", label: "Keamanan & QR" },
   { cx: 520, cy: 458, size: 72, rot: -15, section: "school", label: "SMP Negeri 4" },
-  // Decorative flowers — smaller, no interaction
   { cx: 545, cy: 110, size: 48, rot: 30, section: null, label: null },
   { cx: 710, cy: 130, size: 45, rot: -25, section: null, label: null },
   { cx: 575, cy: 475, size: 46, rot: 10, section: null, label: null },
@@ -120,7 +118,7 @@ function renderFlower(node, hoveredId, setHoveredId) {
         ))}
       </svg>
 
-      {/* Always-visible label for interactive flowers — perfectly horizontal */}
+      {/* Hover-only tooltip */}
       {isInteractive && label && (
         <foreignObject
           x={0} y={-32}
@@ -135,18 +133,20 @@ function renderFlower(node, hoveredId, setHoveredId) {
               left: "50%",
               bottom: "0",
               transform: "translateX(-50%)",
-              background: "#fff",
+              background: "rgba(255,255,255,0.95)",
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
               color: "#C23A57",
               fontSize: "11px",
               fontWeight: 600,
-              padding: "5px 14px",
+              padding: "4px 12px",
               borderRadius: "20px",
               textAlign: "center",
-              boxShadow: "0 2px 12px rgba(194, 58, 87, 0.2)",
-              border: "1px solid rgba(194, 58, 87, 0.15)",
+              boxShadow: "0 4px 16px rgba(194, 58, 87, 0.2)",
               whiteSpace: "nowrap",
-              opacity: isHovered ? 1 : 0.9,
-              transition: "opacity 0.3s ease",
+              opacity: isHovered ? 1 : 0,
+              transition: "opacity 0.2s ease",
+              pointerEvents: "none",
             }}
           >
             {label}

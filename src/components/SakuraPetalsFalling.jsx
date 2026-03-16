@@ -2,11 +2,6 @@ import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { FLOWER_NODES } from "@/components/SakuraBranch";
 
-/**
- * Petals spawn FROM flower positions on the branch, then fall 200vh
- * through all sections. Rendered in a fixed container.
- */
-
 const PETAL_COLORS = ["#FFB7C5", "#FFC8D5", "#FF9EB5", "#FFD6E0", "#FFAFC5"];
 
 function rand(min, max) {
@@ -42,8 +37,6 @@ export default function SakuraPetalsFalling() {
   const isMobile = useIsMobile();
   const count = isMobile ? 35 : 80;
 
-  // Convert flower SVG positions to viewport percentages
-  // SVG viewBox is 0 0 1200 800, hero is 100vw x 100vh
   const flowerPercents = useMemo(() =>
     FLOWER_NODES.map((f) => ({
       xPct: (f.cx / 1200) * 100,
@@ -53,7 +46,6 @@ export default function SakuraPetalsFalling() {
 
   const petals = useMemo(() => {
     return Array.from({ length: count }, (_, i) => {
-      // Pick a random flower as spawn point
       const flower = flowerPercents[i % flowerPercents.length];
       const color = PETAL_COLORS[i % PETAL_COLORS.length];
       const w = rand(10, 20);
@@ -63,9 +55,7 @@ export default function SakuraPetalsFalling() {
       const driftX = rand(-60, 60);
       const rotation = rand(360, 540);
       const tiltY = rand(0, 180);
-      // Spawn near the flower position (slight randomness)
       const startX = flower.xPct + rand(-3, 3);
-      const startY = flower.yPct; // vh percentage of hero
       const blur = i % 6 === 0;
       const opacity = rand(0.6, 0.85);
 
@@ -78,12 +68,12 @@ export default function SakuraPetalsFalling() {
         style: {
           position: "absolute",
           left: `${startX}%`,
-          top: `${startY}vh`,
+          top: "0%",
           width: `${w}px`,
           height: `${h}px`,
           willChange: "transform",
           opacity: 0,
-          animationName: i % 2 === 0 ? "petalFallFromFlower" : "petalFallFromFlower2",
+          animationName: i % 2 === 0 ? "petalFallViewport" : "petalFallViewport2",
           animationDuration: `${duration}s`,
           animationDelay: `${delay}s`,
           animationTimingFunction: "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
@@ -103,7 +93,7 @@ export default function SakuraPetalsFalling() {
   return (
     <div
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 10, width: "100%", height: "200vh", perspective: "600px", overflow: "visible" }}
+      style={{ zIndex: 9999, width: "100vw", height: "100vh", perspective: "600px", overflow: "hidden" }}
       aria-hidden="true"
     >
       {petals.map((p) => (
