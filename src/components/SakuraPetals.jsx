@@ -13,21 +13,41 @@ function randomBetween(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-export default function SakuraPetals({ count = 18 }) {
+/**
+ * @param {number} count
+ * @param {Array<{x:number, y:number}>} [blossomPositions] — if provided, petals originate from these positions (% coords)
+ */
+export default function SakuraPetals({ count = 14, blossomPositions }) {
   const petals = useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: `${randomBetween(0, 100)}%`,
-      size: randomBetween(6, 16),
-      duration: `${randomBetween(8, 16)}s`,
-      delay: `${randomBetween(0, 12)}s`,
-      sway: `${randomBetween(-80, 80)}px`,
-      rotation: `${randomBetween(180, 720)}deg`,
-      color: PETAL_COLORS[i % PETAL_COLORS.length],
-      opacity: randomBetween(0.25, 0.6),
-      alt: i % 3 === 0,
-    }));
-  }, [count]);
+    return Array.from({ length: count }, (_, i) => {
+      const hasPositions = blossomPositions && blossomPositions.length > 0;
+      const blossom = hasPositions
+        ? blossomPositions[i % blossomPositions.length]
+        : null;
+
+      // cluster around blossom with small random offset, or random if no positions
+      const left = blossom
+        ? `${blossom.x + randomBetween(-4, 4)}%`
+        : `${randomBetween(0, 100)}%`;
+      const top = blossom
+        ? `${blossom.y + randomBetween(-2, 3)}%`
+        : "-20px";
+
+      return {
+        id: i,
+        left,
+        top,
+        size: randomBetween(5, 13),
+        duration: `${randomBetween(9, 18)}s`,
+        delay: `${randomBetween(0, 14)}s`,
+        sway: `${randomBetween(-60, 60)}px`,
+        rotation: `${randomBetween(180, 720)}deg`,
+        color: PETAL_COLORS[i % PETAL_COLORS.length],
+        opacity: randomBetween(0.2, 0.5),
+        alt: i % 3 === 0,
+      };
+    });
+  }, [count, blossomPositions]);
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
@@ -38,7 +58,7 @@ export default function SakuraPetals({ count = 18 }) {
           style={{
             position: "absolute",
             left: p.left,
-            top: "-20px",
+            top: p.top,
             width: `${p.size}px`,
             height: `${p.size * 0.7}px`,
             borderRadius: "50% 0 50% 0",
