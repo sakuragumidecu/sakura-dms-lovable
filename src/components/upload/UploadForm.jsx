@@ -135,9 +135,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
       type_id: selectedTypeId,
       folder_id: folderId,
       jenisDokumen: form.jenisDokumen,
-      // Spread category-specific metadata
       ...metaData,
-      // Map common fields for backward compat
       kelas: metaData.kelas || "-",
       class_info: metaData.kelas || "-",
       namaSiswa: metaData.namaSiswa || "",
@@ -149,6 +147,9 @@ export default function UploadForm({ onSuccess, onCancel }) {
       fileUrl: filePreview || "/mock/sample.pdf",
       catatan: form.catatan || undefined,
       folderTujuan: autoFolderDisplay || undefined,
+      urgent: isUrgent,
+      sensitif: isSensitif,
+      ownerNIP: isSensitif ? ownerNip : undefined,
     });
 
     setShowConfirm(false);
