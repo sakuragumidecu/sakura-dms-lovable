@@ -2,7 +2,7 @@ import { X, Eye, Clock, FileText, CheckCircle, XCircle, Archive, QrCode, Folder 
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useState } from "react";
-import PdfPreviewOverlay from "./PdfPreviewOverlay";
+import PdfPreviewOverlay from "./PdfPreview";
 import { useApp } from "@/contexts/AppContext";
 import { QRCodeSVG } from "qrcode.react";
 import { buildVerifyUrl } from "@/lib/verifyToken";

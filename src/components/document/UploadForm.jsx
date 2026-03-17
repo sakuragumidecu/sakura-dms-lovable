@@ -4,7 +4,7 @@ import CameraScanModal from "@/components/shared/CameraScan";
 import { useApp } from "@/contexts/AppContext";
 import OcrScanner from "@/components/document/OcrScanner";
 
-import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
+import PdfPreviewOverlay from "@/components/document/PdfPreview";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
