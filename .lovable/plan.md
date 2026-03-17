@@ -1,244 +1,154 @@
 
-# Rencana Revisi & Perbaikan Sistem SAKURA DMS
 
-## Ringkasan
+## Plan: Codebase Consolidation & File Restructuring
 
-10 area perubahan besar mencakup sidebar, dashboard, upload dokumen, arsip, detail dokumen, manajemen user, login, pengaturan, dan alur persetujuan.
-
----
-
-## 1. Sidebar - Collapse Button di Atas
-
-**File**: `src/components/layout/AppSidebar.tsx`
-
-- Pindahkan tombol collapse/expand dari bagian bawah sidebar ke bagian **atas** (di samping logo SAKURA)
-- Arah panah tetap jelas: `PanelLeftClose` untuk collapse, `PanelLeft` untuk expand
+Pure refactor — no UI, logic, or styling changes. Only move, merge, rename, and update imports.
 
 ---
 
-## 2. Dashboard - Filter Aktivitas & Grafik Interaktif
+### Merge 1: Sakura Animation Files → `src/components/sakura/SakuraBranch.jsx`
 
-### a. Filter Mingguan/Bulanan
+Create `src/components/sakura/SakuraBranch.jsx` containing:
+- The full `SakuraBranch` SVG component (from current `src/components/SakuraBranch.jsx`)
+- `FloatingParticles` (inlined as a named function — only used in HomePage.jsx)
+- `PetalBurstOverlay` + `usePetalBurst` hook (from `src/components/home/PetalBurst.jsx`)
+- Export: `default SakuraBranch`, named `FloatingParticles`, named `PetalBurstOverlay`, named `usePetalBurst`, named `FLOWER_NODES`
 
-**File**: `src/components/dashboard/ActivityChart.tsx`
+**Keep separate** (NOT merged):
+- `FallingPetals.jsx` → move to `src/components/sakura/FallingPetals.jsx` (canvas-based, self-contained, used independently)
+- `SakuraPetals.jsx` → move to `src/components/sakura/SakuraPetals.jsx` (used by LoginPage + SignUpPage, separate concern)
 
-- Tambah toggle button "Mingguan" / "Bulanan" di header chart
-- Untuk bulanan, generate data 30 hari dari mock data
-- Chart title berubah sesuai filter yang aktif
+**Delete after merge:**
+- `src/components/SakuraBranch.jsx`
+- `src/components/FloatingParticles.jsx`
+- `src/components/home/PetalBurst.jsx`
+- `src/components/FallingPetals.jsx`
+- `src/components/SakuraPetals.jsx`
+- `src/components/SakuraPetalsFalling.jsx` (unused — no imports found)
 
-### b. Grafik Status (Disetujui/Ditolak/Menunggu)
-
-- Tambah 3 line baru pada grafik: Disetujui, Ditolak, Menunggu (selain Upload dan Persetujuan yang sudah ada)
-- Atau ganti line yang ada menjadi 3 status tersebut
-
-### c. Klik Titik Grafik
-
-- Sudah ada `onDateClick` handler, perbaiki agar benar-benar menampilkan daftar dokumen sesuai tanggal yang diklik
-
-### d. Klik Status
-
-- Klik pada status di legend grafik menampilkan daftar dokumen dengan filter status tersebut
-
-**File**: `src/data/mockData.ts` - Tambah data chart bulanan
-
----
-
-## 3. Upload Dokumen - Redesign Form dengan Kategori Dinamis
-
-**File**: `src/components/upload/UploadForm.tsx`
-
-### a. Filter Dropdown Jenis Dokumen Baru
-
-Ganti opsi jenis dokumen menjadi:
-- Surat Masuk dan Keluar Siswa
-- Surat Pindah Siswa
-- Sertifikat Guru
-- Sertifikat Prestasi Siswa
-- Ijazah SMP
-- Surat Keterangan Hasil Ujian (SKHU)
-- Rekapitulasi Absensi Siswa dan Guru
-- Surat Keputusan (Arsip Surat)
-- Inventaris Sarana Prasarana
-- Lainnya (input text manual jika dipilih)
-
-### b. Kategori di Atas Jenis Dokumen
-
-- Pindahkan **Kategori** di atas **Jenis Dokumen**
-- Opsi kategori: Data Siswa, Data Guru, Sarana Prasarana Sekolah, Surat Menyurat, Keuangan, Lainnya
-- Setiap kategori memiliki jenis dokumen yang relevan (filter cascade)
-
-### c. Data Detail Opsional (Next Page)
-
-- Setelah metadata utama, tambah tombol "Tambah Data Detail (Opsional)" yang expand/collapse
-- Berisi field tambahan sesuai kategori (mis. untuk Data Siswa: NIS, Tempat Lahir, dll.)
-- Tidak wajib diisi
-
-### d. Filter Folder Tujuan
-
-- Tambah dropdown "Masukkan ke Folder" yang menampilkan folder dari arsip dokumen
-- Auto-mapping berdasarkan jenis dokumen tetap berjalan
-
-### e. Tanggal dengan Date Picker
-
-- Tanggal Upload: tambah icon kalender yang bisa diklik untuk memilih tanggal
-- Tahun Ajaran: ubah jadi dropdown dengan opsi 2023/2024, 2024/2025, 2025/2026, dan "Lainnya" (input manual)
-
-### f. Konfirmasi Upload
-
-- Saat klik Upload: tampilkan dialog konfirmasi "Apakah Anda yakin data sudah benar?"
-- Setelah submit berhasil: toast notifikasi dengan tombol "Lihat di Arsip Dokumen" yang navigasi ke `/archive`
-
-### g. Preview Sesuai File
-
-- Preview menampilkan file yang benar-benar di-upload (untuk image: sudah ada, untuk PDF: tampilkan nama file, bukan dummy)
+**Update imports in:**
+- `src/pages/HomePage.jsx` — all sakura imports point to `@/components/sakura/...`
+- `src/pages/LoginPage.jsx` — SakuraPetals path
+- `src/pages/SignUpPage.jsx` — SakuraPetals path
 
 ---
 
-## 4. Arsip Dokumen
+### Merge 2: Approval Pages → `src/pages/ApprovalPage.jsx`
 
-**File**: `src/pages/ArchivePage.tsx`
+Rewrite `ApprovalPage.jsx` to contain tab-based UI:
+- `useState('pending')` for tab state
+- `PendingList` — content from current `ApprovalPendingPage.jsx` as internal function
+- `ApprovedList` — content from current `ApprovalApprovedPage.jsx` as internal function
 
-- Hapus field "Tambah catatan admin..." dari panel preview samping (tidak perlu catatan di setiap dokumen di semua role)
+**Delete:** `ApprovalPendingPage.jsx`, `ApprovalApprovedPage.jsx`
 
----
+**Update `App.jsx` routes:**
+- `/approval` → `<ApprovalPage />` (no redirect)
+- `/approval/pending` → `<ApprovalPage />` (tab auto-set via URL)
+- `/approval/approved` → `<ApprovalPage />` (tab auto-set via URL)
+- Use `useLocation` inside ApprovalPage to determine active tab from path
 
-## 5. Detail Dokumen - Perbaikan UI
-
-**File**: `src/components/modals/DocumentDetailModal.tsx`
-
-- Role pengunggah: ganti tanda hubung (--) menjadi **badge/border** dengan warna khusus (misal: bg-primary/10 text-primary rounded-full px-2)
-- Status aksi (Mengunggah, Menyetujui, dll.): tampilkan dalam **badge bordered** dengan warna khusus sesuai aksi
-- Hapus penggunaan tanda "—" sebagai pemisah, ganti dengan border/badge styling
-
----
-
-## 6. Manajemen User - CRUD Lengkap
-
-**File**: `src/pages/UserManagementPage.tsx`
-
-- **Create**: Tambah tombol "Tambah User" yang membuka modal form (Nama, Email, Role, Departemen)
-- **Read**: Sudah ada (tabel user)
-- **Update**: Tambah tombol "Edit" yang membuka modal edit semua field user
-- **Delete**: Tambah tombol "Hapus" dengan konfirmasi dialog
-- Semua aksi CRUD hanya bisa dilakukan oleh Admin/TU
-- Tambah kolom Aksi yang lebih lengkap
-
-**File**: `src/contexts/AppContext.tsx` - Tambah fungsi `addUser`, `updateUser`, `deleteUser`
+**Update sidebar:** Links to `/approval/pending` and `/approval/approved` still work.
 
 ---
 
-## 7. Login - Tambah Google Login
+### Merge 3: Dashboard Pages → `src/pages/DashboardPage.jsx`
 
-**File**: `src/pages/LoginPage.tsx`
+Merge `HomeDashboardPage.jsx` content into `DashboardPage.jsx`:
+- Add a "Beranda" tab (or route check for `/home`) that renders the system info + school info cards.
+- Alternatively, since `/home` route exists separately, simply keep DashboardPage as-is and move HomeDashboardPage content as an internal `BerandaTab` function.
 
-- Tambah tombol "Masuk dengan Google" di bawah form login (dengan ikon Google)
-- Tombol ini simulasi saja (alert bahwa fitur memerlukan backend)
-- Styling: border button dengan logo Google, teks "Masuk dengan Google"
-- Tambah divider "atau" antara form login dan tombol Google
+**Delete:** `HomeDashboardPage.jsx`
 
----
-
-## 8. Pengaturan Sistem - Simplifikasi
-
-**File**: `src/pages/SettingsPage.tsx`
-
-- Hapus section "Export JSON" dari Reset & Export
-- Hapus pengaturan frekuensi notifikasi
-- Section "Reset & Export" diganti menjadi "Reset Sistem" saja
-- Tombol: "Reset ke Default" saja
+**Update `App.jsx`:** Route `/home` now also uses `<DashboardPage />` with a prop or URL param.
 
 ---
 
-## 9. Alur Persetujuan - Simplifikasi
+### Merge 4: Layout Renames
 
-**File**: `src/pages/ApprovalPage.tsx`
+- `AppSidebar.jsx` → `Sidebar.jsx` (same folder)
+- `AppHeader.jsx` → `Header.jsx` (same folder)
+- `AppLayout.jsx` → `Layout.jsx` (same folder, inline CopyrightFooter directly)
 
-- Hapus step "Review & Annotate" dan "Verifikasi & Tanda Tangan" dari workflow visual
-- Workflow menjadi: Staff/Guru Upload -> Antrian Persetujuan -> Disetujui/Ditolak
-- Tombol "Approve" diganti teks menjadi **"Setujui"**
-- Modal konfirmasi: ganti dari biometrik menjadi konfirmasi sederhana "Apakah Anda yakin ingin menyetujui dokumen ini?"
-- Hapus ikon Fingerprint dan referensi tanda tangan digital
-- Hapus tombol "Review & Annotate" dari card actions
-- Approval by system: setelah disetujui, dokumen otomatis masuk arsip (status langsung "Diarsipkan")
+**Delete:** `CopyrightFooter.jsx`
 
-**File**: `src/pages/DashboardPage.tsx` (tab Persetujuan)
-- Sama: ganti "Approve" menjadi "Setujui", simplifikasi modal konfirmasi
+**Update imports (14 files):**
+- `Layout.jsx` — internal imports of `Sidebar`
+- `App.jsx` — `import Layout from "@/components/layout/Layout.jsx"`
+- All 13 pages importing AppHeader → `import Header from "@/components/layout/Header"`
 
 ---
 
-## 10. Pratinjau Dokumen
+### Merge 5: Modals Reorganization
 
-**File**: `src/components/modals/PdfPreviewOverlay.tsx`
+**5A:** `DocumentDetailModal.jsx` + `DocumentListModal.jsx` → `src/components/document/DocumentDetail.jsx`
+- DocumentListModal becomes an internal function `DocumentList`
+- Export both: `default DocumentDetail`, named `DocumentList`
 
-- Pastikan preview bisa fullscreen (overlay/ngambang)
-- Tetap ada tombol close
-- Preview harus sesuai file yang di-upload (bukan dummy)
+**5B:** `PdfPreviewOverlay.jsx` → `src/components/document/PdfPreview.jsx` (rename only)
+
+**5C:** `UserProfileModal.jsx` → `src/components/shared/UserProfile.jsx` (rename only)
+
+**5D:** `CameraScanModal.jsx` + `CropOverlay.jsx` → `src/components/shared/CameraScan.jsx` (merge CropOverlay inline)
+
+**Delete:** entire `src/components/modals/` and `src/components/scan/` folders
+
+**Update imports in:** DashboardPage, ArchivePage, ApprovalPage, UploadForm, UserManagementPage
 
 ---
 
-## Detail Teknis
+### Merge 6: Home Sections → `FeaturesSection.jsx`
 
-### File yang Diubah
+Merge `ArchiveSection.jsx` + `WorkflowSection.jsx` + `SecuritySection.jsx` → `src/components/home/FeaturesSection.jsx`
+
+Each becomes a `const` inside the file. Single default export `FeaturesSection` rendering all three.
+
+**Keep separate:** `AboutSection.jsx`, `SchoolSection.jsx` (distinct enough)
+
+**Delete:** `ArchiveSection.jsx`, `WorkflowSection.jsx`, `SecuritySection.jsx`
+
+**Update `HomePage.jsx`:** Replace 3 imports with single `FeaturesSection` import.
+
+---
+
+### Delete Unused Files
+
+- `OtpPage.jsx` — no imports found
+- `PlaceholderPage.jsx` — no imports found (only self-imports AppHeader)
+- `NavLink.jsx` — only imported by itself, never used elsewhere
+
+---
+
+### Upload Form: Keep Separate (adjusted from plan)
+
+UploadForm.jsx is 677 lines + OcrScanner is 223 lines. Too large to inline.
+
+- Move `src/components/upload/UploadForm.jsx` → `src/components/document/UploadForm.jsx`
+- Move `src/components/upload/OcrScanner.jsx` → `src/components/document/OcrScanner.jsx`
+- Delete `src/components/upload/` folder
+- Update imports in `UploadPage.jsx` and `ArchivePage.jsx`
+
+---
+
+### Final Structure
 
 ```text
-src/components/layout/AppSidebar.tsx          - Collapse button ke atas
-src/components/dashboard/ActivityChart.tsx     - Filter + status lines
-src/components/upload/UploadForm.tsx           - Redesign form upload
-src/components/modals/DocumentDetailModal.tsx  - Badge styling
-src/pages/ArchivePage.tsx                      - Hapus catatan
-src/pages/UserManagementPage.tsx               - CRUD user
-src/pages/LoginPage.tsx                        - Google login button
-src/pages/SettingsPage.tsx                     - Simplifikasi
-src/pages/ApprovalPage.tsx                     - Simplifikasi workflow
-src/pages/DashboardPage.tsx                    - Tab persetujuan update
-src/contexts/AppContext.tsx                    - addUser, updateUser, deleteUser
-src/data/mockData.ts                           - Chart data + kategori baru
+src/components/
+  dashboard/        (2 files — unchanged)
+  document/         (4 files: DocumentDetail, PdfPreview, UploadForm, OcrScanner)
+  home/             (3 files: AboutSection, FeaturesSection, SchoolSection)
+  layout/           (3 files: Layout, Sidebar, Header)
+  sakura/           (3 files: SakuraBranch, FallingPetals, SakuraPetals)
+  shared/           (2 files: UserProfile, CameraScan)
+  ui/               (shadcn — untouched)
+
+src/pages/          (12 files)
+  HomePage, LoginPage, SignUpPage, DashboardPage,
+  UploadPage, ArchivePage, ApprovalPage,
+  UserManagementPage, RoleManagementPage, LogPage,
+  SettingsPage, ProfilePage, ChangePasswordPage,
+  VerifyPage, NotFound
 ```
 
-### Kategori & Jenis Dokumen Mapping
+~15 non-shadcn component files, ~15 page files. All functionality preserved.
 
-```text
-Data Siswa:
-  - Surat Masuk dan Keluar Siswa
-  - Surat Pindah Siswa
-  - Ijazah SMP
-  - SKHU
-  - Rekapitulasi Absensi Siswa dan Guru
-
-Data Guru:
-  - Sertifikat Guru
-  - Surat Keputusan (Arsip Surat)
-
-Sarana Prasarana Sekolah:
-  - Inventaris Sarana Prasarana
-
-Surat Menyurat:
-  - Surat Masuk dan Keluar Siswa
-  - Surat Pindah Siswa
-
-Keuangan:
-  - (field manual)
-
-Lainnya:
-  - Sertifikat Prestasi Siswa
-  - Lainnya (input manual)
-```
-
-### Workflow Persetujuan Baru (3 Step)
-
-```text
-1. Staff/Guru Upload
-2. Antrian Persetujuan
-3. Disetujui / Ditolak
-```
-
-### User CRUD Functions
-
-```text
-addUser(user: Omit<User, "id">)      - Generate ID, tambah ke state
-updateUser(id, partial)                - Update field user
-deleteUser(id)                         - Hapus dari state (tidak bisa hapus diri sendiri)
-```
-
-## 11. Website Responsive
-- Website bisa responsif dengan baik dan tidak hancur baik itu dekstop maupun di mobile. Karena nantinya akan dipakai juga di MOBILE, terlebih untuk scan mobile.
