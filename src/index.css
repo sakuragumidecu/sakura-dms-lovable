@@ -506,3 +506,39 @@
     opacity: 0.3;
   }
 }
+
+/* Continuously spawned falling petals */
+@keyframes fallingPetal {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  10% {
+    opacity: inherit;
+  }
+  25% {
+    transform:
+      translate(calc(var(--sway-x) * 0.25), 20vh)
+      rotate(calc(var(--rot-end) * 0.25))
+      scale(0.95);
+  }
+  50% {
+    transform:
+      translate(calc(var(--sway-x) * 0.6), 48vh)
+      rotate(calc(var(--rot-end) * 0.5))
+      scale(0.9);
+  }
+  75% {
+    transform:
+      translate(calc(var(--sway-x) * 0.85), 74vh)
+      rotate(calc(var(--rot-end) * 0.75))
+      scale(0.85);
+    opacity: 0.3;
+  }
+  100% {
+    transform:
+      translate(var(--sway-x), 105vh)
+      rotate(var(--rot-end))
+      scale(0.8);
+    opacity: 0;
+  }
+}

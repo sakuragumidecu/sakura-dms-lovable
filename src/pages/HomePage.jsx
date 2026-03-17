@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import logoSakura from "@/assets/logo_sakura.png";
 import SakuraBranch from "@/components/SakuraBranch";
-import SakuraPetalsFalling from "@/components/SakuraPetalsFalling";
+import FallingPetals from "@/components/FallingPetals";
 import FloatingParticles from "@/components/FloatingParticles";
 import PetalBurstOverlay, { usePetalBurst } from "@/components/home/PetalBurst";
 import AboutSection from "@/components/home/AboutSection";
@@ -57,8 +57,8 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Falling petals overlay */}
-      <SakuraPetalsFalling />
+      {/* Falling petals — z-index 1, behind all content */}
+      <FallingPetals />
 
       {/* Burst petals overlay */}
       <PetalBurstOverlay petals={petals} />
