@@ -1,6 +1,6 @@
 import { useState } from "react";
-import AppHeader from "@/components/layout/AppHeader";
-import UploadForm from "@/components/upload/UploadForm";
+import Header from "@/components/layout/Header";
+import UploadForm from "@/components/document/UploadForm";
 import { motion } from "framer-motion";
 import { useApp } from "@/contexts/AppContext";
 import { Info, AlertCircle } from "lucide-react";
