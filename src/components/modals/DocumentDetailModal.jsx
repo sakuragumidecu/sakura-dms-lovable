@@ -1,4 +1,5 @@
-import { X, Eye, Clock, FileText, CheckCircle, XCircle, Archive, QrCode } from "lucide-react";
+import { X, Eye, Clock, FileText, CheckCircle, XCircle, Archive, QrCode, Folder } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useState } from "react";
 import PdfPreviewOverlay from "./PdfPreviewOverlay";
