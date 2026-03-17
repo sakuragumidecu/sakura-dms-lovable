@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef } from "react";
 import { USERS, DOCUMENTS, ROLE_PERMISSIONS, INITIAL_NOTIFICATIONS, DOCUMENT_TYPES, INITIAL_DOCUMENT_COUNTERS, FOLDERS } from "@/data/mockData.js";
+import avatarAdmin from "@/assets/avatar_admin.jpg";
 
 const AppContext = createContext(null);
 
