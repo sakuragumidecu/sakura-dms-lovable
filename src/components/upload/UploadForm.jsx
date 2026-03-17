@@ -613,7 +613,7 @@ export default function UploadForm({ onSuccess, onCancel, selectedModule, guruUp
           {hasSelection && (selectedCategoryId === 2 || selectedTypeId === 12) && (
             <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 sm:p-6 animate-fade-in">
               <h3 className="font-bold text-foreground mb-1 flex items-center gap-2">
-                <FileIcon size={18} className="text-destructive" />
+                <FileText size={18} className="text-destructive" />
                 Akses Terbatas (Dokumen Sensitif)
               </h3>
               <p className="text-xs text-muted-foreground mb-4">Dokumen ini hanya dapat diakses oleh Admin dan guru terkait berdasarkan NIP.</p>
