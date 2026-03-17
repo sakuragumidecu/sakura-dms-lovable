@@ -373,6 +373,18 @@ export default function UploadForm({ onSuccess, onCancel, selectedModule, guruUp
               <span className="text-muted-foreground"> (auto-mapping)</span>
             </div>
           )}
+          {/* OCR Scanner */}
+          <OcrScanner onApplyFields={(fields) => {
+            fields.forEach((f) => {
+              if (f.key === "Nama" || f.key === "Teks 1") update("judul", f.value);
+              if (f.key === "NIP") updateMeta("nip", f.value.replace(/\s/g, ""));
+              if (f.key === "NIS/NISN") updateMeta("nisn", f.value);
+              if (f.key === "Kelas") updateMeta("kelas", f.value);
+              if (f.key === "Nomor Surat") update("nomorDokumen", f.value);
+              if (f.key === "Perihal") update("judul", f.value);
+            });
+          }} />
+
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
             <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><FileText size={18} className="text-primary" /> File Dokumen</h3>
             <div
