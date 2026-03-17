@@ -68,6 +68,35 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
             {showApproveForm && (<div className="p-4 rounded-lg border border-sakura-success/30 bg-sakura-success/5 space-y-3"><h4 className="font-semibold text-sm text-sakura-success">Konfirmasi Persetujuan</h4><p className="text-sm text-foreground">Apakah Anda yakin ingin menyetujui dokumen ini?</p><textarea value={approveComment} onChange={(e) => setApproveComment(e.target.value)} placeholder="Komentar (opsional)..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" /><div className="flex gap-2"><button onClick={handleApprove} className="px-4 py-2 rounded-lg bg-sakura-success text-white text-sm font-semibold hover:opacity-90">Setujui</button><button onClick={() => { setShowApproveForm(false); setApproveComment(""); }} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button></div></div>)}
             {showArchiveConfirm && (<div className="p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-3"><h4 className="font-semibold text-sm text-primary">Konfirmasi Pengarsipan Dokumen</h4><p className="text-sm text-foreground">Apakah Anda yakin ingin memasukkan dokumen ini ke Arsip Dokumen? QR Code verifikasi akan otomatis dibuat.</p><div className="flex gap-2"><button onClick={handleArchive} className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:opacity-90">Arsipkan Dokumen</button><button onClick={() => setShowArchiveConfirm(false)} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button></div></div>)}
             {showRejectForm && (<div className="p-4 rounded-lg border border-destructive/30 bg-destructive/5 space-y-3"><h4 className="font-semibold text-sm text-destructive">Alasan Penolakan</h4><textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} placeholder="Masukkan alasan penolakan..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring resize-none" /><div className="flex gap-2"><button onClick={handleReject} className="px-4 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-semibold hover:opacity-90">Tolak</button><button onClick={() => setShowRejectForm(false)} className="px-4 py-2 rounded-lg border border-input text-sm">Batal</button></div></div>)}
+            {/* Lokasi File breadcrumb */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Folder size={16} className="text-primary" />
+                <span className="font-semibold text-sm text-foreground">Lokasi File</span>
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                <button onClick={() => { onClose(); navigate(`/archive?kategori=${encodeURIComponent(doc.kategori)}`); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-secondary text-xs text-foreground hover:bg-muted transition-colors cursor-pointer">
+                  {doc.kategori}
+                </button>
+                {doc.jenisDokumen && (
+                  <>
+                    <span className="text-muted-foreground text-xs mx-1">›</span>
+                    <button onClick={() => { onClose(); navigate(`/archive?kategori=${encodeURIComponent(doc.kategori)}`); }} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-secondary text-xs text-foreground hover:bg-muted transition-colors cursor-pointer">
+                      {doc.jenisDokumen}
+                    </button>
+                  </>
+                )}
+                {doc.tahunAjaran && doc.tahunAjaran !== "-" && (
+                  <>
+                    <span className="text-muted-foreground text-xs mx-1">›</span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-secondary text-xs text-foreground">
+                      {doc.tahunAjaran}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
             <div>
               <div className="flex items-center gap-2 mb-4"><Clock size={18} className="text-primary" /><h3 className="font-bold text-foreground">Jejak Aktivitas</h3><span className="text-xs text-muted-foreground">(Read-only)</span></div>
               <div className="space-y-4">{doc.auditTrail.map((entry, i) => (<div key={i} className="flex gap-3 animate-slide-in" style={{ animationDelay: `${i * 50}ms` }}><img src={entry.user.avatar} alt="" className="w-9 h-9 rounded-full object-cover shrink-0 mt-0.5" /><div className="flex-1"><div className="flex items-center gap-2 flex-wrap"><span className="font-semibold text-sm text-foreground">{entry.user.nama}</span><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_BADGE[entry.user.role] || "bg-muted text-muted-foreground border border-border"}`}>{entry.user.role}</span><span className="text-xs text-muted-foreground ml-auto">{format(new Date(entry.time), "yyyy-MM-dd HH:mm")}</span></div><div className="mt-1"><span className={`inline-block text-xs px-2.5 py-1 rounded-full font-medium ${getActionBadgeClass(entry.action)}`}>{entry.action}</span></div></div></div>))}</div>
