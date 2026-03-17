@@ -22,6 +22,7 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
   const [approveComment, setApproveComment] = useState("");
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
+  const navigate = useNavigate();
   const isAdmin = currentUser.role === "Operator/TU";
 
   const handleAddNote = () => { if (!noteText.trim()) return; addAuditNote(doc.id, noteText.trim()); setNoteText(""); };
