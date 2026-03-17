@@ -9,7 +9,7 @@ import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import UploadForm from "@/components/upload/UploadForm";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { buildFolderTree, docMatchesFolder, docMatchesFolderStrict, KATEGORI_OPTIONS } from "@/data/mockData";
+import { buildFolderTree, docMatchesFolder, docMatchesFolderStrict, KATEGORI_OPTIONS, SIDEBAR_FOLDERS } from "@/data/mockData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
