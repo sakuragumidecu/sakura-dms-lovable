@@ -52,7 +52,31 @@ export default function UploadForm({ onSuccess, onCancel, selectedModule, guruUp
 
   const [isUrgent, setIsUrgent] = useState(false);
   const [isSensitif, setIsSensitif] = useState(false);
-  const [ownerNip, setOwnerNip] = useState("");
+  const [ownerNIPs, setOwnerNIPs] = useState(lockedNip ? [lockedNip] : []);
+  const [nipSearch, setNipSearch] = useState("");
+  const [nipDropdownOpen, setNipDropdownOpen] = useState(false);
+
+  // Users with NIP for multi-select
+  const nipUsers = useMemo(() => {
+    return users.filter((u) => u.nip && u.nip.length > 0);
+  }, [users]);
+
+  const filteredNipUsers = useMemo(() => {
+    if (!nipSearch) return nipUsers.filter((u) => !ownerNIPs.includes(u.nip));
+    const q = nipSearch.toLowerCase();
+    return nipUsers.filter((u) => !ownerNIPs.includes(u.nip) && (u.nama.toLowerCase().includes(q) || u.nip.includes(q)));
+  }, [nipUsers, nipSearch, ownerNIPs]);
+
+  const addNip = (nip) => {
+    setOwnerNIPs((prev) => [...prev, nip]);
+    setNipSearch("");
+    setNipDropdownOpen(false);
+  };
+
+  const removeNip = (nip) => {
+    if (guruUploadOwn) return; // locked
+    setOwnerNIPs((prev) => prev.filter((n) => n !== nip));
+  };
 
   const [form, setForm] = useState({
     nomorDokumen: "",
