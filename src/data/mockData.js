@@ -264,10 +264,85 @@ export const PERMISSIONS = [
 ];
 
 export const ROLE_PERMISSIONS = {
-  "Operator/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit"],
+  "Operator/TU": ["dashboard.view", "documents.upload", "documents.archive", "documents.edit", "users.manage", "roles.manage", "audit.view", "audit.addNote", "profile.edit", "documents.approve"],
   "Kepala Sekolah": ["dashboard.view", "documents.approve", "documents.reject", "documents.archive", "audit.view", "profile.edit"],
   "Guru": ["dashboard.view", "documents.archive", "profile.edit"],
 };
+
+// Module definitions for upload permissions
+export const MODULE_DEFINITIONS = [
+  {
+    id: "kesiswaan",
+    label: "Kesiswaan",
+    category_id: 1,
+    type_ids: [1, 2, 3, 4],
+    uploadRoles: ["Operator/TU"],
+    viewRoles: ["Operator/TU", "Kepala Sekolah", "Guru"],
+  },
+  {
+    id: "kepegawaian",
+    label: "Kepegawaian",
+    category_id: 2,
+    type_ids: [5, 6, 7],
+    uploadRoles: ["Operator/TU"],
+    viewRoles: ["Operator/TU", "Kepala Sekolah"],
+    subPermissions: {
+      // Sertifikat & Diklat: Guru can upload own docs
+      6: { guruCanUploadOwn: true },
+      7: { guruCanUploadOwn: true },
+    },
+    guruViewOwnOnly: true,
+  },
+  {
+    id: "inventaris",
+    label: "Inventaris",
+    category_id: 3,
+    type_ids: [8, 9],
+    uploadRoles: ["Operator/TU"],
+    viewRoles: ["Operator/TU", "Kepala Sekolah"],
+  },
+  {
+    id: "korespondensi",
+    label: "Korespondensi",
+    category_id: 4,
+    type_ids: [10, 11, 12],
+    uploadRoles: ["Operator/TU"],
+    viewRoles: ["Operator/TU", "Kepala Sekolah", "Guru"],
+  },
+];
+
+// Sidebar folder structure for archive navigation
+export const SIDEBAR_FOLDERS = [
+  { label: "Semua Dokumen", path: null, icon: "all" },
+  {
+    module: "Kesiswaan", children: [
+      { label: "Buku Klapper", folder: "klapper", path: "cat:1/type:1" },
+      { label: "Buku Induk Siswa", folder: "induk-siswa", path: "cat:1/type:2" },
+      { label: "Ijazah SMP", folder: "ijazah", path: "cat:1/type:4" },
+      { label: "Surat Keterangan", folder: "surat-ket", path: "cat:1/type:3" },
+    ],
+  },
+  {
+    module: "Kepegawaian", children: [
+      { label: "Sertifikat/Diklat", folder: "sertifikat", path: "cat:2/type:6" },
+      { label: "Buku Induk Pegawai", folder: "induk-pegawai", path: "cat:2/type:5" },
+      { label: "Catatan Diklat", folder: "catatan-diklat", path: "cat:2/type:7" },
+    ],
+  },
+  {
+    module: "Inventaris", children: [
+      { label: "Buku Barang", folder: "barang", path: "cat:3/type:8" },
+      { label: "Kartu Perbaikan", folder: "perbaikan", path: "cat:3/type:9" },
+    ],
+  },
+  {
+    module: "Korespondensi", children: [
+      { label: "Surat Masuk", folder: "surat-masuk", path: "cat:4/type:10" },
+      { label: "Surat Keluar", folder: "surat-keluar", path: "cat:4/type:11" },
+      { label: "SK & Edaran", folder: "sk", path: "cat:4/type:12" },
+    ],
+  },
+];
 
 export const CHART_MONTHS = [
   { label: "September 2025", value: "2025-09" },

@@ -1,7 +1,8 @@
 import { useState, useRef, useMemo, useCallback } from "react";
-import { Upload, Camera, X, Eye, FileText, CalendarIcon, ChevronDown, Maximize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCw, AlertTriangle, Lock } from "lucide-react";
+import { Upload, Camera, X, Eye, FileText, CalendarIcon, ChevronDown, Maximize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCw, AlertTriangle, Lock, Search } from "lucide-react";
 import CameraScanModal from "@/components/scan/CameraScanModal";
 import { useApp } from "@/contexts/AppContext";
+import OcrScanner from "@/components/upload/OcrScanner";
 
 import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
 import { format } from "date-fns";
@@ -10,8 +11,8 @@ import { useNavigate } from "react-router-dom";
 import { CATEGORIES, DOCUMENT_TYPES, TAHUN_AJARAN_OPTIONS, CATEGORY_FORM_FIELDS, SURAT_TYPE_FORM_FIELDS, getAutoFolderPath, getFolderIdForDocument } from "@/data/mockData";
 import { Calendar } from "@/components/ui/calendar";
 
-export default function UploadForm({ onSuccess, onCancel }) {
-  const { uploadDocument, currentUser, generateDocumentNumber } = useApp();
+export default function UploadForm({ onSuccess, onCancel, selectedModule, guruUploadOwn, lockedNip, lockedTypeId }) {
+  const { uploadDocument, currentUser, generateDocumentNumber, users } = useApp();
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -51,7 +52,31 @@ export default function UploadForm({ onSuccess, onCancel }) {
 
   const [isUrgent, setIsUrgent] = useState(false);
   const [isSensitif, setIsSensitif] = useState(false);
-  const [ownerNip, setOwnerNip] = useState("");
+  const [ownerNIPs, setOwnerNIPs] = useState(lockedNip ? [lockedNip] : []);
+  const [nipSearch, setNipSearch] = useState("");
+  const [nipDropdownOpen, setNipDropdownOpen] = useState(false);
+
+  // Users with NIP for multi-select
+  const nipUsers = useMemo(() => {
+    return users.filter((u) => u.nip && u.nip.length > 0);
+  }, [users]);
+
+  const filteredNipUsers = useMemo(() => {
+    if (!nipSearch) return nipUsers.filter((u) => !ownerNIPs.includes(u.nip));
+    const q = nipSearch.toLowerCase();
+    return nipUsers.filter((u) => !ownerNIPs.includes(u.nip) && (u.nama.toLowerCase().includes(q) || u.nip.includes(q)));
+  }, [nipUsers, nipSearch, ownerNIPs]);
+
+  const addNip = (nip) => {
+    setOwnerNIPs((prev) => [...prev, nip]);
+    setNipSearch("");
+    setNipDropdownOpen(false);
+  };
+
+  const removeNip = (nip) => {
+    if (guruUploadOwn) return; // locked
+    setOwnerNIPs((prev) => prev.filter((n) => n !== nip));
+  };
 
   const [form, setForm] = useState({
     nomorDokumen: "",
@@ -149,7 +174,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
       folderTujuan: autoFolderDisplay || undefined,
       urgent: isUrgent,
       sensitif: isSensitif,
-      ownerNIP: isSensitif ? ownerNip : undefined,
+      ownerNIPs: isSensitif ? ownerNIPs : [],
     });
 
     setShowConfirm(false);
@@ -272,7 +297,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
             )}
           </div>
 
-          {/* Sensitive toggle */}
+          {/* Sensitive toggle + Multi-select NIP */}
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-foreground">Dokumen Sensitif (hanya bisa dilihat pemilik)</span>
@@ -288,7 +313,54 @@ export default function UploadForm({ onSuccess, onCancel }) {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">NIP Pemilik Dokumen *</label>
-                  <input value={ownerNip} onChange={(e) => setOwnerNip(e.target.value)} placeholder="18 digit NIP" maxLength={18} className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring" />
+                  {/* Selected NIPs as pills */}
+                  {ownerNIPs.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {ownerNIPs.map((nip) => {
+                        const user = nipUsers.find((u) => u.nip === nip);
+                        return (
+                          <span key={nip} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                            {user ? `${user.nama} — ${nip}` : nip}
+                            {!guruUploadOwn && (
+                              <button type="button" onClick={() => removeNip(nip)} className="hover:text-destructive">
+                                <X size={12} />
+                              </button>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Searchable dropdown */}
+                  {!guruUploadOwn && (
+                    <div className="relative">
+                      <div className="relative">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                        <input
+                          value={nipSearch}
+                          onChange={(e) => { setNipSearch(e.target.value); setNipDropdownOpen(true); }}
+                          onFocus={() => setNipDropdownOpen(true)}
+                          placeholder="Cari nama atau NIP..."
+                          className="w-full pl-8 pr-3 py-2 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                      </div>
+                      {nipDropdownOpen && filteredNipUsers.length > 0 && (
+                        <div className="absolute z-30 top-full mt-1 w-full bg-card border border-border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                          {filteredNipUsers.map((u) => (
+                            <button
+                              key={u.nip}
+                              type="button"
+                              onClick={() => addNip(u.nip)}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
+                            >
+                              <span className="font-medium text-foreground">{u.nama}</span>
+                              <span className="text-muted-foreground"> — {u.nip}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -301,6 +373,18 @@ export default function UploadForm({ onSuccess, onCancel }) {
               <span className="text-muted-foreground"> (auto-mapping)</span>
             </div>
           )}
+          {/* OCR Scanner */}
+          <OcrScanner onApplyFields={(fields) => {
+            fields.forEach((f) => {
+              if (f.key === "Nama" || f.key === "Teks 1") update("judul", f.value);
+              if (f.key === "NIP") updateMeta("nip", f.value.replace(/\s/g, ""));
+              if (f.key === "NIS/NISN") updateMeta("nisn", f.value);
+              if (f.key === "Kelas") updateMeta("kelas", f.value);
+              if (f.key === "Nomor Surat") update("nomorDokumen", f.value);
+              if (f.key === "Perihal") update("judul", f.value);
+            });
+          }} />
+
           <div className="bg-card border border-border rounded-xl p-4 sm:p-6">
             <h3 className="font-bold text-foreground mb-4 flex items-center gap-2"><FileText size={18} className="text-primary" /> File Dokumen</h3>
             <div
@@ -529,7 +613,7 @@ export default function UploadForm({ onSuccess, onCancel }) {
           {hasSelection && (selectedCategoryId === 2 || selectedTypeId === 12) && (
             <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 sm:p-6 animate-fade-in">
               <h3 className="font-bold text-foreground mb-1 flex items-center gap-2">
-                <FileIcon size={18} className="text-destructive" />
+                <FileText size={18} className="text-destructive" />
                 Akses Terbatas (Dokumen Sensitif)
               </h3>
               <p className="text-xs text-muted-foreground mb-4">Dokumen ini hanya dapat diakses oleh Admin dan guru terkait berdasarkan NIP.</p>

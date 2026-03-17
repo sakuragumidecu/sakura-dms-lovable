@@ -9,7 +9,7 @@ import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
 import UploadForm from "@/components/upload/UploadForm";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { buildFolderTree, docMatchesFolder, docMatchesFolderStrict, KATEGORI_OPTIONS } from "@/data/mockData";
+import { buildFolderTree, docMatchesFolder, docMatchesFolderStrict, KATEGORI_OPTIONS, SIDEBAR_FOLDERS } from "@/data/mockData";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
@@ -35,14 +35,27 @@ export default function ArchivePage() {
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [categoryFilter, setCategoryFilter] = useState("Semua");
 
-  // Auto-filter from query param
+  // Auto-filter from query param (kategori or folder)
   useEffect(() => {
     const kat = searchParams.get("kategori");
     if (kat && KATEGORI_OPTIONS.includes(kat)) {
       setCategoryFilter(kat);
       setSearchParams({}, { replace: true });
     }
-  }, []);
+    const folder = searchParams.get("folder");
+    if (folder) {
+      // Find the matching folder path from SIDEBAR_FOLDERS
+      for (const item of SIDEBAR_FOLDERS) {
+        if (item.children) {
+          const match = item.children.find((c) => c.folder === folder);
+          if (match) {
+            setSelectedFolder(match.path);
+            break;
+          }
+        }
+      }
+    }
+  }, [searchParams]);
   const [detailDoc, setDetailDoc] = useState(null);
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [expandedFolders, setExpandedFolders] = useState(new Set());

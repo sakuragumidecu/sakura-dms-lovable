@@ -46,11 +46,11 @@ export default function LogPage() {
           </div>
           <select value={filterAction} onChange={(e) => setFilterAction(e.target.value)} className="px-3 py-2 rounded-lg border border-input bg-background text-sm">
             <option value="Semua">Semua Aktivitas</option>
-            <option value="Mengunggah">Upload</option>
-            <option value="Melihat">View</option>
-            <option value="Menyetujui">Approve</option>
-            <option value="Menolak">Reject</option>
-            <option value="Mengarsipkan">Archive</option>
+            <option value="Mengunggah">Unggah</option>
+            <option value="Melihat">Lihat</option>
+            <option value="Menyetujui">Setujui</option>
+            <option value="Menolak">Tolak</option>
+            <option value="Mengarsipkan">Arsipkan</option>
             <option value="Catatan">Catatan Admin</option>
           </select>
           <button onClick={() => { setSearch(""); setFilterAction("Semua"); }} className="flex items-center gap-1 px-3 py-2 rounded-lg border border-input text-sm hover:bg-muted transition-colors">
