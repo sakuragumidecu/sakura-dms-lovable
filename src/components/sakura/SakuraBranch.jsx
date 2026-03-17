@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 
 /**
  * Cinematic SVG cherry blossom branch with 3D flowers.
