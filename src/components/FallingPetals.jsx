@@ -1,20 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
-// Inject keyframe via JS to guarantee it loads
-const STYLE_ID = "sakura-fall-style";
-const STYLE = `
-@keyframes sakuraFall {
-  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
-  15%  { transform: translate(calc(var(--sx) * 0.15), 12vh) rotate(60deg) scale(0.98); }
-  30%  { transform: translate(calc(var(--sx) * 0.35), 26vh) rotate(130deg) scale(0.96); }
-  45%  { transform: translate(calc(var(--sx) * 0.50), 40vh) rotate(200deg) scale(0.94); }
-  60%  { transform: translate(calc(var(--sx) * 0.65), 55vh) rotate(290deg) scale(0.92); }
-  75%  { transform: translate(calc(var(--sx) * 0.80), 72vh) rotate(380deg) scale(0.90); opacity: 0.25; }
-  90%  { transform: translate(calc(var(--sx) * 0.92), 90vh) rotate(460deg) scale(0.88); opacity: 0.1; }
-  100% { transform: translate(var(--sx), 108vh) rotate(540deg) scale(0.85); opacity: 0; }
-}
-`;
-
+// Spawn positions matching branch flower locations (% of viewport)
 const FLOWERS = [
   { x: 10, y: 37 }, { x: 15, y: 31 }, { x: 20, y: 26 },
   { x: 26, y: 22 }, { x: 31, y: 18 }, { x: 37, y: 15 },
@@ -24,98 +10,158 @@ const FLOWERS = [
 ];
 
 const COLORS = [
-  "#FFB7C5", "#FF9EBA", "#FFC5D0",
-  "#FFADC0", "#FFD0DC", "#FF90AF",
+  [255, 183, 197], [255, 158, 186], [255, 200, 213],
+  [255, 173, 192], [255, 208, 220], [255, 144, 175],
 ];
 
-let uid = 0;
-
-function spawn(ox, oy) {
+function makePetal(ox, oy) {
   const f = FLOWERS[Math.floor(Math.random() * FLOWERS.length)];
+  const xPct = (ox ?? f.x) + (Math.random() - 0.5) * 3;
+  const yPct = (oy ?? f.y) + (Math.random() - 0.5) * 2;
   return {
-    id: ++uid,
-    x: (ox ?? f.x) + (Math.random() - 0.5) * 3,
-    y: (oy ?? f.y) + (Math.random() - 0.5) * 2,
-    size: 9 + Math.random() * 13,
-    dur: 7 + Math.random() * 8,
-    // Use vw unit for sway so calc multiplication works (unitless * vw)
-    sx: ((Math.random() - 0.5) * 20).toFixed(1), // in vw
+    xPct,
+    yPct,
+    x: 0, // will be set on first frame
+    y: 0,
+    size: 8 + Math.random() * 12,
+    speed: 0.4 + Math.random() * 0.5, // px per frame at 60fps
+    swayAmp: 30 + Math.random() * 60,
+    swayFreq: 0.005 + Math.random() * 0.008,
+    rot: 0,
+    rotSpeed: 1 + Math.random() * 3,
     color: COLORS[Math.floor(Math.random() * COLORS.length)],
-    op: 0.5 + Math.random() * 0.45,
+    opacity: 0.5 + Math.random() * 0.4,
+    age: 0,
+    life: 500 + Math.random() * 500, // frames
+    phase: Math.random() * Math.PI * 2,
+    needsInit: true,
   };
 }
 
-function PetalSVG({ color, size }) {
-  return (
-    <svg width={size} height={size * 1.3} viewBox="0 0 18 24" fill="none">
-      <path
-        d="M 9 0 C 15 0 18 6 18 12 C 18 18 14 24 9 24 C 4 24 0 18 0 12 C 0 6 3 0 9 0 Z"
-        fill={color}
-        opacity="0.9"
-      />
-      <path
-        d="M 9 3 C 9 8, 9 16, 9 22"
-        stroke="#fff"
-        strokeWidth="0.5"
-        opacity="0.3"
-        fill="none"
-      />
-    </svg>
-  );
-}
-
 export default function FallingPetals() {
-  const [petals, setPetals] = useState([]);
-  const timers = useRef([]);
-
-  const addPetal = useCallback((p) => {
-    setPetals((prev) => {
-      const next = [...prev, p];
-      return next.length > 150 ? next.slice(-150) : next;
-    });
-    const t = setTimeout(() => {
-      setPetals((prev) => prev.filter((x) => x.id !== p.id));
-    }, (p.dur + 0.5) * 1000);
-    timers.current.push(t);
-  }, []);
+  const canvasRef = useRef(null);
+  const petalsRef = useRef([]);
+  const rafRef = useRef(null);
+  const spawnTimerRef = useRef(null);
 
   useEffect(() => {
-    // Inject keyframe style
-    if (!document.getElementById(STYLE_ID)) {
-      const el = document.createElement("style");
-      el.id = STYLE_ID;
-      el.textContent = STYLE;
-      document.head.appendChild(el);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const resize = () => {
+      canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+      canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      ctx.setTransform(window.devicePixelRatio || 1, 0, 0, window.devicePixelRatio || 1, 0, 0);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    // Draw a single petal shape
+    function drawPetal(x, y, size, rot, color, opacity) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate((rot * Math.PI) / 180);
+      ctx.globalAlpha = opacity;
+      ctx.beginPath();
+      const h = size * 1.3;
+      const w = size;
+      ctx.moveTo(0, -h / 2);
+      ctx.bezierCurveTo(w / 2, -h / 3, w / 2, h / 3, 0, h / 2);
+      ctx.bezierCurveTo(-w / 2, h / 3, -w / 2, -h / 3, 0, -h / 2);
+      ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+      ctx.fill();
+      // Vein
+      ctx.beginPath();
+      ctx.moveTo(0, -h / 2 + 2);
+      ctx.lineTo(0, h / 2 - 2);
+      ctx.strokeStyle = `rgba(255,255,255,0.3)`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+      ctx.restore();
     }
 
-    // Spawn initial batch staggered
-    for (let i = 0; i < 28; i++) {
-      const t = setTimeout(() => addPetal(spawn()), i * 120);
-      timers.current.push(t);
+    // Animation loop
+    function animate() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      const petals = petalsRef.current;
+      for (let i = petals.length - 1; i >= 0; i--) {
+        const p = petals[i];
+
+        // Initialize position from viewport percentages
+        if (p.needsInit) {
+          p.x = (p.xPct / 100) * w;
+          p.y = (p.yPct / 100) * h;
+          p.needsInit = false;
+        }
+
+        p.age++;
+        p.y += p.speed;
+        p.x += Math.sin(p.age * p.swayFreq + p.phase) * 0.8;
+        p.rot += p.rotSpeed;
+
+        // Fade out in last 25% of life
+        let alpha = p.opacity;
+        const fadeStart = p.life * 0.75;
+        if (p.age > fadeStart) {
+          alpha *= 1 - (p.age - fadeStart) / (p.life * 0.25);
+        }
+
+        if (p.age > p.life || alpha <= 0) {
+          petals.splice(i, 1);
+          continue;
+        }
+
+        drawPetal(p.x, p.y, p.size, p.rot, p.color, Math.max(0, alpha));
+      }
+
+      rafRef.current = requestAnimationFrame(animate);
     }
 
-    // Continuous spawning every 380ms — runs forever
-    const interval = setInterval(() => addPetal(spawn()), 380);
+    // Spawn initial batch
+    for (let i = 0; i < 30; i++) {
+      const p = makePetal();
+      p.age = Math.floor(Math.random() * 300); // stagger ages
+      petalsRef.current.push(p);
+    }
 
-    // Flower click bursts
+    // Continuous spawning every 380ms
+    spawnTimerRef.current = setInterval(() => {
+      if (petalsRef.current.length < 150) {
+        petalsRef.current.push(makePetal());
+      }
+    }, 380);
+
+    // Flower click burst
     const onBurst = (e) => {
       const { x, y } = e.detail;
       for (let i = 0; i < 20; i++) {
-        const t = setTimeout(() => addPetal(spawn(x, y)), i * 60);
-        timers.current.push(t);
+        const p = makePetal(x, y);
+        p.speed = 0.5 + Math.random() * 0.8;
+        p.opacity = 0.7 + Math.random() * 0.3;
+        petalsRef.current.push(p);
       }
     };
     window.addEventListener("sakuraBurst", onBurst);
 
+    rafRef.current = requestAnimationFrame(animate);
+
     return () => {
-      clearInterval(interval);
-      timers.current.forEach(clearTimeout);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (spawnTimerRef.current) clearInterval(spawnTimerRef.current);
+      window.removeEventListener("resize", resize);
       window.removeEventListener("sakuraBurst", onBurst);
     };
-  }, [addPetal]);
+  }, []);
 
   return (
-    <div
+    <canvas
+      ref={canvasRef}
       style={{
         position: "fixed",
         top: 0,
@@ -124,26 +170,8 @@ export default function FallingPetals() {
         height: "100vh",
         pointerEvents: "none",
         zIndex: 1,
-        overflow: "visible",
       }}
       aria-hidden="true"
-    >
-      {petals.map((p) => (
-        <div
-          key={p.id}
-          style={{
-            position: "absolute",
-            left: `${p.x}vw`,
-            top: `${p.y}vh`,
-            opacity: p.op,
-            animation: `sakuraFall ${p.dur}s ease-in forwards`,
-            "--sx": `${p.sx}vw`,
-            pointerEvents: "none",
-          }}
-        >
-          <PetalSVG color={p.color} size={p.size} />
-        </div>
-      ))}
-    </div>
+    />
   );
 }
