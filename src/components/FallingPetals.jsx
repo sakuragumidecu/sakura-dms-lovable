@@ -48,43 +48,44 @@ function PetalSVG({ color, size }) {
 export default function FallingPetals() {
   const [petals, setPetals] = useState([]);
 
-  const spawnPetal = useCallback(() => {
-    const spawn = FLOWER_SPAWN_POINTS[
-      Math.floor(Math.random() * FLOWER_SPAWN_POINTS.length)
-    ];
+  useEffect(() => {
+    const spawnPetal = () => {
+      const spawn = FLOWER_SPAWN_POINTS[
+        Math.floor(Math.random() * FLOWER_SPAWN_POINTS.length)
+      ];
 
-    const duration = 7 + Math.random() * 9;
-    const petal = {
-      id: Date.now() + Math.random(),
-      startX: spawn.x + (Math.random() - 0.5) * 3,
-      startY: spawn.y + (Math.random() - 0.5) * 2,
-      size: 8 + Math.random() * 14,
-      duration,
-      swayX: (Math.random() - 0.5) * 140,
-      rotationEnd: 360 + Math.random() * 720,
-      color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
-      opacity: 0.45 + Math.random() * 0.45,
+      const duration = 7 + Math.random() * 8;
+      const petal = {
+        id: Date.now() + Math.random(),
+        startX: spawn.x + (Math.random() - 0.5) * 4,
+        startY: spawn.y + (Math.random() - 0.5) * 3,
+        size: 8 + Math.random() * 14,
+        duration,
+        swayX: (Math.random() - 0.5) * 150,
+        rotationEnd: 360 + Math.random() * 720,
+        color: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+        opacity: 0.5 + Math.random() * 0.4,
+      };
+
+      setPetals(prev => {
+        const next = [...prev, petal];
+        return next.length > 120 ? next.slice(-120) : next;
+      });
+
+      setTimeout(() => {
+        setPetals(prev => prev.filter(p => p.id !== petal.id));
+      }, (duration + 0.5) * 1000);
     };
 
-    setPetals(prev => {
-      const updated = [...prev, petal];
-      return updated.length > 100 ? updated.slice(-100) : updated;
-    });
-
-    setTimeout(() => {
-      setPetals(prev => prev.filter(p => p.id !== petal.id));
-    }, (duration + 1) * 1000);
-  }, []);
-
-  useEffect(() => {
-    // Spawn initial batch
-    for (let i = 0; i < 20; i++) {
-      setTimeout(spawnPetal, i * 150);
+    // Spawn 25 petals immediately, staggered
+    for (let i = 0; i < 25; i++) {
+      setTimeout(spawnPetal, i * 100);
     }
-    // Continuous spawning
-    const interval = setInterval(spawnPetal, 350);
+
+    // Continuously spawn every 400ms forever
+    const interval = setInterval(spawnPetal, 400);
     return () => clearInterval(interval);
-  }, [spawnPetal]);
+  }, []);
 
   return (
     <div
