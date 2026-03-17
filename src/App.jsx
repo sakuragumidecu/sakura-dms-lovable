@@ -12,7 +12,8 @@ import SignUpPage from "@/pages/SignUpPage.jsx";
 import DashboardPage from "@/pages/DashboardPage.jsx";
 import UploadPage from "@/pages/UploadPage.jsx";
 import ArchivePage from "@/pages/ArchivePage.jsx";
-import ApprovalPage from "@/pages/ApprovalPage.jsx";
+import ApprovalPendingPage from "@/pages/ApprovalPendingPage.jsx";
+import ApprovalApprovedPage from "@/pages/ApprovalApprovedPage.jsx";
 import RoleManagementPage from "@/pages/RoleManagementPage.jsx";
 import UserManagementPage from "@/pages/UserManagementPage.jsx";
 import LogPage from "@/pages/LogPage.jsx";
@@ -44,7 +45,9 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/archive" element={<ArchivePage />} />
-        <Route path="/approval" element={<ApprovalPage />} />
+        <Route path="/approval" element={<Navigate to="/approval/pending" replace />} />
+        <Route path="/approval/pending" element={<ApprovalPendingPage />} />
+        <Route path="/approval/approved" element={<ApprovalApprovedPage />} />
         <Route path="/users" element={<UserManagementPage />} />
         <Route path="/roles" element={<RoleManagementPage />} />
         <Route path="/logs" element={<LogPage />} />

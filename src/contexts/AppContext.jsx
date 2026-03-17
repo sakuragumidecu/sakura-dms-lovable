@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useRef } from "react";
 import { USERS, DOCUMENTS, ROLE_PERMISSIONS, INITIAL_NOTIFICATIONS, DOCUMENT_TYPES, INITIAL_DOCUMENT_COUNTERS, FOLDERS } from "@/data/mockData.js";
+import avatarAdmin from "@/assets/avatar_admin.jpg";
 
 const AppContext = createContext(null);
 
@@ -100,9 +101,27 @@ export const AppProvider = ({ children }) => {
 
   const login = (email) => {
     const user = users.find((u) => u.email === email);
-    if (user) { setCurrentUser(user); setIsLoggedIn(true); return true; }
-    return false;
+    if (!user) return false;
+    if (user.status === "menunggu_approval") return "pending";
+    setCurrentUser(user); setIsLoggedIn(true); return true;
   };
+
+  const registerUser = (userData) => {
+    const newUser = { ...userData, id: Date.now(), status: "menunggu_approval", avatar: avatarAdmin, registeredAt: new Date().toISOString() };
+    setUsers((prev) => [...prev, newUser]);
+    return newUser;
+  };
+
+  const activateUser = (userId) => {
+    setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, status: "active", role: u.role || "Guru" } : u));
+  };
+
+  const rejectRegistration = (userId) => {
+    setUsers((prev) => prev.filter((u) => u.id !== userId));
+  };
+
+  const pendingUsers = users.filter((u) => u.status === "menunggu_approval");
+  const activeUsers = users.filter((u) => u.status !== "menunggu_approval");
 
   const logout = () => setIsLoggedIn(false);
 
@@ -253,10 +272,12 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider value={{
       currentUser, users, documents, rolePermissions, notifications, isLoggedIn, customFolders,
+      pendingUsers, activeUsers,
       login, logout, updateUserRole, updateUserAvatar, togglePermission, addAuditNote,
       hasPermission, approveDocument, rejectDocument, uploadDocument, archiveDocument,
       toggleFavorite, markNotificationRead, markAllNotificationsRead,
       addUser, updateUser, deleteUser, generateDocumentNumber, updateProfile, changePassword,
+      registerUser, activateUser, rejectRegistration,
       createFolder, editFolder, deleteFolder, editDocument, moveDocument, deleteDocument,
     }}>
       {children}

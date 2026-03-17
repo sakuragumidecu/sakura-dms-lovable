@@ -1,122 +1,244 @@
 
+# Rencana Revisi & Perbaikan Sistem SAKURA DMS
 
-## Plan: Multi-Feature Enhancement for SAKURA App
+## Ringkasan
 
-This plan covers 4 major features across ~12 files. No changes to homepage, hero, petals, or branch.
-
----
-
-### Feature 1 — Document Detail: "Lokasi" Field with Navigation
-
-**Files to modify:**
-- `src/components/modals/DocumentDetailModal.jsx` — Add a "Lokasi" row after existing detail grid showing a clickable folder pill (Lucide `Folder` icon + `doc.kategori`). On click, `navigate('/archive?kategori=' + doc.kategori)`.
-- `src/pages/ArchivePage.jsx` — On mount, read `searchParams.get('kategori')` and auto-select/filter that category in the folder tree.
+10 area perubahan besar mencakup sidebar, dashboard, upload dokumen, arsip, detail dokumen, manajemen user, login, pengaturan, dan alur persetujuan.
 
 ---
 
-### Feature 2 — Sidebar Dropdown + Approval Redesign + Upload Restriction
+## 1. Sidebar - Collapse Button di Atas
 
-**2A — Sidebar Persetujuan Dropdown**
+**File**: `src/components/layout/AppSidebar.tsx`
 
-Modify `src/components/layout/AppSidebar.jsx`:
-- Replace the single "Persetujuan" nav item with a collapsible group containing two sub-items: "Pending" (`/approval/pending`) and "Disetujui" (`/approval/approved`).
-- Show pending document count badge on "Pending" sub-item.
-- Use `useState` for expand/collapse with `max-height` CSS transition.
-- In collapsed sidebar mode, keep single icon behavior.
-
-**2B — Pending Approval Page Redesign**
-
-Create `src/pages/ApprovalPendingPage.jsx`:
-- Top: 3-step horizontal flow diagram (Upload → Review → Approved/Rejected) with styled circles and arrows.
-- Note: "Hanya Operator TU yang dapat mengunggah dokumen"
-- Full-width document cards with: uploader info + role badge, urgent badge (if `doc.urgent`), document title, tag pills, notes box (left-bordered), and action buttons (Lihat Detail, Setujui, Tolak).
-
-Create `src/pages/ApprovalApprovedPage.jsx`:
-- Simple list of approved/archived/rejected documents reusing existing "recent decisions" pattern.
-
-**2C — Upload Restriction**
-
-Modify `src/pages/UploadPage.jsx`:
-- If `currentUser.role !== "Operator/TU"`, show info banner with restriction message and disable the form submit button.
-
-**Routing:** Update `src/App.jsx` to add routes `/approval/pending` and `/approval/approved`, redirect `/approval` to `/approval/pending`.
+- Pindahkan tombol collapse/expand dari bagian bawah sidebar ke bagian **atas** (di samping logo SAKURA)
+- Arah panah tetap jelas: `PanelLeftClose` untuk collapse, `PanelLeft` untuk expand
 
 ---
 
-### Feature 3 — Urgent Flag on Upload
+## 2. Dashboard - Filter Aktivitas & Grafik Interaktif
 
-Modify `src/components/upload/UploadForm.jsx`:
-- Add an "Tandai sebagai Urgent" toggle (using existing Switch component or custom toggle) at the top of the form before the file upload section.
-- When ON, show amber warning notice below.
-- Store `isUrgent` in form state; include `urgent: true/false` in `uploadDocument()` call.
+### a. Filter Mingguan/Bulanan
 
-Modify `src/contexts/AppContext.jsx` — `uploadDocument` already spreads the doc object, so `urgent` will be preserved automatically.
+**File**: `src/components/dashboard/ActivityChart.tsx`
 
-The pending approval cards (Feature 2B) will read `doc.urgent` to display the URGENT badge.
+- Tambah toggle button "Mingguan" / "Bulanan" di header chart
+- Untuk bulanan, generate data 30 hari dari mock data
+- Chart title berubah sesuai filter yang aktif
 
----
+### b. Grafik Status (Disetujui/Ditolak/Menunggu)
 
-### Feature 4 — Auth Changes: Remove Google/OTP + Admin Approval
+- Tambah 3 line baru pada grafik: Disetujui, Ditolak, Menunggu (selain Upload dan Persetujuan yang sudah ada)
+- Atau ganti line yang ada menjadi 3 status tersebut
 
-**4A — Remove Google Login + OTP**
+### c. Klik Titik Grafik
 
-Modify `src/pages/LoginPage.jsx`:
-- Remove Google button, divider, and `handleGoogleLogin`.
-- Remove OTP step: `handleLogin` calls `login(email)` directly → navigate to `/dashboard`.
-- Remove `OtpPage` import.
+- Sudah ada `onDateClick` handler, perbaiki agar benar-benar menampilkan daftar dokumen sesuai tanggal yang diklik
 
-`src/pages/OtpPage.jsx` — Keep file but it becomes unreachable (no deletion needed).
+### d. Klik Status
 
-**4B — Teacher Signup with NIP + Pending Approval**
+- Klik pada status di legend grafik menampilkan daftar dokumen dengan filter status tersebut
 
-Modify `src/pages/SignUpPage.jsx`:
-- Restructure form: Nama, NIP (18 digits, required, with validation), Email, Departemen (dropdown of subjects), Password, Konfirmasi Password.
-- On submit: add user to context with `status: "menunggu_approval"` via new `registerUser` function.
-- Success page: hourglass icon, "Pendaftaran Berhasil!", message about waiting for Operator TU approval, "Kembali ke Beranda" button.
-
-Modify `src/contexts/AppContext.jsx`:
-- Add `registerUser(userData)` that creates user with `status: "menunggu_approval"`.
-- Add `activateUser(userId)` and `rejectRegistration(userId)` functions.
-- Modify `login()`: check if user has `status === "menunggu_approval"` and return a specific error.
-- Add `pendingUsers` derived state (users with `status === "menunggu_approval"`).
-
-**4C — NIP-based Document Access**
-
-Modify document filtering logic in archive/document list pages:
-- Documents with `sensitif: true` only visible if `doc.ownerNIP === currentUser.nip` or user is Operator/TU.
-- Show lock icon on sensitive documents.
-- Access denied message for unauthorized access attempts.
-
-Modify `src/components/upload/UploadForm.jsx`:
-- Add "Dokumen Sensitif" toggle after Urgent toggle.
-- When ON, show "NIP Pemilik Dokumen" input field.
-- Include `sensitif: true` and `ownerNIP` in upload data.
-
-**4D — User Management: Approval Queue**
-
-Modify `src/pages/UserManagementPage.jsx`:
-- Split into two sections with divider.
-- Section 1 (top): "Menunggu Persetujuan" — pending user cards with amber styling, Aktifkan/Tolak buttons, confirmation dialog.
-- Section 2 (bottom): "Pengguna Aktif" — existing table with green "Aktif" dot added.
+**File**: `src/data/mockData.ts` - Tambah data chart bulanan
 
 ---
 
-### Summary of Files to Create/Modify
+## 3. Upload Dokumen - Redesign Form dengan Kategori Dinamis
 
-| File | Action |
-|------|--------|
-| `src/components/modals/DocumentDetailModal.jsx` | Add Lokasi field |
-| `src/pages/ArchivePage.jsx` | Read kategori query param |
-| `src/components/layout/AppSidebar.jsx` | Collapsible Persetujuan dropdown |
-| `src/pages/ApprovalPendingPage.jsx` | **Create** — redesigned pending page |
-| `src/pages/ApprovalApprovedPage.jsx` | **Create** — approved list page |
-| `src/pages/ApprovalPage.jsx` | Redirect to /approval/pending |
-| `src/App.jsx` | Add new approval routes |
-| `src/pages/UploadPage.jsx` | Role restriction banner |
-| `src/components/upload/UploadForm.jsx` | Urgent + Sensitif toggles |
-| `src/pages/LoginPage.jsx` | Remove Google + OTP |
-| `src/pages/SignUpPage.jsx` | NIP validation + pending approval flow |
-| `src/contexts/AppContext.jsx` | registerUser, activateUser, login check |
-| `src/pages/UserManagementPage.jsx` | Approval queue section |
-| `src/data/mockData.js` | Add status field to USERS |
+**File**: `src/components/upload/UploadForm.tsx`
 
+### a. Filter Dropdown Jenis Dokumen Baru
+
+Ganti opsi jenis dokumen menjadi:
+- Surat Masuk dan Keluar Siswa
+- Surat Pindah Siswa
+- Sertifikat Guru
+- Sertifikat Prestasi Siswa
+- Ijazah SMP
+- Surat Keterangan Hasil Ujian (SKHU)
+- Rekapitulasi Absensi Siswa dan Guru
+- Surat Keputusan (Arsip Surat)
+- Inventaris Sarana Prasarana
+- Lainnya (input text manual jika dipilih)
+
+### b. Kategori di Atas Jenis Dokumen
+
+- Pindahkan **Kategori** di atas **Jenis Dokumen**
+- Opsi kategori: Data Siswa, Data Guru, Sarana Prasarana Sekolah, Surat Menyurat, Keuangan, Lainnya
+- Setiap kategori memiliki jenis dokumen yang relevan (filter cascade)
+
+### c. Data Detail Opsional (Next Page)
+
+- Setelah metadata utama, tambah tombol "Tambah Data Detail (Opsional)" yang expand/collapse
+- Berisi field tambahan sesuai kategori (mis. untuk Data Siswa: NIS, Tempat Lahir, dll.)
+- Tidak wajib diisi
+
+### d. Filter Folder Tujuan
+
+- Tambah dropdown "Masukkan ke Folder" yang menampilkan folder dari arsip dokumen
+- Auto-mapping berdasarkan jenis dokumen tetap berjalan
+
+### e. Tanggal dengan Date Picker
+
+- Tanggal Upload: tambah icon kalender yang bisa diklik untuk memilih tanggal
+- Tahun Ajaran: ubah jadi dropdown dengan opsi 2023/2024, 2024/2025, 2025/2026, dan "Lainnya" (input manual)
+
+### f. Konfirmasi Upload
+
+- Saat klik Upload: tampilkan dialog konfirmasi "Apakah Anda yakin data sudah benar?"
+- Setelah submit berhasil: toast notifikasi dengan tombol "Lihat di Arsip Dokumen" yang navigasi ke `/archive`
+
+### g. Preview Sesuai File
+
+- Preview menampilkan file yang benar-benar di-upload (untuk image: sudah ada, untuk PDF: tampilkan nama file, bukan dummy)
+
+---
+
+## 4. Arsip Dokumen
+
+**File**: `src/pages/ArchivePage.tsx`
+
+- Hapus field "Tambah catatan admin..." dari panel preview samping (tidak perlu catatan di setiap dokumen di semua role)
+
+---
+
+## 5. Detail Dokumen - Perbaikan UI
+
+**File**: `src/components/modals/DocumentDetailModal.tsx`
+
+- Role pengunggah: ganti tanda hubung (--) menjadi **badge/border** dengan warna khusus (misal: bg-primary/10 text-primary rounded-full px-2)
+- Status aksi (Mengunggah, Menyetujui, dll.): tampilkan dalam **badge bordered** dengan warna khusus sesuai aksi
+- Hapus penggunaan tanda "—" sebagai pemisah, ganti dengan border/badge styling
+
+---
+
+## 6. Manajemen User - CRUD Lengkap
+
+**File**: `src/pages/UserManagementPage.tsx`
+
+- **Create**: Tambah tombol "Tambah User" yang membuka modal form (Nama, Email, Role, Departemen)
+- **Read**: Sudah ada (tabel user)
+- **Update**: Tambah tombol "Edit" yang membuka modal edit semua field user
+- **Delete**: Tambah tombol "Hapus" dengan konfirmasi dialog
+- Semua aksi CRUD hanya bisa dilakukan oleh Admin/TU
+- Tambah kolom Aksi yang lebih lengkap
+
+**File**: `src/contexts/AppContext.tsx` - Tambah fungsi `addUser`, `updateUser`, `deleteUser`
+
+---
+
+## 7. Login - Tambah Google Login
+
+**File**: `src/pages/LoginPage.tsx`
+
+- Tambah tombol "Masuk dengan Google" di bawah form login (dengan ikon Google)
+- Tombol ini simulasi saja (alert bahwa fitur memerlukan backend)
+- Styling: border button dengan logo Google, teks "Masuk dengan Google"
+- Tambah divider "atau" antara form login dan tombol Google
+
+---
+
+## 8. Pengaturan Sistem - Simplifikasi
+
+**File**: `src/pages/SettingsPage.tsx`
+
+- Hapus section "Export JSON" dari Reset & Export
+- Hapus pengaturan frekuensi notifikasi
+- Section "Reset & Export" diganti menjadi "Reset Sistem" saja
+- Tombol: "Reset ke Default" saja
+
+---
+
+## 9. Alur Persetujuan - Simplifikasi
+
+**File**: `src/pages/ApprovalPage.tsx`
+
+- Hapus step "Review & Annotate" dan "Verifikasi & Tanda Tangan" dari workflow visual
+- Workflow menjadi: Staff/Guru Upload -> Antrian Persetujuan -> Disetujui/Ditolak
+- Tombol "Approve" diganti teks menjadi **"Setujui"**
+- Modal konfirmasi: ganti dari biometrik menjadi konfirmasi sederhana "Apakah Anda yakin ingin menyetujui dokumen ini?"
+- Hapus ikon Fingerprint dan referensi tanda tangan digital
+- Hapus tombol "Review & Annotate" dari card actions
+- Approval by system: setelah disetujui, dokumen otomatis masuk arsip (status langsung "Diarsipkan")
+
+**File**: `src/pages/DashboardPage.tsx` (tab Persetujuan)
+- Sama: ganti "Approve" menjadi "Setujui", simplifikasi modal konfirmasi
+
+---
+
+## 10. Pratinjau Dokumen
+
+**File**: `src/components/modals/PdfPreviewOverlay.tsx`
+
+- Pastikan preview bisa fullscreen (overlay/ngambang)
+- Tetap ada tombol close
+- Preview harus sesuai file yang di-upload (bukan dummy)
+
+---
+
+## Detail Teknis
+
+### File yang Diubah
+
+```text
+src/components/layout/AppSidebar.tsx          - Collapse button ke atas
+src/components/dashboard/ActivityChart.tsx     - Filter + status lines
+src/components/upload/UploadForm.tsx           - Redesign form upload
+src/components/modals/DocumentDetailModal.tsx  - Badge styling
+src/pages/ArchivePage.tsx                      - Hapus catatan
+src/pages/UserManagementPage.tsx               - CRUD user
+src/pages/LoginPage.tsx                        - Google login button
+src/pages/SettingsPage.tsx                     - Simplifikasi
+src/pages/ApprovalPage.tsx                     - Simplifikasi workflow
+src/pages/DashboardPage.tsx                    - Tab persetujuan update
+src/contexts/AppContext.tsx                    - addUser, updateUser, deleteUser
+src/data/mockData.ts                           - Chart data + kategori baru
+```
+
+### Kategori & Jenis Dokumen Mapping
+
+```text
+Data Siswa:
+  - Surat Masuk dan Keluar Siswa
+  - Surat Pindah Siswa
+  - Ijazah SMP
+  - SKHU
+  - Rekapitulasi Absensi Siswa dan Guru
+
+Data Guru:
+  - Sertifikat Guru
+  - Surat Keputusan (Arsip Surat)
+
+Sarana Prasarana Sekolah:
+  - Inventaris Sarana Prasarana
+
+Surat Menyurat:
+  - Surat Masuk dan Keluar Siswa
+  - Surat Pindah Siswa
+
+Keuangan:
+  - (field manual)
+
+Lainnya:
+  - Sertifikat Prestasi Siswa
+  - Lainnya (input manual)
+```
+
+### Workflow Persetujuan Baru (3 Step)
+
+```text
+1. Staff/Guru Upload
+2. Antrian Persetujuan
+3. Disetujui / Ditolak
+```
+
+### User CRUD Functions
+
+```text
+addUser(user: Omit<User, "id">)      - Generate ID, tambah ke state
+updateUser(id, partial)                - Update field user
+deleteUser(id)                         - Hapus dari state (tidak bisa hapus diri sendiri)
+```
+
+## 11. Website Responsive
+- Website bisa responsif dengan baik dan tidak hancur baik itu dekstop maupun di mobile. Karena nantinya akan dipakai juga di MOBILE, terlebih untuk scan mobile.

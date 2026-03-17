@@ -1,4 +1,5 @@
-import { X, Eye, Clock, FileText, CheckCircle, XCircle, Archive, QrCode } from "lucide-react";
+import { X, Eye, Clock, FileText, CheckCircle, XCircle, Archive, QrCode, Folder } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useState } from "react";
 import PdfPreviewOverlay from "./PdfPreviewOverlay";
@@ -21,6 +22,7 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
   const [approveComment, setApproveComment] = useState("");
   const [showArchiveConfirm, setShowArchiveConfirm] = useState(false);
   const { addAuditNote, currentUser, hasPermission, approveDocument, rejectDocument, archiveDocument } = useApp();
+  const navigate = useNavigate();
   const isAdmin = currentUser.role === "Operator/TU";
 
   const handleAddNote = () => { if (!noteText.trim()) return; addAuditNote(doc.id, noteText.trim()); setNoteText(""); };
@@ -45,6 +47,17 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
               {[["Nomor Dokumen", doc.nomorDokumen], ["Kategori", doc.kategori], ["Kelas / Unit", doc.kelas], ["Pengunggah", null], ["Tanggal Upload", format(new Date(doc.tanggalUpload), "yyyy-MM-dd HH:mm")], ["Tanggal Edit Terakhir", format(new Date(doc.tanggalEdit), "yyyy-MM-dd HH:mm")], ["Versi", `v${doc.versi}`], ["Status", null], ...(doc.namaSiswa ? [["Nama Siswa", doc.namaSiswa]] : []), ...(doc.nisn ? [["NISN", doc.nisn]] : []), ...(doc.tahunAjaran ? [["Tahun Ajaran", doc.tahunAjaran]] : [])].map(([label, val]) => (
                 <div key={label}><div className="text-muted-foreground text-xs">{label}</div>{label === "Pengunggah" ? (<div className="flex items-center gap-2 mt-0.5"><span className="font-medium text-foreground">{doc.pengunggah.nama}</span><span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_BADGE[doc.pengunggah.role] || "bg-muted text-muted-foreground border border-border"}`}>{doc.pengunggah.role}</span></div>) : label === "Status" ? (<span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-0.5 ${STATUS_COLORS[doc.status]}`}>{doc.status}</span>) : (<div className="font-medium text-foreground">{val}</div>)}</div>
               ))}
+            </div>
+            {/* Lokasi field */}
+            <div className="col-span-2">
+              <div className="text-muted-foreground text-xs mb-1">Lokasi</div>
+              <button
+                onClick={() => { onClose(); navigate(`/archive?kategori=${encodeURIComponent(doc.kategori)}`); }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border bg-card text-[13px] text-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                <Folder size={16} className="text-muted-foreground" />
+                {doc.kategori}
+              </button>
             </div>
             {doc.catatan && <div className="px-3 py-2 rounded-lg bg-sakura-warning/10 border border-sakura-warning/30 text-sm text-sakura-warning font-medium">⚠ {doc.catatan}</div>}
             <div className="flex flex-wrap gap-3">
