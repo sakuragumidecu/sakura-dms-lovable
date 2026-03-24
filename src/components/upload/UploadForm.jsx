@@ -1,10 +1,10 @@
 import { useState, useRef, useMemo, useCallback } from "react";
 import { Upload, Camera, X, Eye, FileText, CalendarIcon, ChevronDown, Maximize, ZoomIn, ZoomOut, ChevronLeft, ChevronRight, RotateCw, AlertTriangle, Lock, Search } from "lucide-react";
-import CameraScanModal from "@/components/scan/CameraScanModal";
+import CameraScanModal from "@/components/shared/CameraScan";
 import { useApp } from "@/contexts/AppContext";
-import OcrScanner from "@/components/upload/OcrScanner";
+import OcrScanner from "@/components/document/OcrScanner";
 
-import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
+import PdfPreviewOverlay from "@/components/document/PdfPreview";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";

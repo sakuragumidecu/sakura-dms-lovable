@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { User, Mail, Shield, Building2, Camera, Upload as UploadIcon, Save, Hash } from "lucide-react";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 

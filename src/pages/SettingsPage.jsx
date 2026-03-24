@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sun, Moon, Monitor, Type, Globe, Bell, Eye, Camera, FolderTree, Shield, RotateCcw, ChevronRight } from "lucide-react";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";

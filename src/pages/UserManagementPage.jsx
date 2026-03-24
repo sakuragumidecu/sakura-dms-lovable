@@ -1,7 +1,7 @@
 import { useState } from "react";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useApp } from "@/contexts/AppContext";
-import UserProfileModal from "@/components/modals/UserProfileModal";
+import UserProfileModal from "@/components/shared/UserProfile";
 import { Plus, Pencil, Trash2, X, Clock, UserCheck, UserX } from "lucide-react";
 import avatarAdmin from "@/assets/avatar_admin.jpg";
 import { useToast } from "@/hooks/use-toast";
