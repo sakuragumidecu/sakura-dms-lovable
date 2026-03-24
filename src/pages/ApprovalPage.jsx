@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { CheckCircle, XCircle, Clock, Eye, FileText, ArrowRight, AlertTriangle } from "lucide-react";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useApp } from "@/contexts/AppContext";
-import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
-import PdfPreviewOverlay from "@/components/modals/PdfPreviewOverlay";
+import DocumentDetailModal from "@/components/document/DocumentDetail";
+import PdfPreviewOverlay from "@/components/document/PdfPreview";
 import { format, differenceInHours } from "date-fns";
 
 const STEPS = [

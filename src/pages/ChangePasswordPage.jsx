@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { KeyRound, Eye, EyeOff, Save } from "lucide-react";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useApp } from "@/contexts/AppContext";
 import { useToast } from "@/hooks/use-toast";
 

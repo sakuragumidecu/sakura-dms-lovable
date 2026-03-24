@@ -111,11 +111,8 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
   );
 }
 
-/* ═══════════════════════════════════════
-   DocumentList (formerly DocumentListModal.jsx)
-   ═══════════════════════════════════════ */
 
-const LIST_STATUS_COLORS = { Menunggu: "bg-sakura-warning/20 text-sakura-warning", Disetujui: "bg-sakura-success/20 text-sakura-success", Ditolak: "bg-destructive/20 text-destructive", Diarsipkan: "bg-muted text-muted-foreground" };
+
 
 export function DocumentList({ title, documents, onClose, onSelectDocument }) {
   return (
@@ -128,7 +125,7 @@ export function DocumentList({ title, documents, onClose, onSelectDocument }) {
             <button key={doc.id} onClick={() => onSelectDocument(doc)} className="w-full flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors text-left">
               <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center shrink-0"><FileText size={20} className="text-primary" /></div>
               <div className="flex-1 min-w-0"><div className="font-semibold text-sm text-foreground truncate">{doc.judul}</div><div className="text-xs text-muted-foreground">{doc.nomorDokumen} · {doc.kategori} · {doc.kelas}</div></div>
-              <div className="flex flex-col items-end gap-1 shrink-0"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${LIST_STATUS_COLORS[doc.status]}`}>{doc.status}</span><span className="text-xs text-muted-foreground">{format(new Date(doc.tanggalUpload), "dd/MM/yyyy")}</span></div>
+              <div className="flex flex-col items-end gap-1 shrink-0"><span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[doc.status]}`}>{doc.status}</span><span className="text-xs text-muted-foreground">{format(new Date(doc.tanggalUpload), "dd/MM/yyyy")}</span></div>
             </button>
           ))}
         </div>

@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useApp } from "@/contexts/AppContext.jsx";
 import { SettingsProvider } from "@/contexts/SettingsContext.jsx";
-import AppLayout from "@/components/layout/Layout.jsx";
+import Layout from "@/components/layout/Layout.jsx";
 import HomePage from "@/pages/HomePage.jsx";
 import LoginPage from "@/pages/LoginPage.jsx";
 import SignUpPage from "@/pages/SignUpPage.jsx";
@@ -40,7 +40,7 @@ function AppRoutes() {
       <Route path="/login" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
       <Route path="/signup" element={isLoggedIn ? <Navigate to="/dashboard" replace /> : <SignUpPage />} />
       <Route path="/verify-document/:id" element={<VerifyPage />} />
-      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+      <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path="/home" element={<HomeDashboardPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/upload" element={<UploadPage />} />

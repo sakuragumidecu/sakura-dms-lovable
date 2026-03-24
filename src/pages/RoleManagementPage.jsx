@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Shield, Check, X as XIcon } from "lucide-react";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useApp } from "@/contexts/AppContext";
 import { PERMISSIONS } from "@/data/mockData";
 

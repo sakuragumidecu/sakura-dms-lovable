@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Search, RotateCcw, FileText, Clock } from "lucide-react";
 import { format } from "date-fns";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { useApp } from "@/contexts/AppContext";
 
 export default function LogPage() {

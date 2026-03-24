@@ -3,10 +3,10 @@ import { useSearchParams } from "react-router-dom";
 import { Search, RotateCcw, Folder, FolderOpen, Star, FileText as FileIcon, ChevronRight, ChevronDown, Download, Clock, X, Upload, Plus, Pencil, Trash2, Monitor, MoreVertical, FolderPlus, FilePlus, ArrowRightLeft, Grid2X2, Grid3X3, LayoutGrid, Home, GripVertical } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
-import AppHeader from "@/components/layout/AppHeader";
-import DocumentDetailModal from "@/components/modals/DocumentDetailModal";
+import AppHeader from "@/components/layout/Header";
+import DocumentDetailModal from "@/components/document/DocumentDetail";
 
-import UploadForm from "@/components/upload/UploadForm";
+import UploadForm from "@/components/document/UploadForm";
 import { useApp } from "@/contexts/AppContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { buildFolderTree, docMatchesFolder, docMatchesFolderStrict, KATEGORI_OPTIONS, SIDEBAR_FOLDERS } from "@/data/mockData";

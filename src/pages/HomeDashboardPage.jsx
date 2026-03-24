@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import AppHeader from "@/components/layout/AppHeader";
+import AppHeader from "@/components/layout/Header";
 import { Card, CardContent } from "@/components/ui/card";
 import logoSakura from "@/assets/logo_sakura.png";
 import schoolBuilding from "@/assets/school_building.jpg";
