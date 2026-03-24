@@ -113,7 +113,6 @@ export default function DocumentDetailModal({ document: doc, onClose }) {
 
 
 
-const STATUS_COLORS = { Menunggu: "bg-sakura-warning/20 text-sakura-warning", Disetujui: "bg-sakura-success/20 text-sakura-success", Ditolak: "bg-destructive/20 text-destructive", Diarsipkan: "bg-muted text-muted-foreground" };
 
 export function DocumentList({ title, documents, onClose, onSelectDocument }) {
   return (
