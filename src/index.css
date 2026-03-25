@@ -544,3 +544,37 @@
     opacity: 0;
   }
 }
+
+/* Login page falling petals */
+@keyframes loginPetalFall {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+    opacity: var(--petal-opacity, 0.6);
+  }
+  20% {
+    transform:
+      translate(calc(var(--sway) * 0.25), 20vh)
+      rotate(calc(var(--rot) * 0.2))
+      scale(0.97);
+  }
+  50% {
+    transform:
+      translate(calc(var(--sway) * 0.6), 50vh)
+      rotate(calc(var(--rot) * 0.5))
+      scale(0.92);
+  }
+  80% {
+    transform:
+      translate(calc(var(--sway) * 0.85), 82vh)
+      rotate(calc(var(--rot) * 0.8))
+      scale(0.87);
+    opacity: 0.2;
+  }
+  100% {
+    transform:
+      translate(var(--sway), 110vh)
+      rotate(var(--rot))
+      scale(0.8);
+    opacity: 0;
+  }
+}
